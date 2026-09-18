@@ -11,173 +11,692 @@
 
     <meta name="color-scheme" content="light">
 
-    <title>BuyHaat Admin Dashboard</title>
+    <title>BuyHaat — Admin Dashboard</title>
 
     <link rel="stylesheet" href="admin.css">
 </head>
 
 <body class="dashboard-body">
 
+    <!-- Mobile Overlay -->
+    <div
+        id="sidebarOverlay"
+        class="sidebar-overlay"
+    ></div>
+
+
     <!-- =====================================================
-         ADMIN HEADER
+         SIDEBAR
     ====================================================== -->
 
-    <header class="admin-header">
+    <aside
+        id="adminSidebar"
+        class="admin-sidebar"
+    >
 
-        <div class="admin-brand">
-            <div class="admin-logo">B</div>
+        <div class="sidebar-top">
 
-            <div>
-                <h1>BuyHaat Admin</h1>
-                <p>Dashboard</p>
+            <div class="sidebar-brand">
+
+                <div class="sidebar-logo">
+                    B
+                </div>
+
+                <div class="sidebar-brand-text">
+                    <strong>BuyHaat</strong>
+                    <span>Admin Panel</span>
+                </div>
+
             </div>
+
+
+            <button
+                type="button"
+                id="sidebarClose"
+                class="sidebar-close"
+            >
+                ×
+            </button>
+
         </div>
 
 
-        <button
-            type="button"
-            id="logoutBtn"
-            class="logout-btn"
-        >
-            Logout
-        </button>
+        <nav class="sidebar-nav">
 
-    </header>
+            <p class="nav-label">
+                MAIN MENU
+            </p>
+
+            <a
+                href="#dashboard"
+                class="nav-item active"
+                data-section="dashboard"
+            >
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+
+            <a
+                href="#stores"
+                class="nav-item"
+                data-section="stores"
+            >
+                <span class="nav-icon">▣</span>
+                <span>Stores</span>
+            </a>
+
+
+            <a
+                href="#products"
+                class="nav-item"
+                data-section="products"
+            >
+                <span class="nav-icon">□</span>
+                <span>Products</span>
+            </a>
+
+
+            <a
+                href="#orders"
+                class="nav-item"
+                data-section="orders"
+            >
+                <span class="nav-icon">≡</span>
+                <span>Orders</span>
+            </a>
+
+
+            <a
+                href="#users"
+                class="nav-item"
+                data-section="users"
+            >
+                <span class="nav-icon">♙</span>
+                <span>Users</span>
+            </a>
+
+
+            <p class="nav-label nav-label-space">
+                SYSTEM
+            </p>
+
+
+            <a
+                href="#settings"
+                class="nav-item"
+                data-section="settings"
+            >
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="admin-mini-profile">
+
+                <div class="admin-avatar">
+                    A
+                </div>
+
+                <div class="admin-mini-info">
+
+                    <strong id="sidebarAdminName">
+                        Admin
+                    </strong>
+
+                    <span>
+                        Administrator
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="logoutBtn"
+                class="sidebar-logout"
+            >
+                <span>↪</span>
+                Logout
+            </button>
+
+        </div>
+
+    </aside>
 
 
     <!-- =====================================================
-         DASHBOARD
+         MAIN
     ====================================================== -->
 
-    <main class="dashboard-container">
+    <div class="admin-main">
 
-        <section class="welcome-card">
+        <!-- TOPBAR -->
 
-            <p class="welcome-label">
-                Welcome Admin
-            </p>
+        <header class="admin-topbar">
 
-            <h2>
-                BuyHaat Admin Dashboard
-            </h2>
+            <div class="topbar-left">
 
-            <p id="adminEmailText">
-                Loading admin information...
-            </p>
+                <button
+                    type="button"
+                    id="sidebarOpen"
+                    class="menu-button"
+                >
+                    ☰
+                </button>
 
-        </section>
+                <div>
+
+                    <p class="topbar-small">
+                        Admin Panel
+                    </p>
+
+                    <h1 id="pageTitle">
+                        Dashboard
+                    </h1>
+
+                </div>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <button
+                    type="button"
+                    class="notification-button"
+                    title="Notifications"
+                >
+                    ♢
+
+                    <span class="notification-dot"></span>
+                </button>
+
+
+                <div class="topbar-admin">
+
+                    <div class="topbar-avatar">
+                        A
+                    </div>
+
+                    <div class="topbar-admin-info">
+
+                        <strong id="topbarAdminName">
+                            Admin
+                        </strong>
+
+                        <span id="adminEmailText">
+                            Loading...
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
 
 
         <!-- =================================================
-             STAT CARDS
+             CONTENT
         ================================================== -->
 
-        <section class="stats-grid">
-
-            <div class="stat-card">
-                <span class="stat-title">
-                    Stores
-                </span>
-
-                <strong id="storesCount">
-                    0
-                </strong>
-            </div>
+        <main class="dashboard-content">
 
 
-            <div class="stat-card">
-                <span class="stat-title">
-                    Products
-                </span>
+            <!-- DASHBOARD SECTION -->
 
-                <strong id="productsCount">
-                    0
-                </strong>
-            </div>
-
-
-            <div class="stat-card">
-                <span class="stat-title">
-                    Orders
-                </span>
-
-                <strong id="ordersCount">
-                    0
-                </strong>
-            </div>
-
-
-            <div class="stat-card">
-                <span class="stat-title">
-                    Users
-                </span>
-
-                <strong id="usersCount">
-                    0
-                </strong>
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             ADMIN SECTIONS
-        ================================================== -->
-
-        <section class="admin-section-grid">
-
-            <button
-                type="button"
-                class="admin-section-card"
+            <section
+                id="section-dashboard"
+                class="admin-content-section active"
             >
-                <span>🏪</span>
-                <strong>Stores</strong>
-                <small>Store management</small>
-            </button>
+
+                <div class="welcome-banner">
+
+                    <div class="welcome-content">
+
+                        <span class="welcome-badge">
+                            ADMIN DASHBOARD
+                        </span>
+
+                        <h2>
+                            Welcome back, Admin 👋
+                        </h2>
+
+                        <p>
+                            এখান থেকে আপনার BuyHaat marketplace
+                            পরিচালনা করুন।
+                        </p>
+
+                    </div>
+
+                    <div class="welcome-decoration">
+                        B
+                    </div>
+
+                </div>
 
 
-            <button
-                type="button"
-                class="admin-section-card"
+                <!-- STATISTICS -->
+
+                <div class="section-heading">
+
+                    <div>
+                        <h2>
+                            Overview
+                        </h2>
+
+                        <p>
+                            আপনার marketplace-এর বর্তমান অবস্থা
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="stats-grid">
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-card-top">
+
+                            <div class="stat-icon stores-icon">
+                                ▣
+                            </div>
+
+                            <span class="stat-more">
+                                →
+                            </span>
+
+                        </div>
+
+                        <div class="stat-card-bottom">
+
+                            <span>
+                                Total Stores
+                            </span>
+
+                            <strong id="storesCount">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-card-top">
+
+                            <div class="stat-icon products-icon">
+                                □
+                            </div>
+
+                            <span class="stat-more">
+                                →
+                            </span>
+
+                        </div>
+
+                        <div class="stat-card-bottom">
+
+                            <span>
+                                Total Products
+                            </span>
+
+                            <strong id="productsCount">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-card-top">
+
+                            <div class="stat-icon orders-icon">
+                                ≡
+                            </div>
+
+                            <span class="stat-more">
+                                →
+                            </span>
+
+                        </div>
+
+                        <div class="stat-card-bottom">
+
+                            <span>
+                                Total Orders
+                            </span>
+
+                            <strong id="ordersCount">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-card-top">
+
+                            <div class="stat-icon users-icon">
+                                ♙
+                            </div>
+
+                            <span class="stat-more">
+                                →
+                            </span>
+
+                        </div>
+
+                        <div class="stat-card-bottom">
+
+                            <span>
+                                Total Users
+                            </span>
+
+                            <strong id="usersCount">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- LOWER GRID -->
+
+                <div class="dashboard-lower-grid">
+
+
+                    <!-- RECENT ORDERS -->
+
+                    <div class="dashboard-panel">
+
+                        <div class="panel-header">
+
+                            <div>
+                                <h3>
+                                    Recent Orders
+                                </h3>
+
+                                <p>
+                                    সর্বশেষ অর্ডারগুলো
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="view-all-btn"
+                                data-section-link="orders"
+                            >
+                                View all →
+                            </button>
+
+                        </div>
+
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                ≡
+                            </div>
+
+                            <strong>
+                                No orders yet
+                            </strong>
+
+                            <span>
+                                নতুন order আসলে এখানে দেখা যাবে।
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- QUICK ACTIONS -->
+
+                    <div class="dashboard-panel">
+
+                        <div class="panel-header">
+
+                            <div>
+                                <h3>
+                                    Quick Actions
+                                </h3>
+
+                                <p>
+                                    দ্রুত কাজ শুরু করুন
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <div class="quick-actions">
+
+                            <button
+                                type="button"
+                                class="quick-action"
+                                data-section-link="stores"
+                            >
+                                <span>▣</span>
+
+                                <div>
+                                    <strong>
+                                        Manage Stores
+                                    </strong>
+
+                                    <small>
+                                        সব store দেখুন
+                                    </small>
+                                </div>
+
+                                <b>→</b>
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="quick-action"
+                                data-section-link="products"
+                            >
+                                <span>□</span>
+
+                                <div>
+                                    <strong>
+                                        Manage Products
+                                    </strong>
+
+                                    <small>
+                                        সব product দেখুন
+                                    </small>
+                                </div>
+
+                                <b>→</b>
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="quick-action"
+                                data-section-link="orders"
+                            >
+                                <span>≡</span>
+
+                                <div>
+                                    <strong>
+                                        Manage Orders
+                                    </strong>
+
+                                    <small>
+                                        সব order দেখুন
+                                    </small>
+                                </div>
+
+                                <b>→</b>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- STORES -->
+
+            <section
+                id="section-stores"
+                class="admin-content-section"
             >
-                <span>📦</span>
-                <strong>Products</strong>
-                <small>Product management</small>
-            </button>
+
+                <div class="empty-page">
+
+                    <div class="empty-page-icon">
+                        ▣
+                    </div>
+
+                    <h2>
+                        Stores
+                    </h2>
+
+                    <p>
+                        Store management এখানে যোগ করা হবে।
+                    </p>
+
+                </div>
+
+            </section>
 
 
-            <button
-                type="button"
-                class="admin-section-card"
+            <!-- PRODUCTS -->
+
+            <section
+                id="section-products"
+                class="admin-content-section"
             >
-                <span>🛒</span>
-                <strong>Orders</strong>
-                <small>Order management</small>
-            </button>
+
+                <div class="empty-page">
+
+                    <div class="empty-page-icon">
+                        □
+                    </div>
+
+                    <h2>
+                        Products
+                    </h2>
+
+                    <p>
+                        Product management এখানে যোগ করা হবে।
+                    </p>
+
+                </div>
+
+            </section>
 
 
-            <button
-                type="button"
-                class="admin-section-card"
+            <!-- ORDERS -->
+
+            <section
+                id="section-orders"
+                class="admin-content-section"
             >
-                <span>👥</span>
-                <strong>Users</strong>
-                <small>User management</small>
-            </button>
+
+                <div class="empty-page">
+
+                    <div class="empty-page-icon">
+                        ≡
+                    </div>
+
+                    <h2>
+                        Orders
+                    </h2>
+
+                    <p>
+                        Order management এখানে যোগ করা হবে।
+                    </p>
+
+                </div>
+
+            </section>
 
 
-            <button
-                type="button"
-                class="admin-section-card"
+            <!-- USERS -->
+
+            <section
+                id="section-users"
+                class="admin-content-section"
             >
-                <span>⚙️</span>
-                <strong>Settings</strong>
-                <small>Admin settings</small>
-            </button>
 
-        </section>
+                <div class="empty-page">
 
-    </main>
+                    <div class="empty-page-icon">
+                        ♙
+                    </div>
+
+                    <h2>
+                        Users
+                    </h2>
+
+                    <p>
+                        User management এখানে যোগ করা হবে।
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- SETTINGS -->
+
+            <section
+                id="section-settings"
+                class="admin-content-section"
+            >
+
+                <div class="empty-page">
+
+                    <div class="empty-page-icon">
+                        ⚙
+                    </div>
+
+                    <h2>
+                        Settings
+                    </h2>
+
+                    <p>
+                        Admin settings এখানে যোগ করা হবে।
+                    </p>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
 
 
     <!-- =====================================================
@@ -201,6 +720,188 @@
         );
 
 
+        /* -------------------------------------------------
+           ELEMENTS
+        ------------------------------------------------- */
+
+        const sidebar =
+            document.getElementById("adminSidebar");
+
+        const overlay =
+            document.getElementById("sidebarOverlay");
+
+        const sidebarOpen =
+            document.getElementById("sidebarOpen");
+
+        const sidebarClose =
+            document.getElementById("sidebarClose");
+
+        const logoutBtn =
+            document.getElementById("logoutBtn");
+
+        const pageTitle =
+            document.getElementById("pageTitle");
+
+
+        /* -------------------------------------------------
+           SIDEBAR
+        ------------------------------------------------- */
+
+        function openSidebar() {
+
+            sidebar.classList.add("open");
+            overlay.classList.add("show");
+
+        }
+
+
+        function closeSidebar() {
+
+            sidebar.classList.remove("open");
+            overlay.classList.remove("show");
+
+        }
+
+
+        sidebarOpen.addEventListener(
+            "click",
+            openSidebar
+        );
+
+
+        sidebarClose.addEventListener(
+            "click",
+            closeSidebar
+        );
+
+
+        overlay.addEventListener(
+            "click",
+            closeSidebar
+        );
+
+
+        /* -------------------------------------------------
+           SECTION SWITCH
+        ------------------------------------------------- */
+
+        const sectionTitles = {
+
+            dashboard: "Dashboard",
+            stores: "Stores",
+            products: "Products",
+            orders: "Orders",
+            users: "Users",
+            settings: "Settings"
+
+        };
+
+
+        function showSection(sectionName) {
+
+            document
+                .querySelectorAll(
+                    ".admin-content-section"
+                )
+                .forEach(section => {
+
+                    section.classList.remove("active");
+
+                });
+
+
+            const target =
+                document.getElementById(
+                    "section-" + sectionName
+                );
+
+
+            if (target) {
+
+                target.classList.add("active");
+
+            }
+
+
+            document
+                .querySelectorAll(".nav-item")
+                .forEach(item => {
+
+                    item.classList.remove("active");
+
+                    if (
+                        item.dataset.section ===
+                        sectionName
+                    ) {
+
+                        item.classList.add("active");
+
+                    }
+
+                });
+
+
+            pageTitle.textContent =
+                sectionTitles[sectionName] ||
+                "Dashboard";
+
+
+            history.replaceState(
+                null,
+                "",
+                "#" + sectionName
+            );
+
+
+            closeSidebar();
+
+        }
+
+
+        document
+            .querySelectorAll(".nav-item")
+            .forEach(item => {
+
+                item.addEventListener(
+                    "click",
+                    event => {
+
+                        event.preventDefault();
+
+                        showSection(
+                            item.dataset.section
+                        );
+
+                    }
+                );
+
+            });
+
+
+        document
+            .querySelectorAll(
+                "[data-section-link]"
+            )
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        showSection(
+                            button.dataset.sectionLink
+                        );
+
+                    }
+                );
+
+            });
+
+
+        /* -------------------------------------------------
+           ADMIN AUTH CHECK
+        ------------------------------------------------- */
+
         async function checkAdmin() {
 
             try {
@@ -212,29 +913,31 @@
                 } = await sb.auth.getSession();
 
 
-                /*
-                 * Login করা নেই
-                 */
+                if (
+                    !session ||
+                    !session.user
+                ) {
 
-                if (!session || !session.user) {
-
-                    window.location.href = "/admin";
+                    window.location.href =
+                        "/admin";
 
                     return;
+
                 }
 
-
-                /*
-                 * Profile থেকে role check
-                 */
 
                 const {
                     data: profile,
                     error
                 } = await sb
                     .from("profiles")
-                    .select("role, full_name")
-                    .eq("id", session.user.id)
+                    .select(
+                        "role, full_name"
+                    )
+                    .eq(
+                        "id",
+                        session.user.id
+                    )
                     .single();
 
 
@@ -246,26 +949,59 @@
 
                     await sb.auth.signOut();
 
-                    window.location.href = "/admin";
+                    window.location.href =
+                        "/admin";
 
                     return;
+
                 }
 
 
-                /*
-                 * Admin information
-                 */
+                const name =
+                    profile.full_name ||
+                    "Admin";
 
-                const emailElement =
-                    document.getElementById(
+                const email =
+                    session.user.email ||
+                    "";
+
+
+                document
+                    .getElementById(
                         "adminEmailText"
-                    );
+                    )
+                    .textContent = email;
 
 
-                if (emailElement) {
+                document
+                    .getElementById(
+                        "topbarAdminName"
+                    )
+                    .textContent = name;
 
-                    emailElement.textContent =
-                        session.user.email || "Admin";
+
+                document
+                    .getElementById(
+                        "sidebarAdminName"
+                    )
+                    .textContent = name;
+
+
+                /* URL section */
+
+                const hash =
+                    window.location.hash
+                        .replace("#", "")
+                        .trim();
+
+
+                if (
+                    hash &&
+                    sectionTitles[hash]
+                ) {
+
+                    showSection(hash);
+
                 }
 
             }
@@ -279,33 +1015,36 @@
 
                 await sb.auth.signOut();
 
-                window.location.href = "/admin";
+                window.location.href =
+                    "/admin";
+
             }
 
         }
 
 
-        /*
-         * Logout
-         */
+        /* -------------------------------------------------
+           LOGOUT
+        ------------------------------------------------- */
 
-        document
-            .getElementById("logoutBtn")
-            .addEventListener(
-                "click",
-                async () => {
+        logoutBtn.addEventListener(
+            "click",
+            async () => {
 
-                    await sb.auth.signOut();
+                logoutBtn.disabled = true;
 
-                    window.location.href = "/admin";
+                await sb.auth.signOut();
 
-                }
-            );
+                window.location.href =
+                    "/admin";
+
+            }
+        );
 
 
-        /*
-         * Start
-         */
+        /* -------------------------------------------------
+           START
+        ------------------------------------------------- */
 
         checkAdmin();
 
