@@ -125,6 +125,100 @@
     <section id="product-detail" class="page"></section>
   </main>
 
+    <section id="product-detail" class="page"></section>
+
+
+  <!-- =====================================================
+       LOGIN / REGISTER MODAL
+       ===================================================== -->
+
+  <div id="authModal" class="auth-modal">
+
+    <div class="auth-box">
+
+      <button
+        id="closeAuthBtn"
+        class="auth-close"
+        aria-label="Close">
+        ×
+      </button>
+
+      <div class="auth-header">
+
+        <p class="eyebrow">BUYHAAT ACCOUNT</p>
+
+        <h2 id="authTitle">
+          Login
+        </h2>
+
+        <p id="authSubtitle">
+          আপনার BuyHaat account-এ Login করুন।
+        </p>
+
+      </div>
+
+
+      <form id="authForm">
+
+        <label for="authEmail">
+          Email
+        </label>
+
+        <input
+          id="authEmail"
+          type="email"
+          placeholder="আপনার email"
+          autocomplete="email"
+          required
+        >
+
+
+        <label for="authPassword">
+          Password
+        </label>
+
+        <input
+          id="authPassword"
+          type="password"
+          placeholder="Password"
+          autocomplete="current-password"
+          required
+        >
+
+
+        <button
+          id="authSubmitBtn"
+          class="primary-btn"
+          type="submit">
+
+          Login
+
+        </button>
+
+      </form>
+
+
+      <p id="authMessage" class="auth-message"></p>
+
+
+      <button
+        id="authSwitchBtn"
+        class="auth-switch"
+        type="button">
+
+        নতুন account তৈরি করুন
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+
   <nav class="bottom-nav" aria-label="Main navigation">
     <a href="#home" data-page="home">⌂<span>Home</span></a>
     <a href="#following" data-page="following">♡<span>Following</span></a>
