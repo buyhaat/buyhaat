@@ -3,39 +3,6 @@ const sb = window.supabaseClient || window.supabase.createClient(
   window.SUPABASE_ANON_KEY
 );
 
-async function uploadImage(file, folder) {
-  if (!file) return null;
-
-  const ext =
-    file.name.split(".").pop().toLowerCase();
-
-  const fileName =
-    `${folder}/${crypto.randomUUID()}.${ext}`;
-
-  const {
-    error
-  } = await sb.storage
-    .from("store-images")
-    .upload(fileName, file, {
-      cacheControl: "3600",
-      upsert: false
-    });
-
-  if (error) {
-    console.error("Image upload error:", error);
-    toast(error.message || "Image upload failed");
-    return null;
-  }
-
-  const {
-    data
-  } = sb.storage
-    .from("store-images")
-    .getPublicUrl(fileName);
-
-  return data.publicUrl;
-}
-
 let products = [];
 let stores = [];
 let categories = ["All"];
@@ -677,11 +644,7 @@ async function addProduct(event) {
     stock: Number($("productStock").value),
     category_id: category.id,
     store_id: currentMyStore.id,
-    const imageFile =
-  $("productImageFile")?.files?.[0] || null;
-
-const imageUrl =
-  await uploadImage(imageFile, "products");
+    image_url: $("productImageUrl").value.trim() || null,
     is_active: true,
     is_approved: false
   };
