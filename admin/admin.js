@@ -1,3 +1,5 @@
+alert("ADMIN JS LOADED");
+
 /* =========================================================
    BUYHAAT ADMIN PANEL
    Login + Dashboard + Stores + Products + Orders
