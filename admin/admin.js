@@ -1,427 +1,452 @@
 /* =========================================================
-   BUYHAAT ADMIN PANEL
-   Login → Admin Panel → Dashboard
-========================================================= */
+   BUYHAAT ADMIN — LOGIN DEBUG
+   ========================================================= */
 
-
-/* =========================================================
-   SUPABASE
-========================================================= */
-
-const sb = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-);
-
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-const $ = (id) =>
-    document.getElementById(id);
-
-
-function esc(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-        return "";
-    }
-
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-
-function money(value) {
-
-    const number =
-        Number(value || 0);
-
-    return `৳${number.toLocaleString("en-BD")}`;
-}
-
-
-function dateText(value) {
-
-    if (!value) {
-        return "—";
-    }
-
-    try {
-
-        return new Date(value)
-            .toLocaleString(
-                "en-BD",
-                {
-                    dateStyle: "medium",
-                    timeStyle: "short"
-                }
-            );
-
-    } catch {
-
-        return String(value);
-
-    }
-}
-
-
-function shortId(value) {
-
-    if (!value) {
-        return "—";
-    }
-
-    return String(value)
-        .slice(0, 8);
-}
+console.log("ADMIN JS STARTED");
 
 
 /* =========================================================
    ELEMENTS
-========================================================= */
+   ========================================================= */
 
-const adminLogin =
-    $("adminLogin");
+const adminLogin = document.getElementById("adminLogin");
+const adminApp = document.getElementById("adminApp");
 
-const adminApp =
-    $("adminApp");
+const adminLoginForm = document.getElementById("adminLoginForm");
+const adminEmail = document.getElementById("adminEmail");
+const adminPassword = document.getElementById("adminPassword");
+const adminLoginBtn = document.getElementById("adminLoginBtn");
+const loginMessage = document.getElementById("loginMessage");
 
-const adminLoginForm =
-    $("adminLoginForm");
 
-const adminEmail =
-    $("adminEmail");
+/* =========================================================
+   DEBUG MESSAGE
+   ========================================================= */
 
-const adminPassword =
-    $("adminPassword");
+function debug(message, type = "normal") {
 
-const adminLoginBtn =
-    $("adminLoginBtn");
+    console.log("[ADMIN DEBUG]", message);
 
-const loginMessage =
-    $("loginMessage");
+    if (loginMessage) {
 
-const logoutBtn =
-    $("logoutBtn");
+        loginMessage.textContent = message;
 
-const sidebarToggle =
-    $("sidebarToggle");
+        loginMessage.style.display = "block";
+        loginMessage.style.padding = "12px";
+        loginMessage.style.marginTop = "15px";
+        loginMessage.style.borderRadius = "8px";
+        loginMessage.style.fontSize = "14px";
+        loginMessage.style.lineHeight = "1.5";
 
-const adminSidebar =
-    $("adminSidebar");
+        if (type === "error") {
+            loginMessage.style.background = "#fee2e2";
+            loginMessage.style.color = "#991b1b";
+        }
+
+        else if (type === "success") {
+            loginMessage.style.background = "#dcfce7";
+            loginMessage.style.color = "#166534";
+        }
+
+        else {
+            loginMessage.style.background = "#f3f4f6";
+            loginMessage.style.color = "#374151";
+        }
+    }
+}
+
+
+/* =========================================================
+   BASIC CHECK
+   ========================================================= */
+
+debug("Admin JS চালু হয়েছে...");
+
+
+if (!adminLogin) {
+    debug("ERROR: #adminLogin পাওয়া যায়নি।", "error");
+}
+
+if (!adminApp) {
+    debug("ERROR: #adminApp পাওয়া যায়নি।", "error");
+}
+
+if (!adminLoginForm) {
+    debug("ERROR: #adminLoginForm পাওয়া যায়নি।", "error");
+}
+
+if (!adminEmail) {
+    debug("ERROR: #adminEmail পাওয়া যায়নি।", "error");
+}
+
+if (!adminPassword) {
+    debug("ERROR: #adminPassword পাওয়া যায়নি।", "error");
+}
+
+if (!adminLoginBtn) {
+    debug("ERROR: #adminLoginBtn পাওয়া যায়নি।", "error");
+}
+
+
+/* =========================================================
+   SUPABASE CONFIG CHECK
+   ========================================================= */
+
+if (typeof window.supabase === "undefined") {
+
+    debug(
+        "ERROR: Supabase library পাওয়া যায়নি।",
+        "error"
+    );
+
+}
+
+else if (typeof SUPABASE_URL === "undefined") {
+
+    debug(
+        "ERROR: SUPABASE_URL পাওয়া যায়নি।",
+        "error"
+    );
+
+}
+
+else if (typeof SUPABASE_ANON_KEY === "undefined") {
+
+    debug(
+        "ERROR: SUPABASE_ANON_KEY পাওয়া যায়নি।",
+        "error"
+    );
+
+}
+
+else {
+
+    debug("Supabase config পাওয়া গেছে।");
+
+}
+
+
+/* =========================================================
+   CREATE SUPABASE CLIENT
+   ========================================================= */
+
+let sb = null;
+
+try {
+
+    if (
+        typeof window.supabase !== "undefined" &&
+        typeof SUPABASE_URL !== "undefined" &&
+        typeof SUPABASE_ANON_KEY !== "undefined"
+    ) {
+
+        sb = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+        );
+
+        console.log("Supabase client:", sb);
+
+        debug("Supabase client তৈরি হয়েছে।");
+
+    }
+
+}
+catch (error) {
+
+    console.error("Supabase client error:", error);
+
+    debug(
+        "ERROR: Supabase client তৈরি করা যায়নি: " +
+        error.message,
+        "error"
+    );
+
+}
 
 
 /* =========================================================
    SHOW LOGIN
-========================================================= */
+   ========================================================= */
 
 function showLogin() {
 
-    adminLogin.hidden = false;
+    console.log("showLogin()");
 
-    adminApp.hidden = true;
+    if (adminLogin) {
+        adminLogin.hidden = false;
+        adminLogin.style.display = "flex";
+    }
 
-    document.body.classList.remove(
-        "logged-in"
-    );
-
+    if (adminApp) {
+        adminApp.hidden = true;
+        adminApp.style.display = "none";
+    }
 }
 
 
 /* =========================================================
    SHOW ADMIN
-========================================================= */
+   ========================================================= */
 
 function showAdminApp() {
 
-    adminLogin.hidden = true;
+    console.log("showAdminApp()");
 
-    adminApp.hidden = false;
+    if (adminLogin) {
+        adminLogin.hidden = true;
+        adminLogin.style.display = "none";
+    }
 
-    document.body.classList.add(
-        "logged-in"
+    if (adminApp) {
+        adminApp.hidden = false;
+        adminApp.style.display = "block";
+    }
+
+    debug(
+        "LOGIN সফল হয়েছে। Admin Panel দেখানো হচ্ছে।",
+        "success"
+    );
+}
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+if (adminLoginForm) {
+
+    adminLoginForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            console.log("LOGIN BUTTON CLICKED");
+
+            debug("Login request পাঠানো হচ্ছে...");
+
+            if (!sb) {
+
+                debug(
+                    "ERROR: Supabase client তৈরি হয়নি।",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            const email = adminEmail.value.trim();
+            const password = adminPassword.value;
+
+
+            console.log("Email:", email);
+            console.log(
+                "Password length:",
+                password.length
+            );
+
+
+            if (!email || !password) {
+
+                debug(
+                    "Email এবং Password দুটোই দিতে হবে।",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            adminLoginBtn.disabled = true;
+            adminLoginBtn.textContent = "Logging in...";
+
+
+            try {
+
+                console.log(
+                    "Calling supabase.auth.signInWithPassword..."
+                );
+
+                const result =
+                    await sb.auth.signInWithPassword({
+
+                        email: email,
+
+                        password: password
+
+                    });
+
+
+                console.log(
+                    "LOGIN RESULT:",
+                    result
+                );
+
+
+                const { data, error } = result;
+
+
+                /* -----------------------------------------
+                   ERROR
+                   ----------------------------------------- */
+
+                if (error) {
+
+                    console.error(
+                        "SUPABASE LOGIN ERROR:",
+                        error
+                    );
+
+                    debug(
+                        "LOGIN ERROR: " +
+                        error.message,
+                        "error"
+                    );
+
+                    adminLoginBtn.disabled = false;
+                    adminLoginBtn.textContent = "Login";
+
+                    return;
+                }
+
+
+                /* -----------------------------------------
+                   SUCCESS CHECK
+                   ----------------------------------------- */
+
+                if (!data) {
+
+                    debug(
+                        "Supabase কোনো data ফেরত দেয়নি।",
+                        "error"
+                    );
+
+                    adminLoginBtn.disabled = false;
+                    adminLoginBtn.textContent = "Login";
+
+                    return;
+                }
+
+
+                console.log(
+                    "Session:",
+                    data.session
+                );
+
+                console.log(
+                    "User:",
+                    data.user
+                );
+
+
+                if (!data.session) {
+
+                    debug(
+                        "Login request সফল হলেও Session পাওয়া যায়নি।",
+                        "error"
+                    );
+
+                    adminLoginBtn.disabled = false;
+                    adminLoginBtn.textContent = "Login";
+
+                    return;
+                }
+
+
+                /* -----------------------------------------
+                   LOGIN SUCCESS
+                   ----------------------------------------- */
+
+                debug(
+                    "Login সফল! এখন Admin Panel খুলছি...",
+                    "success"
+                );
+
+
+                showAdminApp();
+
+
+                adminLoginBtn.disabled = false;
+                adminLoginBtn.textContent = "Login";
+
+
+            }
+            catch (error) {
+
+                console.error(
+                    "LOGIN CATCH ERROR:",
+                    error
+                );
+
+                debug(
+                    "Unexpected error: " +
+                    error.message,
+                    "error"
+                );
+
+
+                adminLoginBtn.disabled = false;
+                adminLoginBtn.textContent = "Login";
+
+            }
+
+        }
+    );
+
+}
+else {
+
+    debug(
+        "ERROR: Login form পাওয়া যায়নি।",
+        "error"
     );
 
 }
 
 
 /* =========================================================
-   LOGIN MESSAGE
-========================================================= */
+   INITIAL SESSION CHECK
+   ========================================================= */
 
-function setLoginMessage(
-    message,
-    type = "error"
-) {
+async function checkSession() {
 
-    if (!loginMessage) {
-        return;
-    }
-
-    loginMessage.textContent =
-        message;
+    console.log("Checking existing session...");
 
 
-    if (type === "success") {
+    if (!sb) {
 
-        loginMessage.style.color =
-            "#16a34a";
+        debug(
+            "Session check করা যাচ্ছে না — Supabase client নেই।",
+            "error"
+        );
 
-    } else {
-
-        loginMessage.style.color =
-            "#dc2626";
-
-    }
-
-}
-
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-function showToast(
-    message,
-    type = "success"
-) {
-
-    const toast =
-        $("toast");
-
-    if (!toast) {
         return;
     }
 
 
-    toast.textContent =
-        message;
+    try {
+
+        const { data, error } =
+            await sb.auth.getSession();
 
 
-    toast.className =
-        "toast show";
-
-
-    if (type === "error") {
-
-        toast.style.background =
-            "#dc2626";
-
-    } else {
-
-        toast.style.background =
-            "#111827";
-
-    }
-
-
-    setTimeout(() => {
-
-        toast.classList.remove(
-            "show"
+        console.log(
+            "INITIAL SESSION:",
+            data
         );
-
-    }, 3000);
-
-}
-
-
-/* =========================================================
-   LOGIN
-========================================================= */
-
-adminLoginForm.addEventListener(
-    "submit",
-    async (event) => {
-
-        event.preventDefault();
-
-
-        const email =
-            adminEmail.value.trim();
-
-        const password =
-            adminPassword.value;
-
-
-        if (!email || !password) {
-
-            setLoginMessage(
-                "Email এবং Password দুটোই দিন।"
-            );
-
-            return;
-        }
-
-
-        adminLoginBtn.disabled =
-            true;
-
-        adminLoginBtn.textContent =
-            "Login হচ্ছে...";
-
-
-        setLoginMessage(
-            "Account যাচাই করা হচ্ছে...",
-            "success"
-        );
-
-
-        try {
-
-            const {
-                data,
-                error
-            } =
-                await sb.auth
-                    .signInWithPassword({
-                        email,
-                        password
-                    });
-
-
-            /* =============================================
-               ERROR
-            ============================================== */
-
-            if (error) {
-
-                console.error(
-                    "Supabase Login Error:",
-                    error
-                );
-
-
-                setLoginMessage(
-                    "Login ব্যর্থ: " +
-                    error.message
-                );
-
-
-                adminLoginBtn.disabled =
-                    false;
-
-                adminLoginBtn.textContent =
-                    "Login";
-
-                return;
-            }
-
-
-            /* =============================================
-               SUCCESS
-            ============================================== */
-
-            if (!data?.session) {
-
-                setLoginMessage(
-                    "Login হয়েছে, কিন্তু session পাওয়া যায়নি।"
-                );
-
-
-                adminLoginBtn.disabled =
-                    false;
-
-                adminLoginBtn.textContent =
-                    "Login";
-
-                return;
-            }
-
-
-            console.log(
-                "Login successful:",
-                data.user?.email
-            );
-
-
-            setLoginMessage(
-                "✓ Login সফল! Admin Panel খুলছে...",
-                "success"
-            );
-
-
-            adminLoginBtn.textContent =
-                "Success ✓";
-
-
-            /*
-               সরাসরি Admin Panel দেখানো
-            */
-
-            showAdminApp();
-
-
-            /*
-               Dashboard initialize
-            */
-
-            await initializeAdmin();
-
-
-        } catch (error) {
-
-            console.error(
-                "Login Exception:",
-                error
-            );
-
-
-            setLoginMessage(
-                "একটি সমস্যা হয়েছে: " +
-                (
-                    error?.message ||
-                    "Unknown error"
-                )
-            );
-
-
-            adminLoginBtn.disabled =
-                false;
-
-            adminLoginBtn.textContent =
-                "Login";
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-logoutBtn.addEventListener(
-    "click",
-    async () => {
-
-        logoutBtn.disabled =
-            true;
-
-
-        const {
-            error
-        } =
-            await sb.auth.signOut();
-
-
-        logoutBtn.disabled =
-            false;
 
 
         if (error) {
 
-            showToast(
+            console.error(
+                "SESSION ERROR:",
+                error
+            );
+
+            debug(
+                "Session check error: " +
                 error.message,
                 "error"
             );
@@ -430,1458 +455,42 @@ logoutBtn.addEventListener(
         }
 
 
-        adminInitialized =
-            false;
+        if (data.session) {
 
+            console.log(
+                "Existing session found."
+            );
 
-        showLogin();
+            showAdminApp();
 
+        }
 
-        adminEmail.value =
-            "";
+        else {
 
-        adminPassword.value =
-            "";
-
-        adminLoginBtn.disabled =
-            false;
-
-        adminLoginBtn.textContent =
-            "Login";
-
-        setLoginMessage("");
-
-    }
-);
-
-
-/* =========================================================
-   SESSION CHECK
-========================================================= */
-
-async function checkSession() {
-
-    /*
-       প্রথমেই Login Page দেখানো হবে।
-    */
-
-    showLogin();
-
-
-    try {
-
-        const {
-            data,
-            error
-        } =
-            await sb.auth.getSession();
-
-
-        if (error) {
-
-            console.error(
-                "Session Error:",
-                error
+            console.log(
+                "No existing session."
             );
 
             showLogin();
 
-            return;
+            debug(
+                "Login করার জন্য Email ও Password দিন।"
+            );
+
         }
 
-
-        if (!data?.session) {
-
-            showLogin();
-
-            return;
-        }
-
-
-        /*
-           আগে থেকেই login করা থাকলে
-           সরাসরি Admin Panel।
-        */
-
-        showAdminApp();
-
-
-        await initializeAdmin();
-
-
-    } catch (error) {
+    }
+    catch (error) {
 
         console.error(
-            "Session Check Error:",
+            "SESSION CHECK CATCH:",
             error
         );
 
-        showLogin();
-
-    }
-
-}
-
-
-/* =========================================================
-   ADMIN INITIALIZE
-========================================================= */
-
-let adminInitialized =
-    false;
-
-
-async function initializeAdmin() {
-
-    if (adminInitialized) {
-        return;
-    }
-
-
-    adminInitialized =
-        true;
-
-
-    try {
-
-        const {
-            data,
-            error
-        } =
-            await sb.auth.getUser();
-
-
-        if (error) {
-
-            console.error(
-                "Get User Error:",
-                error
-            );
-
-        }
-
-
-        if (data?.user) {
-
-            const emailDisplay =
-                $("adminEmailDisplay");
-
-
-            if (emailDisplay) {
-
-                emailDisplay.textContent =
-                    data.user.email || "—";
-
-            }
-
-        }
-
-
-        setupNavigation();
-
-        setupSidebar();
-
-        setupRefreshButtons();
-
-
-        await loadDashboard();
-
-        await checkSupabase();
-
-
-    } catch (error) {
-
-        console.error(
-            "Admin Initialization Error:",
-            error
-        );
-
-        /*
-           Initialization error হলেও
-           Login Page-এ ফেরত যাবে না।
-           কারণ login সফল হয়েছে।
-        */
-
-    }
-
-}
-
-
-/* =========================================================
-   NAVIGATION
-========================================================= */
-
-function setupNavigation() {
-
-    const navItems =
-        document.querySelectorAll(
-            ".nav-item"
-        );
-
-
-    const pages =
-        document.querySelectorAll(
-            ".admin-page-section"
-        );
-
-
-    navItems.forEach(
-        (item) => {
-
-            item.addEventListener(
-                "click",
-                async () => {
-
-                    const page =
-                        item.dataset.page;
-
-
-                    navItems.forEach(
-                        (nav) => {
-
-                            nav.classList.remove(
-                                "active"
-                            );
-
-                        }
-                    );
-
-
-                    item.classList.add(
-                        "active"
-                    );
-
-
-                    pages.forEach(
-                        (section) => {
-
-                            section.classList.remove(
-                                "active"
-                            );
-
-                        }
-                    );
-
-
-                    const target =
-                        document.getElementById(
-                            `page-${page}`
-                        );
-
-
-                    if (target) {
-
-                        target.classList.add(
-                            "active"
-                        );
-
-                    }
-
-
-                    if (
-                        page === "dashboard"
-                    ) {
-
-                        await loadDashboard();
-
-                    }
-
-
-                    if (
-                        page === "stores"
-                    ) {
-
-                        await loadStores();
-
-                    }
-
-
-                    if (
-                        page === "products"
-                    ) {
-
-                        await loadProducts();
-
-                    }
-
-
-                    if (
-                        page === "orders"
-                    ) {
-
-                        await loadOrders();
-
-                    }
-
-
-                    /*
-                       Mobile sidebar বন্ধ
-                    */
-
-                    if (
-                        window.innerWidth <= 850
-                    ) {
-
-                        adminSidebar.classList.remove(
-                            "open"
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   SIDEBAR
-========================================================= */
-
-function setupSidebar() {
-
-    sidebarToggle.addEventListener(
-        "click",
-        () => {
-
-            adminSidebar.classList.toggle(
-                "open"
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   REFRESH
-========================================================= */
-
-function setupRefreshButtons() {
-
-    $("refreshStoresBtn")
-        ?.addEventListener(
-            "click",
-            loadStores
-        );
-
-
-    $("refreshProductsBtn")
-        ?.addEventListener(
-            "click",
-            loadProducts
-        );
-
-
-    $("refreshOrdersBtn")
-        ?.addEventListener(
-            "click",
-            loadOrders
-        );
-
-}
-
-
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
-async function loadDashboard() {
-
-    await Promise.all([
-        loadStats(),
-        loadRecentOrders(),
-        loadRecentStores()
-    ]);
-
-}
-
-
-/* =========================================================
-   STATS
-========================================================= */
-
-async function loadStats() {
-
-    try {
-
-        const [
-            stores,
-            products,
-            orders
-        ] = await Promise.all([
-
-            sb
-                .from("stores")
-                .select("*", {
-                    count: "exact",
-                    head: true
-                }),
-
-            sb
-                .from("products")
-                .select("*", {
-                    count: "exact",
-                    head: true
-                }),
-
-            sb
-                .from("orders")
-                .select("*", {
-                    count: "exact",
-                    head: true
-                })
-
-        ]);
-
-
-        $("totalStores").textContent =
-            stores.count ?? 0;
-
-
-        $("totalProducts").textContent =
-            products.count ?? 0;
-
-
-        $("totalOrders").textContent =
-            orders.count ?? 0;
-
-
-        $("totalUsers").textContent =
-            "—";
-
-
-    } catch (error) {
-
-        console.error(
-            "Stats Error:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   RECENT STORES
-========================================================= */
-
-async function loadRecentStores() {
-
-    const container =
-        $("recentStores");
-
-
-    if (!container) {
-        return;
-    }
-
-
-    container.innerHTML =
-        `<div class="loading">
-            Loading...
-        </div>`;
-
-
-    const {
-        data,
-        error
-    } =
-        await sb
-            .from("stores")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            )
-            .limit(5);
-
-
-    if (error) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                ${esc(error.message)}
-            </div>`;
-
-        return;
-    }
-
-
-    if (!data?.length) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                কোনো Store নেই।
-            </div>`;
-
-        return;
-    }
-
-
-    container.innerHTML = `
-
-        <table class="admin-table">
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Store
-                    </th>
-
-                    <th>
-                        Slug
-                    </th>
-
-                    <th>
-                        Created
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                ${data.map(
-                    store => `
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                ${esc(
-                                    store.name ||
-                                    store.store_name ||
-                                    "Unnamed Store"
-                                )}
-                            </strong>
-                        </td>
-
-
-                        <td>
-                            ${esc(
-                                store.slug || "—"
-                            )}
-                        </td>
-
-
-                        <td>
-                            ${dateText(
-                                store.created_at
-                            )}
-                        </td>
-
-                    </tr>
-
-                `
-                ).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-/* =========================================================
-   RECENT ORDERS
-========================================================= */
-
-async function loadRecentOrders() {
-
-    const container =
-        $("recentOrders");
-
-
-    if (!container) {
-        return;
-    }
-
-
-    container.innerHTML =
-        `<div class="loading">
-            Loading...
-        </div>`;
-
-
-    const {
-        data,
-        error
-    } =
-        await sb
-            .from("orders")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            )
-            .limit(5);
-
-
-    if (error) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                ${esc(error.message)}
-            </div>`;
-
-        return;
-    }
-
-
-    if (!data?.length) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                কোনো Order নেই।
-            </div>`;
-
-        return;
-    }
-
-
-    container.innerHTML = `
-
-        <table class="admin-table">
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Order ID
-                    </th>
-
-                    <th>
-                        Total
-                    </th>
-
-                    <th>
-                        Status
-                    </th>
-
-                    <th>
-                        Created
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                ${data.map(
-                    order => `
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                #${shortId(
-                                    order.id
-                                )}
-                            </strong>
-                        </td>
-
-
-                        <td>
-                            ${money(
-                                order.total ||
-                                order.subtotal ||
-                                0
-                            )}
-                        </td>
-
-
-                        <td>
-
-                            <span class="
-                                status
-                                status-${esc(
-                                    order.status ||
-                                    "pending"
-                                )}
-                            ">
-
-                                ${esc(
-                                    order.status ||
-                                    "pending"
-                                )}
-
-                            </span>
-
-                        </td>
-
-
-                        <td>
-                            ${dateText(
-                                order.created_at
-                            )}
-                        </td>
-
-                    </tr>
-
-                `
-                ).join("")}
-
-            </tbody>
-
-        </table>
-
-    `;
-
-}
-
-
-/* =========================================================
-   STORES
-========================================================= */
-
-async function loadStores() {
-
-    const container =
-        $("storesTable");
-
-
-    if (!container) {
-        return;
-    }
-
-
-    container.innerHTML =
-        `<div class="loading">
-            Loading stores...
-        </div>`;
-
-
-    const {
-        data,
-        error
-    } =
-        await sb
-            .from("stores")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                ${esc(error.message)}
-            </div>`;
-
-        return;
-    }
-
-
-    if (!data?.length) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                কোনো Store পাওয়া যায়নি।
-            </div>`;
-
-        return;
-    }
-
-
-    container.innerHTML = `
-
-        <div class="table-wrapper">
-
-            <table class="admin-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            Store
-                        </th>
-
-                        <th>
-                            Slug
-                        </th>
-
-                        <th>
-                            Created
-                        </th>
-
-                        <th>
-                            Action
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    ${data.map(
-                        store => `
-
-                        <tr>
-
-                            <td>
-
-                                <strong>
-                                    ${esc(
-                                        store.name ||
-                                        store.store_name ||
-                                        "Unnamed"
-                                    )}
-                                </strong>
-
-                            </td>
-
-
-                            <td>
-                                ${esc(
-                                    store.slug || "—"
-                                )}
-                            </td>
-
-
-                            <td>
-                                ${dateText(
-                                    store.created_at
-                                )}
-                            </td>
-
-
-                            <td>
-
-                                <button
-                                    class="action-btn danger"
-                                    data-delete-store="${esc(
-                                        store.id
-                                    )}"
-                                    type="button"
-                                >
-                                    Delete
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-                    `
-                    ).join("")}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    `;
-
-
-    container
-        .querySelectorAll(
-            "[data-delete-store]"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    async () => {
-
-                        const id =
-                            button.dataset
-                                .deleteStore;
-
-
-                        if (
-                            !confirm(
-                                "এই Store delete করতে চান?"
-                            )
-                        ) {
-                            return;
-                        }
-
-
-                        const {
-                            error
-                        } =
-                            await sb
-                                .from("stores")
-                                .delete()
-                                .eq(
-                                    "id",
-                                    id
-                                );
-
-
-                        if (error) {
-
-                            showToast(
-                                error.message,
-                                "error"
-                            );
-
-                            return;
-                        }
-
-
-                        showToast(
-                            "Store deleted successfully."
-                        );
-
-
-                        await loadStores();
-
-                        await loadStats();
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   PRODUCTS
-========================================================= */
-
-async function loadProducts() {
-
-    const container =
-        $("productsTable");
-
-
-    if (!container) {
-        return;
-    }
-
-
-    container.innerHTML =
-        `<div class="loading">
-            Loading products...
-        </div>`;
-
-
-    const {
-        data,
-        error
-    } =
-        await sb
-            .from("products")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                ${esc(error.message)}
-            </div>`;
-
-        return;
-    }
-
-
-    if (!data?.length) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                কোনো Product পাওয়া যায়নি।
-            </div>`;
-
-        return;
-    }
-
-
-    container.innerHTML = `
-
-        <div class="table-wrapper">
-
-            <table class="admin-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            Product
-                        </th>
-
-                        <th>
-                            Price
-                        </th>
-
-                        <th>
-                            Stock
-                        </th>
-
-                        <th>
-                            Created
-                        </th>
-
-                        <th>
-                            Action
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    ${data.map(
-                        product => `
-
-                        <tr>
-
-                            <td>
-
-                                <strong>
-                                    ${esc(
-                                        product.name ||
-                                        "Unnamed Product"
-                                    )}
-                                </strong>
-
-                            </td>
-
-
-                            <td>
-                                ${money(
-                                    product.price
-                                )}
-                            </td>
-
-
-                            <td>
-                                ${esc(
-                                    product.stock ?? 0
-                                )}
-                            </td>
-
-
-                            <td>
-                                ${dateText(
-                                    product.created_at
-                                )}
-                            </td>
-
-
-                            <td>
-
-                                <button
-                                    class="action-btn danger"
-                                    data-delete-product="${esc(
-                                        product.id
-                                    )}"
-                                    type="button"
-                                >
-                                    Delete
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-                    `
-                    ).join("")}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    `;
-
-
-    container
-        .querySelectorAll(
-            "[data-delete-product]"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    async () => {
-
-                        const id =
-                            button.dataset
-                                .deleteProduct;
-
-
-                        if (
-                            !confirm(
-                                "এই Product delete করতে চান?"
-                            )
-                        ) {
-                            return;
-                        }
-
-
-                        const {
-                            error
-                        } =
-                            await sb
-                                .from("products")
-                                .delete()
-                                .eq(
-                                    "id",
-                                    id
-                                );
-
-
-                        if (error) {
-
-                            showToast(
-                                error.message,
-                                "error"
-                            );
-
-                            return;
-                        }
-
-
-                        showToast(
-                            "Product deleted successfully."
-                        );
-
-
-                        await loadProducts();
-
-                        await loadStats();
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   ORDERS
-========================================================= */
-
-async function loadOrders() {
-
-    const container =
-        $("ordersTable");
-
-
-    if (!container) {
-        return;
-    }
-
-
-    container.innerHTML =
-        `<div class="loading">
-            Loading orders...
-        </div>`;
-
-
-    const {
-        data,
-        error
-    } =
-        await sb
-            .from("orders")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                ${esc(error.message)}
-            </div>`;
-
-        return;
-    }
-
-
-    if (!data?.length) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                কোনো Order পাওয়া যায়নি।
-            </div>`;
-
-        return;
-    }
-
-
-    container.innerHTML = `
-
-        <div class="table-wrapper">
-
-            <table class="admin-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            Order ID
-                        </th>
-
-                        <th>
-                            Total
-                        </th>
-
-                        <th>
-                            Status
-                        </th>
-
-                        <th>
-                            Created
-                        </th>
-
-                        <th>
-                            Action
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    ${data.map(
-                        order => `
-
-                        <tr>
-
-                            <td>
-
-                                <strong>
-                                    #${shortId(
-                                        order.id
-                                    )}
-                                </strong>
-
-                            </td>
-
-
-                            <td>
-                                ${money(
-                                    order.total ||
-                                    order.subtotal ||
-                                    0
-                                )}
-                            </td>
-
-
-                            <td>
-
-                                <span class="
-                                    status
-                                    status-${esc(
-                                        order.status ||
-                                        "pending"
-                                    )}
-                                ">
-
-                                    ${esc(
-                                        order.status ||
-                                        "pending"
-                                    )}
-
-                                </span>
-
-                            </td>
-
-
-                            <td>
-                                ${dateText(
-                                    order.created_at
-                                )}
-                            </td>
-
-
-                            <td>
-
-                                <button
-                                    class="action-btn"
-                                    data-view-order="${esc(
-                                        order.id
-                                    )}"
-                                    type="button"
-                                >
-                                    View
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-                    `
-                    ).join("")}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    `;
-
-
-    container
-        .querySelectorAll(
-            "[data-view-order]"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    async () => {
-
-                        const id =
-                            button.dataset
-                                .viewOrder;
-
-
-                        const {
-                            data,
-                            error
-                        } =
-                            await sb
-                                .from("orders")
-                                .select("*")
-                                .eq(
-                                    "id",
-                                    id
-                                )
-                                .single();
-
-
-                        if (error) {
-
-                            showToast(
-                                error.message,
-                                "error"
-                            );
-
-                            return;
-                        }
-
-
-                        alert(
-                            JSON.stringify(
-                                data,
-                                null,
-                                2
-                            )
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   SUPABASE STATUS
-========================================================= */
-
-async function checkSupabase() {
-
-    const element =
-        $("supabaseStatus");
-
-
-    if (!element) {
-        return;
-    }
-
-
-    try {
-
-        const {
-            error
-        } =
-            await sb
-                .from("stores")
-                .select("id")
-                .limit(1);
-
-
-        if (error) {
-
-            element.textContent =
-                "Connection Error";
-
-            element.style.color =
-                "#dc2626";
-
-            return;
-        }
-
-
-        element.textContent =
-            "Connected";
-
-        element.style.color =
-            "#16a34a";
-
-
-    } catch (error) {
-
-        element.textContent =
-            "Connection Error";
-
-        element.style.color =
-            "#dc2626";
-
-        console.error(
-            "Supabase Check Error:",
-            error
+        debug(
+            "Session check failed: " +
+            error.message,
+            "error"
         );
 
     }
@@ -1891,6 +500,40 @@ async function checkSupabase() {
 
 /* =========================================================
    START
-========================================================= */
+   ========================================================= */
+
+showLogin();
 
 checkSession();
+
+
+/* =========================================================
+   AUTH STATE
+   ========================================================= */
+
+if (sb) {
+
+    sb.auth.onAuthStateChange(
+        function (event, session) {
+
+            console.log(
+                "AUTH EVENT:",
+                event,
+                session
+            );
+
+
+            if (event === "SIGNED_OUT") {
+
+                showLogin();
+
+                debug(
+                    "Logout হয়েছে। আবার Login করুন।"
+                );
+
+            }
+
+        }
+    );
+
+}
