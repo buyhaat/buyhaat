@@ -80,20 +80,47 @@
     </section>
 
     <section id="my-store" class="page">
-      <div class="page-title">
-        <p class="eyebrow">ACCOUNT</p>
-        <h1>My Store</h1>
-        <p>Buyer account, seller account এবং Store management এখানে থাকবে।</p>
-      </div>
-      <div class="account-actions">
-        <button class="primary-btn" id="loginBtn">Login / Register</button>
-        <button class="secondary-btn" id="createStoreBtn">Create Store</button>
-      </div>
-      <div class="empty-card">
-        <h3>Store Manager</h3>
-        <p>Products, orders, stock, customers, chat এবং store settings পরবর্তী ধাপে যুক্ত হবে।</p>
-      </div>
-    </section>
+
+  <div class="page-title">
+    <p class="eyebrow">ACCOUNT</p>
+    <h1>My Store</h1>
+    <p id="accountStatus">
+      Buyer account, seller account এবং Store management এখানে থাকবে।
+    </p>
+  </div>
+
+  <div class="account-actions">
+
+    <button class="primary-btn" id="loginBtn">
+      Login / Register
+    </button>
+
+    <button class="secondary-btn" id="createStoreBtn">
+      Create Store
+    </button>
+
+    <button
+      class="secondary-btn"
+      id="logoutBtn"
+      style="display:none;">
+      Logout
+    </button>
+
+  </div>
+
+  <div class="empty-card" id="storeManagerCard">
+
+    <h3>Store Manager</h3>
+
+    <p>
+      Login করার পর নিজের Store তৈরি করে
+      products, orders, stock, customers এবং chat
+      manage করতে পারবেন।
+    </p>
+
+  </div>
+
+</section>
 
     <section id="product-detail" class="page"></section>
   </main>
