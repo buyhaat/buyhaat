@@ -4,7 +4,7 @@
 
 
 /* ---------------------------------------------------------
-   SUPABASE CHECK
+   CHECK SUPABASE
 --------------------------------------------------------- */
 
 if (
@@ -12,6 +12,7 @@ if (
     typeof SUPABASE_URL === "undefined" ||
     typeof SUPABASE_ANON_KEY === "undefined"
 ) {
+
     document.body.innerHTML = `
         <div style="
             padding:30px;
@@ -82,9 +83,6 @@ if (loginForm) {
 
     loginForm.addEventListener("submit", async (event) => {
 
-        /*
-         * Page refresh বন্ধ করবে
-         */
         event.preventDefault();
 
 
@@ -109,14 +107,15 @@ if (loginForm) {
         loginButton.disabled = true;
         loginButton.textContent = "Logging in...";
 
+
         showMessage("", "success");
 
 
         try {
 
-            /*
-             * Supabase Authentication
-             */
+            /* -------------------------------------------------
+               SUPABASE LOGIN
+            ------------------------------------------------- */
 
             const {
                 data,
@@ -126,10 +125,6 @@ if (loginForm) {
                 password: password
             });
 
-
-            /*
-             * Login error
-             */
 
             if (error) {
 
@@ -147,11 +142,15 @@ if (loginForm) {
             }
 
 
-            /*
-             * Session check
-             */
+            /* -------------------------------------------------
+               SESSION CHECK
+            ------------------------------------------------- */
 
-            if (!data || !data.session) {
+            if (
+                !data ||
+                !data.session ||
+                !data.user
+            ) {
 
                 showMessage(
                     "Login হয়েছে, কিন্তু session পাওয়া যায়নি।",
@@ -162,13 +161,62 @@ if (loginForm) {
             }
 
 
-            /*
-             * Login সফল
-             */
+            const userId =
+                data.user.id;
+
+
+            /* -------------------------------------------------
+               ADMIN ROLE CHECK
+            ------------------------------------------------- */
+
+            const {
+                data: profile,
+                error: profileError
+            } = await sb
+                .from("profiles")
+                .select("role")
+                .eq("id", userId)
+                .single();
+
+
+            if (profileError) {
+
+                console.error(
+                    "Profile error:",
+                    profileError
+                );
+
+                await sb.auth.signOut();
+
+                showMessage(
+                    "Admin profile যাচাই করা যায়নি।",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            if (!profile || profile.role !== "admin") {
+
+                await sb.auth.signOut();
+
+                showMessage(
+                    "এই account-এর Admin access নেই।",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            /* -------------------------------------------------
+               ADMIN LOGIN SUCCESS
+            ------------------------------------------------- */
 
             console.log(
                 "Admin login successful:",
-                data.user.id
+                userId
             );
 
 
@@ -178,14 +226,19 @@ if (loginForm) {
             );
 
 
-            /*
-             * এখন Dashboard page-এ যাবে
-             */
+            /* -------------------------------------------------
+               CLEAN DASHBOARD URL
+            ------------------------------------------------- */
 
-            window.location.href =
-                "dashboard.html";
+            setTimeout(() => {
+
+                window.location.href =
+                    "/admin/dashboard";
+
+            }, 500);
 
         }
+
         catch (error) {
 
             console.error(
@@ -200,10 +253,12 @@ if (loginForm) {
             );
 
         }
+
         finally {
 
             loginButton.disabled = false;
             loginButton.textContent = "Login";
+
         }
 
     });
