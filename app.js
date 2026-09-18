@@ -677,7 +677,11 @@ async function addProduct(event) {
     stock: Number($("productStock").value),
     category_id: category.id,
     store_id: currentMyStore.id,
-    image_url: $("productImageUrl").value.trim() || null,
+    const imageFile =
+  $("productImageFile")?.files?.[0] || null;
+
+const imageUrl =
+  await uploadImage(imageFile, "products");
     is_active: true,
     is_approved: false
   };
