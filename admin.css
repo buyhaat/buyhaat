@@ -5,31 +5,46 @@
 body {
     margin: 0;
     min-height: 100vh;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
     background: #f5f5f5;
     color: #171717;
 }
 
 .login-page {
     min-height: 100vh;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     padding: 20px;
 }
 
 .login-card {
     width: 100%;
     max-width: 400px;
+
     background: #ffffff;
+
     border-radius: 18px;
+
     padding: 32px 24px;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.08);
 }
 
 .logo {
     width: 60px;
     height: 60px;
+
     margin: 0 auto 18px;
 
     display: flex;
@@ -47,20 +62,27 @@ body {
 
 h1 {
     margin: 0;
+
     text-align: center;
+
     font-size: 25px;
 }
 
 .subtitle {
     margin: 8px 0 28px;
+
     text-align: center;
+
     color: #666666;
+
     font-size: 14px;
 }
 
 label {
     display: block;
+
     margin: 0 0 7px;
+
     font-size: 14px;
     font-weight: 600;
 }
@@ -79,6 +101,7 @@ input {
     color: #111111;
 
     font-size: 15px;
+
     outline: none;
 }
 
@@ -121,12 +144,14 @@ button:disabled {
 
 .login-message.error {
     display: block;
+
     background: #fef2f2;
     color: #b91c1c;
 }
 
 .login-message.success {
     display: block;
+
     background: #f0fdf4;
     color: #15803d;
 }
