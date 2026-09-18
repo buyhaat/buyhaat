@@ -188,6 +188,11 @@ function closeMenu() {
 
     $("menuOverlay")?.classList.remove("show");
 
+    $("sideMenu")?.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
     document.body.classList.remove(
         "menu-open"
     );
@@ -196,9 +201,30 @@ function closeMenu() {
 
 function openMenu() {
 
+    const page =
+        (location.hash || "#home")
+            .slice(1)
+            .split("?")[0];
+
+    /*
+       Side menu শুধু Home page-এ খুলবে।
+    */
+
+    if (page !== "home") {
+
+        closeMenu();
+
+        return;
+    }
+
     $("sideMenu")?.classList.add("open");
 
     $("menuOverlay")?.classList.add("show");
+
+    $("sideMenu")?.setAttribute(
+        "aria-hidden",
+        "false"
+    );
 
     document.body.classList.add(
         "menu-open"
@@ -244,6 +270,11 @@ function route() {
         }
     }
 
+
+    /*
+       Page activate
+    */
+
     document
         .querySelectorAll(".page")
         .forEach((el) => {
@@ -255,6 +286,10 @@ function route() {
 
         });
 
+
+    /*
+       Bottom navigation
+    */
 
     document
         .querySelectorAll(".bottom button")
@@ -269,25 +304,47 @@ function route() {
 
 
     /*
-       Menu button শুধু Home page-এ দেখাবে।
-       তবে Menu নিজে অন্য page থেকেও ভুল করে খোলা
-       থাকলে route() সেটি বন্ধ করে দেবে।
+       Menu + search button
+       শুধু Home page-এ থাকবে।
     */
+
+    const isHome =
+        page === "home";
+
 
     $("menuBtn")?.classList.toggle(
         "hidden",
-        page !== "home"
+        !isHome
     );
 
 
     $("headerSearchBtn")?.classList.toggle(
         "hidden",
-        page !== "home"
+        !isHome
     );
 
 
-    closeMenu();
+    /*
+       অন্য page-এ গেলে menu force close
+    */
 
+    if (!isHome) {
+
+        closeMenu();
+
+    } else {
+
+        /*
+           route-এর সময় menu open রাখা হবে না।
+        */
+
+        closeMenu();
+    }
+
+
+    /*
+       Page specific rendering
+    */
 
     if (page === "home") {
 
@@ -1295,6 +1352,7 @@ function openProduct(id) {
 
 /* =========================================================
    CREATE ORDER
+   orders → store_orders → order_items
 ========================================================= */
 
 async function createOrder(productId) {
@@ -1357,16 +1415,22 @@ async function createOrder(productId) {
 
     const quantity = 1;
 
+    const unitPrice =
+        Number(product.price);
 
-    const total =
-        Number(product.price) *
-        quantity;
+    const subtotal =
+        unitPrice * quantity;
 
 
     toast(
         "Order তৈরি হচ্ছে..."
     );
 
+
+    /*
+       STEP 1
+       Main order
+    */
 
     const {
         data: order,
@@ -1380,7 +1444,7 @@ async function createOrder(productId) {
                     currentUser.id,
 
                 total_amount:
-                    total,
+                    subtotal,
 
                 status:
                     "pending"
@@ -1406,6 +1470,74 @@ async function createOrder(productId) {
     }
 
 
+    /*
+       STEP 2
+       Store order
+    */
+
+    const {
+        data: storeOrder,
+        error: storeOrderError
+    } =
+        await sb
+            .from("store_orders")
+            .insert({
+
+                order_id:
+                    order.id,
+
+                store_id:
+                    product.storeId,
+
+                subtotal:
+                    subtotal,
+
+                status:
+                    "pending"
+
+            })
+            .select()
+            .single();
+
+
+    if (storeOrderError) {
+
+        console.error(
+            "Store order create error:",
+            storeOrderError
+        );
+
+
+        await sb
+            .from("orders")
+            .delete()
+            .eq(
+                "id",
+                order.id
+            );
+
+
+        toast(
+            storeOrderError.message ||
+            "Store order তৈরি করা যায়নি।"
+        );
+
+        return;
+    }
+
+
+    /*
+       STEP 3
+       Order item
+
+       Actual columns:
+       store_order_id
+       product_id
+       unit_price
+       quantity
+       subtotal
+    */
+
     const {
         error: itemError
     } =
@@ -1413,17 +1545,20 @@ async function createOrder(productId) {
             .from("order_items")
             .insert({
 
-                order_id:
-                    order.id,
+                store_order_id:
+                    storeOrder.id,
 
                 product_id:
                     product.id,
 
+                unit_price:
+                    unitPrice,
+
                 quantity:
                     quantity,
 
-                price:
-                    Number(product.price)
+                subtotal:
+                    subtotal
 
             });
 
@@ -1434,6 +1569,15 @@ async function createOrder(productId) {
             "Order item error:",
             itemError
         );
+
+
+        await sb
+            .from("store_orders")
+            .delete()
+            .eq(
+                "id",
+                storeOrder.id
+            );
 
 
         await sb
@@ -1958,10 +2102,7 @@ async function addProduct(event) {
 
 
     /*
-       IMPORTANT:
        products.slug NOT NULL
-       তাই name থেকে slug তৈরি করে
-       database-এ পাঠানো হচ্ছে।
     */
 
     const baseSlug =
@@ -1969,9 +2110,10 @@ async function addProduct(event) {
 
 
     const slug =
-        `${baseSlug || "product"}-${Math.random()
+        `${baseSlug || "product"}-${Date.now()
+            .toString(36)}-${Math.random()
             .toString(36)
-            .slice(2, 8)}`;
+            .slice(2, 6)}`;
 
 
     const payload = {
@@ -2911,6 +3053,62 @@ async function saveProductEdit(event) {
     }
 
 
+    const name =
+        $("editProductName")
+            .value
+            .trim();
+
+
+    if (!name) {
+
+        $("editProductMessage")
+            .textContent =
+            "Product name দাও।";
+
+        return;
+    }
+
+
+    const price =
+        Number(
+            $("editProductPrice")
+                .value
+        );
+
+
+    const stock =
+        Number(
+            $("editProductStock")
+                .value
+        );
+
+
+    if (
+        !Number.isFinite(price) ||
+        price < 0
+    ) {
+
+        $("editProductMessage")
+            .textContent =
+            "সঠিক Price দাও।";
+
+        return;
+    }
+
+
+    if (
+        !Number.isInteger(stock) ||
+        stock < 0
+    ) {
+
+        $("editProductMessage")
+            .textContent =
+            "সঠিক Stock দাও।";
+
+        return;
+    }
+
+
     const categoryName =
         $("editProductCategory")
             .value;
@@ -2979,71 +3177,10 @@ async function saveProductEdit(event) {
     }
 
 
-    const price =
-        Number(
-            $("editProductPrice")
-                .value
-        );
-
-
-    const stock =
-        Number(
-            $("editProductStock")
-                .value
-        );
-
-
-    if (
-        !Number.isFinite(price) ||
-        price < 0
-    ) {
-
-        $("editProductMessage")
-            .textContent =
-            "সঠিক Price দাও।";
-
-        return;
-    }
-
-
-    if (
-        !Number.isInteger(stock) ||
-        stock < 0
-    ) {
-
-        $("editProductMessage")
-            .textContent =
-            "সঠিক Stock দাও।";
-
-        return;
-    }
-
-
-    const name =
-        $("editProductName")
-            .value
-            .trim();
-
-
-    if (!name) {
-
-        $("editProductMessage")
-            .textContent =
-            "Product name দাও।";
-
-        return;
-    }
-
-
     const updates = {
 
         name:
             name,
-
-        /*
-           Existing product-এর slug-ও
-           name পরিবর্তন হলে update হবে।
-        */
 
         slug:
             `${createSlug(name) || "product"}-${String(editingProductId).slice(0, 6)}`,
@@ -3172,6 +3309,15 @@ async function deleteProduct(id) {
 
 /* =========================================================
    SELLER ORDERS
+   Actual structure:
+
+   orders
+      ↓
+   store_orders
+      ↓
+   order_items
+      ↓
+   products
 ========================================================= */
 
 async function sellerOrders() {
@@ -3188,38 +3334,67 @@ async function sellerOrders() {
     }
 
 
+    /*
+       IMPORTANT:
+
+       এখানে আর order_items → orders
+       direct relationship ব্যবহার করা হচ্ছে না।
+
+       order_items.store_order_id
+       → store_orders.id
+
+       এবং store_orders.store_id
+       → current store
+    */
+
     const {
         data,
         error
     } =
         await sb
-            .from("order_items")
+            .from("store_orders")
             .select(`
                 id,
                 order_id,
-                quantity,
-                price,
+                store_id,
+                subtotal,
+                status,
+                created_at,
 
-                products!inner(
+                order_items(
                     id,
-                    name,
-                    store_id
-                ),
-
-                orders(
-                    id,
-                    status,
+                    product_id,
+                    unit_price,
+                    quantity,
+                    subtotal,
                     created_at,
-                    total_amount
+
+                    products(
+                        id,
+                        name,
+                        store_id
+                    )
                 )
             `)
             .eq(
-                "products.store_id",
+                "store_id",
                 currentMyStore.id
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
             );
 
 
     if (error) {
+
+        console.error(
+            "Seller orders error:",
+            error
+        );
+
 
         box.innerHTML = `
             <div class="empty">
@@ -3243,74 +3418,161 @@ async function sellerOrders() {
     }
 
 
-    const sorted =
-        [...data].sort(
-            (a, b) =>
-                new Date(
-                    b.orders?.created_at || 0
-                ) -
-                new Date(
-                    a.orders?.created_at || 0
-                )
-        );
-
-
     box.innerHTML =
-        sorted
+        data
             .map(
-                (item) => `
+                (storeOrder) => {
 
-                    <div class="card">
-
-                        <b>
-                            Order #${esc(
-                                item.order_id
-                            )}
-                        </b>
-
-
-                        <p>
-
-                            ${esc(
-                                item.products?.name ||
-                                "Product"
-                            )}
-
-                            ×
-
-                            ${Number(
-                                item.quantity || 0
-                            )}
-
-                        </p>
+                    const items =
+                        Array.isArray(
+                            storeOrder.order_items
+                        )
+                            ? storeOrder.order_items
+                            : [];
 
 
-                        <p>
+                    if (!items.length) {
 
-                            Price:
+                        return `
+                            <div class="card">
 
-                            ${money(
-                                Number(item.price || 0) *
-                                Number(item.quantity || 0)
-                            )}
+                                <b>
+                                    Store Order #${esc(
+                                        storeOrder.id
+                                    )}
+                                </b>
 
-                        </p>
+                                <p>
+                                    কোনো item পাওয়া যায়নি।
+                                </p>
+
+                                <small>
+                                    Status:
+                                    ${esc(
+                                        storeOrder.status ||
+                                        "pending"
+                                    )}
+                                </small>
+
+                            </div>
+                        `;
+                    }
 
 
-                        <small>
+                    return `
 
-                            Status:
+                        <div class="card">
 
-                            ${esc(
-                                item.orders?.status ||
-                                "pending"
-                            )}
+                            <b>
+                                Order #${esc(
+                                    storeOrder.order_id ||
+                                    storeOrder.id
+                                )}
+                            </b>
 
-                        </small>
 
-                    </div>
+                            <small class="store-meta">
 
-                `
+                                ${storeOrder.created_at
+                                    ? new Date(
+                                        storeOrder.created_at
+                                    ).toLocaleString(
+                                        "en-BD"
+                                    )
+                                    : ""
+                                }
+
+                            </small>
+
+
+                            ${
+                                items
+                                    .map(
+                                        (item) => `
+
+                                            <div
+                                                style="
+                                                    padding:10px 0;
+                                                    border-bottom:1px solid #eee;
+                                                "
+                                            >
+
+                                                <p style="margin:0 0 5px;">
+
+                                                    <b>
+                                                        ${esc(
+                                                            item.products?.name ||
+                                                            "Product"
+                                                        )}
+                                                    </b>
+
+                                                </p>
+
+
+                                                <p style="margin:0;">
+
+                                                    Quantity:
+                                                    ${Number(
+                                                        item.quantity || 0
+                                                    )}
+
+                                                    ·
+
+                                                    Unit Price:
+                                                    ${money(
+                                                        item.unit_price
+                                                    )}
+
+                                                </p>
+
+
+                                                <p style="margin:5px 0 0;">
+
+                                                    Subtotal:
+                                                    <b>
+                                                        ${money(
+                                                            item.subtotal
+                                                        )}
+                                                    </b>
+
+                                                </p>
+
+                                            </div>
+
+                                        `
+                                    )
+                                    .join("")
+                            }
+
+
+                            <p>
+
+                                <b>
+                                    Store Subtotal:
+                                </b>
+
+                                ${money(
+                                    storeOrder.subtotal
+                                )}
+
+                            </p>
+
+
+                            <small>
+
+                                Status:
+
+                                ${esc(
+                                    storeOrder.status ||
+                                    "pending"
+                                )}
+
+                            </small>
+
+                        </div>
+
+                    `;
+                }
             )
             .join("");
 }
@@ -3908,6 +4170,19 @@ function init() {
                         tabName !==
                         "settings"
                     );
+
+
+                /*
+                   Orders tab খুললে fresh data load
+                */
+
+                if (
+                    tabName === "orders"
+                ) {
+
+                    sellerOrders();
+
+                }
 
             };
 
