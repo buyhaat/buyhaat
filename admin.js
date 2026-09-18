@@ -218,9 +218,16 @@ async function checkAdmin() {
             error: adminError
         } = await sb.rpc("is_admin");
 
-       console.log("ADMIN CHECK RESULT:", isAdmin);
-       console.log("ADMIN CHECK ERROR:", adminError);
-
+       alert(
+    "ADMIN CHECK RESULT: " +
+    String(isAdmin) +
+    "\n\nADMIN CHECK ERROR: " +
+    String(
+        adminError
+            ? adminError.message
+            : "null"
+    )
+);
         if (adminError) {
 
             console.error(
