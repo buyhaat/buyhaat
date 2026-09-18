@@ -378,6 +378,60 @@ async function loadProducts() {
 
 }
 
+/* =========================================================
+   LOAD STORES
+   ========================================================= */
+
+async function loadStores() {
+
+  const {
+    data,
+    error
+  } = await sb
+    .from("stores")
+    .select(`
+      id,
+      name,
+      slug,
+      logo_url,
+      cover_url,
+      description,
+      is_active,
+      is_approved
+    `)
+    .eq(
+      "is_active",
+      true
+    )
+    .eq(
+      "is_approved",
+      true
+    )
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    );
+
+
+  if (error) {
+
+    console.error(
+      "Store error:",
+      error
+    );
+
+    return;
+
+  }
+
+
+  stores =
+    data || [];
+
+}
+
 
 /* =========================================================
    RENDER CATEGORIES
@@ -580,27 +634,413 @@ function renderProducts(
             `
           )
           .join("")
+/* =========================================================
+   RENDER PRODUCTS + STORES SEARCH
+   ========================================================= */
 
-      :
+function renderProducts(
+  category = "All",
+  query = ""
+) {
 
-        `
+  const container =
+    $("products");
 
-          <div class="empty-card">
+  if (!container) return;
 
-            <h3>
-              কোনো product পাওয়া যায়নি
-            </h3>
 
-            <p>
-              অন্য keyword বা category চেষ্টা করুন।
-            </p>
+  /* =======================================================
+     FILTER PRODUCTS
+     ======================================================= */
+
+  let list =
+    products.filter(
+      p =>
+        category === "All" ||
+        p.category === category
+    );
+
+
+  const q =
+    query
+      .trim()
+      .toLowerCase();
+
+
+  if (q) {
+
+    list =
+      list.filter(
+        p =>
+          (
+            p.name +
+            " " +
+            p.store +
+            " " +
+            p.category
+          )
+            .toLowerCase()
+            .includes(q)
+      );
+
+  }
+
+
+  /* =======================================================
+     FIND STORES
+     ======================================================= */
+
+  let storeList =
+    [];
+
+
+  if (q) {
+
+    storeList =
+      stores.filter(
+        store => {
+
+          const storeName =
+            store.name ||
+            "";
+
+          const storeUsername =
+            store.slug ||
+            "";
+
+
+          return (
+            storeName
+              .toLowerCase()
+              .includes(q) ||
+
+            storeUsername
+              .toLowerCase()
+              .includes(
+                q.replace(/^@/, "")
+              )
+          );
+
+        }
+      );
+
+  }
+
+
+  /* =======================================================
+     PRODUCT COUNT
+     ======================================================= */
+
+  if ($("productCount")) {
+
+    $("productCount")
+      .textContent =
+      list.length +
+      " products" +
+      (
+        storeList.length
+          ? " · " +
+            storeList.length +
+            " stores"
+          : ""
+      );
+
+  }
+
+
+  /* =======================================================
+     STORE RESULTS
+     ======================================================= */
+
+  const storeHTML =
+    storeList.length
+
+      ? `
+
+        <div
+          class="search-store-results">
+
+          <div
+            class="search-section-title">
+
+            Stores
 
           </div>
 
-        `;
+
+          ${storeList
+            .map(
+              store => `
+
+                <div
+                  class="search-store-card"
+                  data-store-id="${escapeHTML(
+                    store.id
+                  )}">
 
 
-  document
+                  <div
+                    class="search-store-avatar">
+
+                    ${
+                      store.logo_url
+
+                        ? `
+
+                          <img
+                            src="${escapeHTML(
+                              store.logo_url
+                            )}"
+                            alt="${escapeHTML(
+                              store.name
+                            )}">
+
+                        `
+
+                        : escapeHTML(
+                            (
+                              store.name ||
+                              "S"
+                            )
+                              .charAt(0)
+                              .toUpperCase()
+                          )
+
+                    }
+
+                  </div>
+
+
+                  <div
+                    class="search-store-info">
+
+
+                    <h3>
+
+                      ${escapeHTML(
+                        store.name
+                      )}
+
+                    </h3>
+
+
+                    <p>
+
+                      @${escapeHTML(
+                        store.slug
+                      )}
+
+                    </p>
+
+
+                    ${
+                      store.description
+
+                        ? `
+
+                          <span>
+
+                            ${escapeHTML(
+                              store.description
+                            )}
+
+                          </span>
+
+                        `
+
+                        : ""
+
+                    }
+
+                  </div>
+
+
+                  <button
+                    type="button"
+                    class="secondary-btn search-store-btn">
+
+                    View
+
+                  </button>
+
+
+                </div>
+
+              `
+            )
+            .join("")}
+
+        </div>
+
+      `
+
+      : "";
+
+
+  /* =======================================================
+     PRODUCT RESULTS
+     ======================================================= */
+
+  const productHTML =
+    list.length
+
+      ? `
+
+        <div
+          class="search-product-results">
+
+
+          ${
+            storeList.length
+
+              ? `
+
+                <div
+                  class="search-section-title">
+
+                  Products
+
+                </div>
+
+              `
+
+              : ""
+
+          }
+
+
+          <div
+            class="product-grid">
+
+
+            ${list
+              .map(
+                p => `
+
+                  <article
+                    class="product-card"
+                    data-product="${p.id}">
+
+
+                    <div
+                      class="product-image">
+
+
+                      ${
+                        p.image
+
+                          ? `
+
+                            <img
+                              src="${escapeHTML(
+                                p.image
+                              )}"
+                              alt="${escapeHTML(
+                                p.name
+                              )}">
+
+                          `
+
+                          : "🛍️"
+
+                      }
+
+                    </div>
+
+
+                    <div
+                      class="product-info">
+
+
+                      <div
+                        class="product-name">
+
+                        ${escapeHTML(
+                          p.name
+                        )}
+
+                      </div>
+
+
+                      <div
+                        class="price">
+
+                        ${money(
+                          p.price
+                        )}
+
+                      </div>
+
+
+                      <div
+                        class="store-name">
+
+                        ${escapeHTML(
+                          p.store
+                        )}
+
+                      </div>
+
+
+                    </div>
+
+
+                  </article>
+
+                `
+              )
+              .join("")}
+
+
+          </div>
+
+        </div>
+
+      `
+
+      : "";
+
+
+  /* =======================================================
+     EMPTY RESULT
+     ======================================================= */
+
+  if (
+    !storeList.length &&
+    !list.length
+  ) {
+
+    container.innerHTML = `
+
+      <div
+        class="empty-card">
+
+        <h3>
+          কোনো product বা store পাওয়া যায়নি
+        </h3>
+
+        <p>
+          অন্য keyword, product name বা store username চেষ্টা করুন।
+        </p>
+
+      </div>
+
+    `;
+
+  } else {
+
+    container.innerHTML =
+      storeHTML +
+      productHTML;
+
+  }
+
+
+  /* =======================================================
+     PRODUCT CLICK
+     ======================================================= */
+
+  container
     .querySelectorAll(
       "[data-product]"
     )
@@ -621,8 +1061,143 @@ function renderProducts(
       }
     );
 
-}
 
+  /* =======================================================
+     STORE CLICK
+     ======================================================= */
+
+  container
+    .querySelectorAll(
+      ".search-store-card"
+    )
+    .forEach(
+      card => {
+
+        card.addEventListener(
+          "click",
+          () => {
+
+            const storeId =
+              card.dataset.storeId;
+
+
+            const store =
+              stores.find(
+                s =>
+                  String(s.id) ===
+                  String(storeId)
+              );
+
+
+            if (!store) return;
+
+
+            /*
+             * Store-এর products দেখানো হবে।
+             * Search box-এ Store name বসিয়ে
+             * একই search system ব্যবহার করছি।
+             */
+
+            const searchInput =
+              $("searchInput");
+
+
+            if (searchInput) {
+
+              searchInput.value =
+                store.name;
+
+            }
+
+
+            renderProducts(
+              "All",
+              store.name
+            );
+
+
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+
+          }
+        );
+
+      }
+    );
+
+
+  /* =======================================================
+     STORE VIEW BUTTON
+     ======================================================= */
+
+  container
+    .querySelectorAll(
+      ".search-store-btn"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          e => {
+
+            e.stopPropagation();
+
+
+            const card =
+              button.closest(
+                ".search-store-card"
+              );
+
+
+            if (!card) return;
+
+
+            const store =
+              stores.find(
+                s =>
+                  String(s.id) ===
+                  String(
+                    card.dataset.storeId
+                  )
+              );
+
+
+            if (!store) return;
+
+
+            const searchInput =
+              $("searchInput");
+
+
+            if (searchInput) {
+
+              searchInput.value =
+                store.name;
+
+            }
+
+
+            renderProducts(
+              "All",
+              store.name
+            );
+
+
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+
+          }
+        );
+
+      }
+    );
+
+}
 
 /* =========================================================
    PRODUCT DETAIL
