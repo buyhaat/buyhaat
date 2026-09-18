@@ -644,6 +644,7 @@ async function createStore(event) {
 /* ---------------- PRODUCT ADD / EDIT ---------------- */
 
 async function addProduct(event) {
+async function addProduct(event) {
   event.preventDefault();
 
   if (!currentUser) {
@@ -656,9 +657,13 @@ async function addProduct(event) {
     return;
   }
 
-  const categoryName = $("productCategory").value;
+  const categoryName =
+    $("productCategory").value;
 
-  const { data: category, error: categoryError } = await sb
+  const {
+    data: category,
+    error: categoryError
+  } = await sb
     .from("categories")
     .select("id")
     .eq("name", categoryName)
@@ -666,39 +671,101 @@ async function addProduct(event) {
 
   if (categoryError || !category) {
     $("productMsg").textContent =
-      categoryError?.message || "Category পাওয়া যায়নি।";
+      categoryError?.message ||
+      "Category পাওয়া যায়নি।";
     return;
   }
 
+  /* -----------------------------
+     Product image upload
+     ----------------------------- */
+
+  const imageFile =
+    $("productImageFile")?.files?.[0] || null;
+
+  let imageUrl = null;
+
+  if (imageFile) {
+    $("productMsg").textContent =
+      "Product image upload হচ্ছে...";
+
+    imageUrl =
+      await uploadImage(
+        imageFile,
+        "products"
+      );
+
+    if (!imageUrl) {
+      $("productMsg").textContent =
+        "Product image upload করা যায়নি।";
+      return;
+    }
+  }
+
+  /* -----------------------------
+     Product data
+     ----------------------------- */
+
   const payload = {
-    name: $("productName").value.trim(),
-    price: Number($("productPrice").value),
-    description: $("productDescription").value.trim() || null,
-    stock: Number($("productStock").value),
-    category_id: category.id,
-    store_id: currentMyStore.id,
-    image_url: $("productImageUrl").value.trim() || null,
+    name:
+      $("productName").value.trim(),
+
+    price:
+      Number($("productPrice").value),
+
+    description:
+      $("productDescription").value.trim() ||
+      null,
+
+    stock:
+      Number($("productStock").value),
+
+    category_id:
+      category.id,
+
+    store_id:
+      currentMyStore.id,
+
+    image_url:
+      imageUrl,
+
     is_active: true,
+
     is_approved: false
   };
 
-  const { error } = await sb
+  $("productMsg").textContent =
+    "Product save হচ্ছে...";
+
+  const {
+    error
+  } = await sb
     .from("products")
     .insert(payload);
 
   if (error) {
-    $("productMsg").textContent = error.message;
+    console.error(
+      "Product insert error:",
+      error
+    );
+
+    $("productMsg").textContent =
+      error.message;
+
     return;
   }
 
   $("productForm").reset();
+
   $("productStock").value = 1;
+
   $("productMsg").textContent =
     "Product added — approval pending.";
 
   await loadProducts();
   await sellerProducts();
-  toast("Product added");
+
+  toast("Product added successfully");
 }
 
 /* ---------------- FOLLOWING ---------------- */
