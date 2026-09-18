@@ -1,325 +1,551 @@
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f7f8fa;--card:#fff;--text:#172033;--muted:#697386;--primary:#0f172a;--line:#e7e9ee;--accent:#f59e0b}
-html{scroll-behavior:smooth}
-body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);padding-bottom:82px}
-button,input{font:inherit}
-button{cursor:pointer}
-a{text-decoration:none;color:inherit}
-.topbar{height:64px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:20}
-.brand{font-size:25px;font-weight:800;letter-spacing:-.8px}.brand span{color:#f59e0b}
-.icon-btn{border:0;background:#f3f4f6;border-radius:12px;width:42px;height:42px;font-size:20px}
-main{max-width:1180px;margin:auto;padding:20px 16px 30px}
-.page{display:none}.page.active{display:block}
-.search-wrap{display:flex;gap:8px;margin:4px auto 18px;max-width:760px}
-.search-wrap input{width:100%;border:1px solid var(--line);background:#fff;border-radius:14px;padding:14px 15px;outline:none}
-.search-wrap input:focus{border-color:#9ca3af}
-.search-btn,.primary-btn{border:0;background:var(--primary);color:#fff;border-radius:13px;padding:0 18px;font-weight:700}
-.welcome{border-radius:22px;padding:28px;background:linear-gradient(135deg,#111827,#334155);color:#fff;min-height:185px;display:flex;align-items:end;box-shadow:0 10px 30px #00000012}
-.eyebrow{font-size:11px;letter-spacing:1.6px;font-weight:800;opacity:.7;margin-bottom:7px}
-.welcome h1{font-size:clamp(25px,5vw,42px);line-height:1.1;max-width:700px;margin-bottom:10px}.welcome p:last-child{color:#dbe1ea;max-width:650px}
-.section{margin-top:26px}.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}.section-head h2{font-size:20px}.muted{color:var(--muted);font-size:13px}
-.categories{display:flex;gap:10px;overflow:auto;padding-bottom:4px}.category{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 15px}.category.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-.product-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.product-card{background:#fff;border:1px solid var(--line);border-radius:17px;overflow:hidden;transition:.2s}.product-card:hover{transform:translateY(-2px);box-shadow:0 8px 25px #0000000b}
-.product-image{aspect-ratio:1/1;background:#eef0f3;display:flex;align-items:center;justify-content:center;font-size:48px}
-.product-info{padding:13px}.product-name{font-weight:750;margin-bottom:5px}.price{font-weight:800;font-size:18px}.store-name{font-size:12px;color:var(--muted);margin-top:7px}
-.page-title{padding:15px 2px 20px}.page-title h1{font-size:28px;margin-bottom:7px}.page-title p:last-child{color:var(--muted)}
-.store-list{display:grid;gap:12px}.store-card,.empty-card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px}.store-card{display:flex;align-items:center;gap:13px}.store-avatar{width:48px;height:48px;border-radius:14px;background:#eef0f3;display:grid;place-items:center;font-weight:800}.store-meta{flex:1}.store-meta h3{font-size:16px}.store-meta p{font-size:13px;color:var(--muted);margin-top:3px}
-.account-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.secondary-btn{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:13px;padding:12px 18px;font-weight:700}
-.detail{max-width:850px;margin:auto}.back-btn{border:0;background:transparent;padding:8px 0;margin-bottom:12px;font-weight:700}.detail-card{background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden}.detail-image{aspect-ratio:16/9;background:#eef0f3;display:grid;place-items:center;font-size:80px}.detail-body{padding:22px}.detail-body h1{font-size:30px;margin-bottom:8px}.detail-price{font-size:26px;font-weight:850;margin:12px 0}.detail-desc{color:var(--muted);line-height:1.6}.order-btn{width:100%;margin-top:20px;padding:14px;border:0;border-radius:13px;background:#0f172a;color:#fff;font-weight:800}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:70px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:30;box-shadow:0 -8px 30px #0000000a}
-.bottom-nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:20px;color:#7a8494}.bottom-nav a span{font-size:10px;font-weight:650}.bottom-nav a.active{color:#111827}.bottom-nav .add-tab{font-size:24px}
-.toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,20px);background:#111827;color:#fff;padding:11px 15px;border-radius:10px;opacity:0;pointer-events:none;transition:.2s;z-index:50;font-size:13px}.toast.show{opacity:1;transform:translate(-50%,0)}
-@media(min-width:700px){.product-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.bottom-nav{max-width:760px;left:50%;right:auto;transform:translateX(-50%);border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0}}
-
 /* =========================================================
-   AUTH MODAL
+   BUYHAAT — MAIN STYLE
+   UI / LAYOUT ONLY
    ========================================================= */
 
-.auth-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.55);
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-.auth-modal.show {
-  display: flex;
+:root {
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --text: #172033;
+    --muted: #697386;
+    --primary: #0f172a;
+    --line: #e7e9ee;
+    --accent: #f59e0b;
+    --soft: #f1f3f6;
 }
 
-.auth-box {
-  position: relative;
-  width: 100%;
-  max-width: 420px;
-  padding: 28px;
-  border-radius: 20px;
-  background: #fff;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+html {
+    scroll-behavior: smooth;
 }
 
-.auth-close {
-  position: absolute;
-  top: 12px;
-  right: 15px;
-  border: 0;
-  background: transparent;
-  font-size: 30px;
-  cursor: pointer;
+body {
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background: var(--bg);
+    color: var(--text);
+
+    padding-bottom: 82px;
 }
 
-.auth-header {
-  margin-bottom: 22px;
+button,
+input,
+textarea,
+select {
+    font: inherit;
 }
 
-.auth-header h2 {
-  margin: 5px 0 8px;
+button {
+    cursor: pointer;
 }
 
-.auth-box form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+a {
+    text-decoration: none;
+    color: inherit;
 }
 
-.auth-box label {
-  font-weight: 600;
-  margin-top: 8px;
-}
-
-.auth-box input {
-  width: 100%;
-  padding: 13px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-  outline: none;
-  font-size: 15px;
-}
-
-.auth-box input:focus {
-  border-color: #0f172a;
-}
-
-.auth-message {
-  min-height: 20px;
-  margin: 12px 0;
-  font-size: 14px;
-}
-
-.auth-switch {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  padding: 10px;
-  font-size: 14px;
-}
 
 /* =========================================================
-   CREATE STORE MODAL
+   TOP BAR
    ========================================================= */
 
-.store-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
+.topbar {
+    height: 64px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    background: #fff;
 
-  padding: 20px;
+    border-bottom: 1px solid var(--line);
 
-  background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-  opacity: 0;
-  visibility: hidden;
+    padding: 0 18px;
 
-  transition: 0.2s ease;
+    position: sticky;
+    top: 0;
+
+    z-index: 20;
+}
+
+.brand {
+    font-size: 25px;
+    font-weight: 800;
+
+    letter-spacing: -0.8px;
+}
+
+.brand span {
+    color: #f59e0b;
+}
+
+.icon-btn {
+    width: 42px;
+    height: 42px;
+
+    border: 0;
+
+    background: #f3f4f6;
+
+    border-radius: 12px;
+
+    font-size: 20px;
 }
 
 
-.store-modal.show {
-  opacity: 1;
-  visibility: visible;
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+main {
+    max-width: 1180px;
+
+    margin: auto;
+
+    padding: 20px 16px 30px;
+}
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
 }
 
 
-.store-modal-card {
-  position: relative;
+/* =========================================================
+   SEARCH
+   ========================================================= */
 
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
+.search-wrap {
+    display: flex;
 
-  overflow-y: auto;
+    gap: 8px;
 
-  background: #ffffff;
-  color: #222;
+    margin: 4px auto 18px;
 
-  border-radius: 18px;
+    max-width: 760px;
+}
 
-  padding: 25px;
+.search-wrap input {
+    width: 100%;
 
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--line);
 
-  transform: translateY(20px);
+    background: #fff;
 
-  transition: 0.2s ease;
+    border-radius: 14px;
+
+    padding: 14px 15px;
+
+    outline: none;
+}
+
+.search-wrap input:focus {
+    border-color: #9ca3af;
+}
+
+.search-btn,
+.primary-btn {
+    border: 0;
+
+    background: var(--primary);
+
+    color: #fff;
+
+    border-radius: 13px;
+
+    padding: 0 18px;
+
+    font-weight: 700;
 }
 
 
-.store-modal.show .store-modal-card {
-  transform: translateY(0);
+/* =========================================================
+   HOME WELCOME
+   ========================================================= */
+
+.welcome {
+    border-radius: 22px;
+
+    padding: 28px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #111827,
+            #334155
+        );
+
+    color: #fff;
+
+    min-height: 185px;
+
+    display: flex;
+    align-items: flex-end;
+
+    box-shadow:
+        0 10px 30px #00000012;
+}
+
+.eyebrow {
+    font-size: 11px;
+
+    letter-spacing: 1.6px;
+
+    font-weight: 800;
+
+    opacity: 0.7;
+
+    margin-bottom: 7px;
+}
+
+.welcome h1 {
+    font-size:
+        clamp(25px, 5vw, 42px);
+
+    line-height: 1.1;
+
+    max-width: 700px;
+
+    margin-bottom: 10px;
+}
+
+.welcome p:last-child {
+    color: #dbe1ea;
+
+    max-width: 650px;
+
+    line-height: 1.5;
 }
 
 
-.store-modal-card h2 {
-  margin: 0 35px 6px 0;
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+.section {
+    margin-top: 28px;
+}
+
+.section-head {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 13px;
+}
+
+.section-head h2 {
+    font-size: 20px;
+}
+
+.muted {
+    color: var(--muted);
+
+    font-size: 13px;
 }
 
 
-.store-modal-subtitle {
-  margin: 0 0 22px;
-  color: #777;
+/* =========================================================
+   CATEGORIES
+   ========================================================= */
+
+.categories {
+    display: flex;
+
+    gap: 10px;
+
+    overflow-x: auto;
+
+    padding-bottom: 5px;
+
+    scrollbar-width: none;
+}
+
+.categories::-webkit-scrollbar {
+    display: none;
+}
+
+.category {
+    white-space: nowrap;
+
+    border: 1px solid var(--line);
+
+    background: #fff;
+
+    border-radius: 999px;
+
+    padding: 10px 15px;
+
+    transition: 0.2s ease;
+}
+
+.category:hover {
+    transform: translateY(-1px);
+}
+
+.category.active {
+    background: var(--primary);
+
+    color: #fff;
+
+    border-color: var(--primary);
 }
 
 
-.store-modal-close {
-  position: absolute;
+/* =========================================================
+   PRODUCTS
+   ========================================================= */
 
-  top: 12px;
-  right: 14px;
+.product-grid {
+    display: grid;
 
-  width: 36px;
-  height: 36px;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
 
-  border: 0;
-  border-radius: 50%;
+    gap: 12px;
+}
 
-  background: #f1f1f1;
+.product-card {
+    background: #fff;
 
-  font-size: 25px;
+    border: 1px solid var(--line);
 
-  cursor: pointer;
+    border-radius: 17px;
+
+    overflow: hidden;
+
+    transition: 0.2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 25px #0000000b;
+}
+
+.product-image {
+    aspect-ratio: 1 / 1;
+
+    background: #eef0f3;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 48px;
+
+    overflow: hidden;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+}
+
+.product-info {
+    padding: 13px;
+}
+
+.product-name {
+    font-weight: 750;
+
+    margin-bottom: 5px;
+
+    line-height: 1.35;
+}
+
+.price {
+    font-weight: 800;
+
+    font-size: 18px;
+}
+
+.store-name {
+    font-size: 12px;
+
+    color: var(--muted);
+
+    margin-top: 7px;
 }
 
 
-#createStoreForm label {
-  display: block;
+/* =========================================================
+   PAGE TITLE
+   ========================================================= */
 
-  margin-bottom: 15px;
+.page-title {
+    padding: 15px 2px 20px;
+}
 
-  font-size: 14px;
-  font-weight: 600;
+.page-title h1 {
+    font-size: 28px;
+
+    margin-bottom: 7px;
+}
+
+.page-title p:last-child {
+    color: var(--muted);
+
+    line-height: 1.5;
 }
 
 
-#createStoreForm input,
-#createStoreForm textarea {
-  display: block;
+/* =========================================================
+   STORE LIST
+   ========================================================= */
 
-  width: 100%;
+.store-list {
+    display: grid;
 
-  margin-top: 7px;
+    gap: 12px;
+}
 
-  padding: 12px 13px;
+.store-card,
+.empty-card {
+    background: #fff;
 
-  border: 1px solid #ddd;
-  border-radius: 10px;
+    border: 1px solid var(--line);
 
-  background: #fff;
+    border-radius: 17px;
 
-  font: inherit;
+    padding: 18px;
+}
 
-  outline: none;
+.store-card {
+    display: flex;
 
-  box-sizing: border-box;
+    align-items: center;
+
+    gap: 13px;
+}
+
+.store-avatar {
+    width: 48px;
+    height: 48px;
+
+    min-width: 48px;
+
+    border-radius: 50%;
+
+    background: #eef0f3;
+
+    display: grid;
+
+    place-items: center;
+
+    font-weight: 800;
+
+    overflow: hidden;
+}
+
+.store-avatar img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+}
+
+.store-meta {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.store-meta h3 {
+    font-size: 16px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.store-meta p {
+    font-size: 13px;
+
+    color: var(--muted);
+
+    margin-top: 3px;
 }
 
 
-#createStoreForm input:focus,
-#createStoreForm textarea:focus {
-  border-color: #111;
+/* =========================================================
+   MY STORE / ACCOUNT
+   ========================================================= */
+
+#my-store {
+    max-width: 760px;
+
+    margin: 0 auto;
 }
 
 
-#createStoreForm textarea {
-  resize: vertical;
-}
-
-
-.primary-store-btn {
-  width: 100%;
-
-  margin-top: 5px;
-
-  padding: 13px;
-
-  border: 0;
-  border-radius: 11px;
-
-  background: #111;
-  color: #fff;
-
-  font-size: 15px;
-  font-weight: 700;
-
-  cursor: pointer;
-}
-
-
-.primary-store-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-
-.store-form-message {
-  min-height: 20px;
-
-  margin: 12px 0 0;
-
-  text-align: center;
-
-  font-size: 14px;
-}
-
-
-/* =====================================================
-   MY STORE / ACCOUNT PROFILE
-   ===================================================== */
+/* Main account profile card */
 
 .account-profile {
+    width: 100%;
+
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
+
     text-align: center;
-    padding: 24px 16px;
-    margin: 12px 0 20px;
-    background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+
+    padding: 28px 20px 22px;
+
+    margin: 0 0 18px;
+
+    background: #fff;
+
+    border: 1px solid var(--line);
+
+    border-radius: 22px;
+
+    box-shadow:
+        0 8px 28px rgba(15, 23, 42, 0.05);
 }
 
 
-/* Profile Picture */
+/* Profile picture */
 
 .account-profile img,
 .account-profile .profile-image,
 .account-profile .avatar {
-    width: 88px !important;
-    height: 88px !important;
+    width: 82px !important;
 
-    min-width: 88px;
-    min-height: 88px;
+    height: 82px !important;
 
-    max-width: 88px !important;
-    max-height: 88px !important;
+    min-width: 82px !important;
+
+    min-height: 82px !important;
+
+    max-width: 82px !important;
+
+    max-height: 82px !important;
 
     border-radius: 50% !important;
 
@@ -327,24 +553,27 @@ main{max-width:1180px;margin:auto;padding:20px 16px 30px}
 
     display: block;
 
-    border: 3px solid #ffffff;
+    background: #eef0f3;
 
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    border: 3px solid #fff;
+
+    box-shadow:
+        0 5px 18px rgba(15, 23, 42, 0.13);
 
     overflow: hidden;
 }
 
 
-/* Account Name */
+/* Profile name */
 
 .account-profile h2,
 .account-profile h3,
 .account-profile .profile-name {
-    margin: 12px 0 4px;
+    margin: 13px 0 3px;
 
     font-size: 20px;
 
-    font-weight: 700;
+    font-weight: 750;
 
     line-height: 1.3;
 
@@ -352,7 +581,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 30px}
 }
 
 
-/* Email / Username */
+/* Profile email */
 
 .account-profile p,
 .account-profile .profile-email,
@@ -367,54 +596,902 @@ main{max-width:1180px;margin:auto;padding:20px 16px 30px}
 }
 
 
-/* Account information area */
+/* Information inside account */
 
 .account-profile .profile-info {
     width: 100%;
 
-    margin-top: 16px;
+    margin-top: 17px;
 
-    padding-top: 15px;
+    padding-top: 16px;
 
     border-top: 1px solid #e5e7eb;
 }
 
 
-/* Buttons inside profile */
+/* Account buttons */
 
 .account-profile button {
     margin-top: 14px;
 }
 
 
-/* Mobile */
+/* Account action buttons */
+
+.account-actions {
+    display: flex;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 16px;
+}
+
+.secondary-btn {
+    border: 1px solid var(--line);
+
+    background: #fff;
+
+    color: var(--text);
+
+    border-radius: 13px;
+
+    padding: 12px 18px;
+
+    font-weight: 700;
+
+    transition: 0.2s ease;
+}
+
+.secondary-btn:hover {
+    background: #f8fafc;
+}
+
+
+/* Store manager */
+
+#storeManagerCard {
+    margin-top: 8px;
+
+    line-height: 1.55;
+}
+
+#storeManagerCard h3 {
+    margin-bottom: 7px;
+}
+
+
+/* =========================================================
+   DETAIL PAGE
+   ========================================================= */
+
+.detail {
+    max-width: 850px;
+
+    margin: auto;
+}
+
+.back-btn {
+    border: 0;
+
+    background: transparent;
+
+    padding: 8px 0;
+
+    margin-bottom: 12px;
+
+    font-weight: 700;
+}
+
+.detail-card {
+    background: #fff;
+
+    border: 1px solid var(--line);
+
+    border-radius: 22px;
+
+    overflow: hidden;
+}
+
+.detail-image {
+    aspect-ratio: 16 / 9;
+
+    background: #eef0f3;
+
+    display: grid;
+
+    place-items: center;
+
+    font-size: 80px;
+
+    overflow: hidden;
+}
+
+.detail-image img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+}
+
+.detail-body {
+    padding: 22px;
+}
+
+.detail-body h1 {
+    font-size: 30px;
+
+    margin-bottom: 8px;
+}
+
+.detail-price {
+    font-size: 26px;
+
+    font-weight: 850;
+
+    margin: 12px 0;
+}
+
+.detail-desc {
+    color: var(--muted);
+
+    line-height: 1.6;
+}
+
+.order-btn {
+    width: 100%;
+
+    margin-top: 20px;
+
+    padding: 14px;
+
+    border: 0;
+
+    border-radius: 13px;
+
+    background: #0f172a;
+
+    color: #fff;
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   BOTTOM NAV
+   ========================================================= */
+
+.bottom-nav {
+    position: fixed;
+
+    bottom: 0;
+
+    left: 0;
+    right: 0;
+
+    height: 70px;
+
+    background: #fff;
+
+    border-top: 1px solid var(--line);
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, 1fr);
+
+    z-index: 30;
+
+    box-shadow:
+        0 -8px 30px #0000000a;
+}
+
+.bottom-nav a {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 3px;
+
+    font-size: 20px;
+
+    color: #7a8494;
+}
+
+.bottom-nav a span {
+    font-size: 10px;
+
+    font-weight: 650;
+}
+
+.bottom-nav a.active {
+    color: #111827;
+}
+
+.bottom-nav .add-tab {
+    font-size: 24px;
+}
+
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+.toast {
+    position: fixed;
+
+    left: 50%;
+
+    bottom: 88px;
+
+    transform:
+        translate(-50%, 20px);
+
+    background: #111827;
+
+    color: #fff;
+
+    padding: 11px 15px;
+
+    border-radius: 10px;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: 0.2s;
+
+    z-index: 50;
+
+    font-size: 13px;
+}
+
+.toast.show {
+    opacity: 1;
+
+    transform:
+        translate(-50%, 0);
+}
+
+
+/* =========================================================
+   AUTH MODAL
+   ========================================================= */
+
+.auth-modal {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 9999;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background:
+        rgba(0, 0, 0, 0.55);
+}
+
+.auth-modal.show {
+    display: flex;
+}
+
+.auth-box {
+    position: relative;
+
+    width: 100%;
+
+    max-width: 420px;
+
+    padding: 28px;
+
+    border-radius: 20px;
+
+    background: #fff;
+
+    box-shadow:
+        0 20px 60px
+        rgba(0, 0, 0, 0.25);
+}
+
+.auth-close {
+    position: absolute;
+
+    top: 12px;
+
+    right: 15px;
+
+    border: 0;
+
+    background: transparent;
+
+    font-size: 30px;
+}
+
+.auth-header {
+    margin-bottom: 22px;
+}
+
+.auth-header h2 {
+    margin: 5px 0 8px;
+}
+
+.auth-box form {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.auth-box label {
+    font-weight: 600;
+
+    margin-top: 8px;
+}
+
+.auth-box input {
+    width: 100%;
+
+    padding: 13px 14px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 10px;
+
+    outline: none;
+
+    font-size: 15px;
+}
+
+.auth-box input:focus {
+    border-color: #0f172a;
+}
+
+.auth-message {
+    min-height: 20px;
+
+    margin: 12px 0;
+
+    font-size: 14px;
+}
+
+.auth-switch {
+    width: 100%;
+
+    border: 0;
+
+    background: transparent;
+
+    padding: 10px;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   CREATE / EDIT STORE MODAL
+   ========================================================= */
+
+.store-modal {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 9999;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background:
+        rgba(0, 0, 0, 0.55);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transition: 0.2s ease;
+}
+
+.store-modal.show {
+    opacity: 1;
+
+    visibility: visible;
+}
+
+.store-modal-card {
+    position: relative;
+
+    width: 100%;
+
+    max-width: 500px;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background: #fff;
+
+    color: #222;
+
+    border-radius: 20px;
+
+    padding: 25px;
+
+    box-shadow:
+        0 20px 60px
+        rgba(0, 0, 0, 0.25);
+
+    transform:
+        translateY(20px);
+
+    transition: 0.2s ease;
+}
+
+.store-modal.show .store-modal-card {
+    transform:
+        translateY(0);
+}
+
+.store-modal-card h2 {
+    margin: 0 35px 6px 0;
+}
+
+.store-modal-subtitle {
+    margin: 0 0 22px;
+
+    color: #777;
+}
+
+.store-modal-close {
+    position: absolute;
+
+    top: 12px;
+
+    right: 14px;
+
+    width: 36px;
+
+    height: 36px;
+
+    border: 0;
+
+    border-radius: 50%;
+
+    background: #f1f1f1;
+
+    font-size: 25px;
+}
+
+
+/* =========================================================
+   CREATE STORE FORM
+   ========================================================= */
+
+#createStoreForm label {
+    display: block;
+
+    margin-bottom: 15px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+#createStoreForm input,
+#createStoreForm textarea {
+    display: block;
+
+    width: 100%;
+
+    margin-top: 7px;
+
+    padding: 12px 13px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 10px;
+
+    background: #fff;
+
+    outline: none;
+
+    box-sizing: border-box;
+}
+
+#createStoreForm input:focus,
+#createStoreForm textarea:focus {
+    border-color: #111;
+}
+
+#createStoreForm textarea {
+    resize: vertical;
+}
+
+.primary-store-btn {
+    width: 100%;
+
+    margin-top: 5px;
+
+    padding: 13px;
+
+    border: 0;
+
+    border-radius: 11px;
+
+    background: #111;
+
+    color: #fff;
+
+    font-size: 15px;
+
+    font-weight: 700;
+}
+
+.primary-store-btn:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
+}
+
+.store-form-message {
+    min-height: 20px;
+
+    margin: 12px 0 0;
+
+    text-align: center;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   STORE IMAGE PREVIEWS
+   ========================================================= */
+
+.store-image-preview {
+    width: 82px;
+
+    height: 82px;
+
+    margin:
+        -4px 0 18px;
+
+    border-radius: 50%;
+
+    background: #f1f3f6;
+
+    border: 1px solid var(--line);
+
+    overflow: hidden;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+.store-image-preview img {
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+}
+
+.store-cover-preview {
+    width: 100%;
+
+    height: 130px;
+
+    margin:
+        -4px 0 18px;
+
+    border-radius: 14px;
+
+    background: #f1f3f6;
+
+    border: 1px solid var(--line);
+
+    overflow: hidden;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+.store-cover-preview img {
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+}
+
+
+/* =========================================================
+   MANAGE PRODUCTS
+   ========================================================= */
+
+#manage-products {
+    max-width: 900px;
+
+    margin: 0 auto;
+}
+
+.seller-tabs {
+    display: flex;
+
+    gap: 8px;
+
+    overflow-x: auto;
+
+    margin-bottom: 16px;
+
+    padding-bottom: 3px;
+}
+
+.seller-tab {
+    white-space: nowrap;
+
+    border: 1px solid var(--line);
+
+    background: #fff;
+
+    border-radius: 12px;
+
+    padding: 10px 15px;
+
+    font-weight: 700;
+}
+
+.seller-tab.active {
+    background: var(--primary);
+
+    color: #fff;
+
+    border-color: var(--primary);
+}
+
+.seller-panel {
+    display: none;
+}
+
+.seller-panel.active {
+    display: block;
+}
+
+
+/* =========================================================
+   SELLER PRODUCT CARDS
+   ========================================================= */
+
+.seller-product-card {
+    background: #fff;
+
+    border: 1px solid var(--line);
+
+    border-radius: 16px;
+
+    padding: 12px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 10px;
+}
+
+.seller-product-card img {
+    width: 64px;
+
+    height: 64px;
+
+    min-width: 64px;
+
+    border-radius: 12px;
+
+    object-fit: cover;
+
+    background: #eef0f3;
+}
+
+.seller-product-info {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.seller-product-info h3 {
+    font-size: 15px;
+
+    margin-bottom: 4px;
+}
+
+.seller-product-info p {
+    font-size: 13px;
+
+    color: var(--muted);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
 @media (max-width: 480px) {
 
-    .account-profile {
-        padding: 22px 14px;
+    main {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
 
-        border-radius: 18px;
+    .welcome {
+        padding: 23px;
+
+        min-height: 175px;
+
+        border-radius: 19px;
+    }
+
+    .welcome h1 {
+        font-size: 27px;
+    }
+
+    .product-grid {
+        gap: 9px;
+    }
+
+    .product-card {
+        border-radius: 14px;
+    }
+
+    .product-info {
+        padding: 11px;
+    }
+
+    .product-name {
+        font-size: 14px;
+    }
+
+    .price {
+        font-size: 17px;
+    }
+
+    .account-profile {
+        padding: 25px 15px 21px;
+
+        border-radius: 20px;
     }
 
     .account-profile img,
     .account-profile .profile-image,
     .account-profile .avatar {
-
         width: 78px !important;
+
         height: 78px !important;
 
-        min-width: 78px;
-        min-height: 78px;
+        min-width: 78px !important;
+
+        min-height: 78px !important;
 
         max-width: 78px !important;
+
         max-height: 78px !important;
     }
 
     .account-profile h2,
     .account-profile h3,
     .account-profile .profile-name {
+        font-size: 19px;
+    }
 
-        font-size: 18px;
+    .account-actions {
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .account-actions button {
+        width: 100%;
+    }
+
+    .auth-box {
+        padding: 24px 20px;
+    }
+
+    .store-modal {
+        padding: 12px;
+    }
+
+    .store-modal-card {
+        max-height: 94vh;
+
+        border-radius: 18px;
+
+        padding: 21px 17px;
+    }
+
+    .store-cover-preview {
+        height: 115px;
+    }
+}
+
+
+/* =========================================================
+   TABLET / DESKTOP
+   ========================================================= */
+
+@media (min-width: 700px) {
+
+    .product-grid {
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+    }
+
+    .bottom-nav {
+        max-width: 760px;
+
+        left: 50%;
+        right: auto;
+
+        transform:
+            translateX(-50%);
+
+        border: 1px solid var(--line);
+
+        border-bottom: 0;
+
+        border-radius:
+            18px 18px 0 0;
+    }
+}
+
+
+/* =========================================================
+   LARGE SCREEN
+   ========================================================= */
+
+@media (min-width: 1000px) {
+
+    .account-profile {
+        padding: 32px 25px;
+    }
+
+    .account-profile img,
+    .account-profile .profile-image,
+    .account-profile .avatar {
+        width: 90px !important;
+
+        height: 90px !important;
+
+        min-width: 90px !important;
+
+        min-height: 90px !important;
+
+        max-width: 90px !important;
+
+        max-height: 90px !important;
     }
 }
