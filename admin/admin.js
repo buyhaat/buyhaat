@@ -156,80 +156,202 @@ function showToast(message, type = "success") {
    LOGIN
 ========================================================= */
 
-adminLoginForm?.addEventListener(
-    "submit",
-    async (event) => {
+/* =========================================================
+   LOGIN
+========================================================= */
 
-        event.preventDefault();
+adminLoginForm?.addEventListener("submit", async (event) => {
 
-        const email = adminEmail.value.trim();
+    event.preventDefault();
 
-        const password = adminPassword.value;
+    const email = adminEmail.value.trim();
+    const password = adminPassword.value;
 
-        if (!email || !password) {
+    if (!email || !password) {
 
-            loginMessage.textContent =
-                "Email এবং Password দিন।";
+        loginMessage.textContent =
+            "Email এবং Password দুটোই দিন।";
 
-            return;
-        }
+        loginMessage.style.color = "#dc2626";
+
+        return;
+    }
 
 
-        adminLoginBtn.disabled = true;
+    /* Login button */
 
-        adminLoginBtn.textContent = "Logging in...";
+    adminLoginBtn.disabled = true;
+    adminLoginBtn.textContent = "Login হচ্ছে...";
 
-        loginMessage.textContent = "";
+    loginMessage.textContent =
+        "Account যাচাই করা হচ্ছে...";
 
+    loginMessage.style.color = "#555";
+
+
+    try {
+
+        /* ================================================
+           SUPABASE LOGIN
+        ================================================= */
 
         const { data, error } =
             await sb.auth.signInWithPassword({
-                email,
-                password
+                email: email,
+                password: password
             });
 
 
+        /* ================================================
+           LOGIN ERROR
+        ================================================= */
+
         if (error) {
 
+            console.error(
+                "LOGIN ERROR:",
+                error
+            );
+
             loginMessage.textContent =
-                error.message ||
-                "Login failed.";
+                "Login ব্যর্থ: " + error.message;
+
+            loginMessage.style.color =
+                "#dc2626";
 
             adminLoginBtn.disabled = false;
 
-            adminLoginBtn.textContent = "Login";
+            adminLoginBtn.textContent =
+                "Login";
 
             return;
         }
 
 
-        if (!data?.session) {
+        /* ================================================
+           LOGIN SUCCESS
+        ================================================= */
+
+        console.log(
+            "LOGIN SUCCESS:",
+            data
+        );
+
+
+        /* Session আছে কিনা আবার নিশ্চিত করি */
+
+        const {
+            data: sessionData,
+            error: sessionError
+        } = await sb.auth.getSession();
+
+
+        if (sessionError) {
+
+            console.error(
+                "SESSION ERROR:",
+                sessionError
+            );
 
             loginMessage.textContent =
-                "Login session তৈরি হয়নি।";
+                "Login হয়েছে, কিন্তু session পাওয়া যাচ্ছে না।";
+
+            loginMessage.style.color =
+                "#dc2626";
 
             adminLoginBtn.disabled = false;
 
-            adminLoginBtn.textContent = "Login";
+            adminLoginBtn.textContent =
+                "Login";
 
             return;
         }
 
 
-        loginMessage.textContent = "";
+        if (!sessionData?.session) {
 
-        adminLoginBtn.disabled = false;
+            loginMessage.textContent =
+                "Login সম্পন্ন হয়নি। আবার চেষ্টা করুন।";
 
-        adminLoginBtn.textContent = "Login";
+            loginMessage.style.color =
+                "#dc2626";
+
+            adminLoginBtn.disabled = false;
+
+            adminLoginBtn.textContent =
+                "Login";
+
+            return;
+        }
 
 
-        showAdminApp();
+        /* ================================================
+           SUCCESS MESSAGE
+        ================================================= */
+
+        loginMessage.textContent =
+            "✓ Login সফল! Admin Panel খুলছে...";
+
+        loginMessage.style.color =
+            "#16a34a";
+
+
+        adminLoginBtn.textContent =
+            "Success ✓";
+
+
+        /* ================================================
+           LOGIN PAGE HIDE
+        ================================================= */
+
+        adminLogin.hidden = true;
+
+        adminLogin.style.display = "none";
+
+
+        /* ================================================
+           ADMIN PANEL SHOW
+        ================================================= */
+
+        adminApp.hidden = false;
+
+        adminApp.style.display = "block";
+
+
+        document.body.classList.add(
+            "logged-in"
+        );
+
+
+        /* ================================================
+           LOAD ADMIN PANEL
+        ================================================= */
 
         await initializeAdmin();
 
-    }
-);
 
+    } catch (error) {
+
+        console.error(
+            "LOGIN CATCH ERROR:",
+            error
+        );
+
+        loginMessage.textContent =
+            "একটি সমস্যা হয়েছে: " +
+            (error.message || error);
+
+        loginMessage.style.color =
+            "#dc2626";
+
+        adminLoginBtn.disabled = false;
+
+        adminLoginBtn.textContent =
+            "Login";
+
+    }
+
+});
 
 /* =========================================================
    LOGOUT
