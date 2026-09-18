@@ -644,7 +644,6 @@ async function createStore(event) {
 /* ---------------- PRODUCT ADD / EDIT ---------------- */
 
 async function addProduct(event) {
-async function addProduct(event) {
   event.preventDefault();
 
   if (!currentUser) {
