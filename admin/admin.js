@@ -1,6 +1,6 @@
 /* =========================================================
    BUYHAAT ADMIN PANEL
-   Login → Dashboard
+   Login → Admin Panel → Dashboard
 ========================================================= */
 
 
@@ -18,12 +18,16 @@ const sb = window.supabase.createClient(
    HELPERS
 ========================================================= */
 
-const $ = (id) => document.getElementById(id);
+const $ = (id) =>
+    document.getElementById(id);
 
 
-const esc = (value) => {
+function esc(value) {
 
-    if (value === null || value === undefined) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
         return "";
     }
 
@@ -33,18 +37,19 @@ const esc = (value) => {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
-};
+}
 
 
-const money = (value) => {
+function money(value) {
 
-    const number = Number(value || 0);
+    const number =
+        Number(value || 0);
 
     return `৳${number.toLocaleString("en-BD")}`;
-};
+}
 
 
-const dateText = (value) => {
+function dateText(value) {
 
     if (!value) {
         return "—";
@@ -52,81 +57,132 @@ const dateText = (value) => {
 
     try {
 
-        return new Date(value).toLocaleString(
-            "en-BD",
-            {
-                dateStyle: "medium",
-                timeStyle: "short"
-            }
-        );
+        return new Date(value)
+            .toLocaleString(
+                "en-BD",
+                {
+                    dateStyle: "medium",
+                    timeStyle: "short"
+                }
+            );
 
     } catch {
 
-        return value;
+        return String(value);
+
     }
-};
+}
 
 
-const shortId = (value) => {
+function shortId(value) {
 
     if (!value) {
         return "—";
     }
 
-    return String(value).slice(0, 8);
-};
+    return String(value)
+        .slice(0, 8);
+}
 
 
 /* =========================================================
    ELEMENTS
 ========================================================= */
 
-const adminLogin = $("adminLogin");
-const adminApp = $("adminApp");
+const adminLogin =
+    $("adminLogin");
 
-const adminLoginForm = $("adminLoginForm");
-const adminEmail = $("adminEmail");
-const adminPassword = $("adminPassword");
-const adminLoginBtn = $("adminLoginBtn");
-const loginMessage = $("loginMessage");
+const adminApp =
+    $("adminApp");
 
-const logoutBtn = $("logoutBtn");
+const adminLoginForm =
+    $("adminLoginForm");
 
-const sidebarToggle = $("sidebarToggle");
-const adminSidebar = $("adminSidebar");
+const adminEmail =
+    $("adminEmail");
+
+const adminPassword =
+    $("adminPassword");
+
+const adminLoginBtn =
+    $("adminLoginBtn");
+
+const loginMessage =
+    $("loginMessage");
+
+const logoutBtn =
+    $("logoutBtn");
+
+const sidebarToggle =
+    $("sidebarToggle");
+
+const adminSidebar =
+    $("adminSidebar");
 
 
 /* =========================================================
-   INITIAL STATE
-   Login page visible
-   Admin app hidden
+   SHOW LOGIN
 ========================================================= */
 
 function showLogin() {
 
     adminLogin.hidden = false;
-    adminLogin.style.display = "flex";
 
     adminApp.hidden = true;
-    adminApp.style.display = "none";
 
     document.body.classList.remove(
         "logged-in"
     );
+
 }
 
+
+/* =========================================================
+   SHOW ADMIN
+========================================================= */
 
 function showAdminApp() {
 
     adminLogin.hidden = true;
-    adminLogin.style.display = "none";
 
     adminApp.hidden = false;
-    adminApp.style.display = "block";
 
     document.body.classList.add(
         "logged-in"
     );
+
+}
+
+
+/* =========================================================
+   LOGIN MESSAGE
+========================================================= */
+
+function setLoginMessage(
+    message,
+    type = "error"
+) {
+
+    if (!loginMessage) {
+        return;
+    }
+
+    loginMessage.textContent =
+        message;
+
+
+    if (type === "success") {
+
+        loginMessage.style.color =
+            "#16a34a";
+
+    } else {
+
+        loginMessage.style.color =
+            "#dc2626";
+
+    }
+
 }
 
 
@@ -134,25 +190,48 @@ function showAdminApp() {
    TOAST
 ========================================================= */
 
-function showToast(message, type = "success") {
+function showToast(
+    message,
+    type = "success"
+) {
 
-    const toast = $("toast");
+    const toast =
+        $("toast");
 
     if (!toast) {
         return;
     }
 
-    toast.textContent = message;
 
-    toast.className = `toast ${type}`;
+    toast.textContent =
+        message;
 
-    toast.classList.add("show");
+
+    toast.className =
+        "toast show";
+
+
+    if (type === "error") {
+
+        toast.style.background =
+            "#dc2626";
+
+    } else {
+
+        toast.style.background =
+            "#111827";
+
+    }
+
 
     setTimeout(() => {
 
-        toast.classList.remove("show");
+        toast.classList.remove(
+            "show"
+        );
 
     }, 3000);
+
 }
 
 
@@ -160,214 +239,217 @@ function showToast(message, type = "success") {
    LOGIN
 ========================================================= */
 
-/* =========================================================
-   LOGIN
-========================================================= */
+adminLoginForm.addEventListener(
+    "submit",
+    async (event) => {
 
-adminLoginForm?.addEventListener("submit", async (event) => {
-
-    event.preventDefault();
-
-    const email = adminEmail.value.trim();
-    const password = adminPassword.value;
-
-    if (!email || !password) {
-
-        loginMessage.textContent =
-            "Email এবং Password দুটোই দিন।";
-
-        loginMessage.style.color = "#dc2626";
-
-        return;
-    }
+        event.preventDefault();
 
 
-    /* Login button */
+        const email =
+            adminEmail.value.trim();
 
-    adminLoginBtn.disabled = true;
-    adminLoginBtn.textContent = "Login হচ্ছে...";
-
-    loginMessage.textContent =
-        "Account যাচাই করা হচ্ছে...";
-
-    loginMessage.style.color = "#555";
+        const password =
+            adminPassword.value;
 
 
-    try {
+        if (!email || !password) {
 
-        /* ================================================
-           SUPABASE LOGIN
-        ================================================= */
+            setLoginMessage(
+                "Email এবং Password দুটোই দিন।"
+            );
 
-        const { data, error } =
-            await sb.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
+            return;
+        }
 
 
-        /* ================================================
-           LOGIN ERROR
-        ================================================= */
+        adminLoginBtn.disabled =
+            true;
 
-        if (error) {
+        adminLoginBtn.textContent =
+            "Login হচ্ছে...";
+
+
+        setLoginMessage(
+            "Account যাচাই করা হচ্ছে...",
+            "success"
+        );
+
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await sb.auth
+                    .signInWithPassword({
+                        email,
+                        password
+                    });
+
+
+            /* =============================================
+               ERROR
+            ============================================== */
+
+            if (error) {
+
+                console.error(
+                    "Supabase Login Error:",
+                    error
+                );
+
+
+                setLoginMessage(
+                    "Login ব্যর্থ: " +
+                    error.message
+                );
+
+
+                adminLoginBtn.disabled =
+                    false;
+
+                adminLoginBtn.textContent =
+                    "Login";
+
+                return;
+            }
+
+
+            /* =============================================
+               SUCCESS
+            ============================================== */
+
+            if (!data?.session) {
+
+                setLoginMessage(
+                    "Login হয়েছে, কিন্তু session পাওয়া যায়নি।"
+                );
+
+
+                adminLoginBtn.disabled =
+                    false;
+
+                adminLoginBtn.textContent =
+                    "Login";
+
+                return;
+            }
+
+
+            console.log(
+                "Login successful:",
+                data.user?.email
+            );
+
+
+            setLoginMessage(
+                "✓ Login সফল! Admin Panel খুলছে...",
+                "success"
+            );
+
+
+            adminLoginBtn.textContent =
+                "Success ✓";
+
+
+            /*
+               সরাসরি Admin Panel দেখানো
+            */
+
+            showAdminApp();
+
+
+            /*
+               Dashboard initialize
+            */
+
+            await initializeAdmin();
+
+
+        } catch (error) {
 
             console.error(
-                "LOGIN ERROR:",
+                "Login Exception:",
                 error
             );
 
-            loginMessage.textContent =
-                "Login ব্যর্থ: " + error.message;
 
-            loginMessage.style.color =
-                "#dc2626";
-
-            adminLoginBtn.disabled = false;
-
-            adminLoginBtn.textContent =
-                "Login";
-
-            return;
-        }
-
-
-        /* ================================================
-           LOGIN SUCCESS
-        ================================================= */
-
-        console.log(
-            "LOGIN SUCCESS:",
-            data
-        );
-
-
-        /* Session আছে কিনা আবার নিশ্চিত করি */
-
-        const {
-            data: sessionData,
-            error: sessionError
-        } = await sb.auth.getSession();
-
-
-        if (sessionError) {
-
-            console.error(
-                "SESSION ERROR:",
-                sessionError
+            setLoginMessage(
+                "একটি সমস্যা হয়েছে: " +
+                (
+                    error?.message ||
+                    "Unknown error"
+                )
             );
 
-            loginMessage.textContent =
-                "Login হয়েছে, কিন্তু session পাওয়া যাচ্ছে না।";
 
-            loginMessage.style.color =
-                "#dc2626";
-
-            adminLoginBtn.disabled = false;
+            adminLoginBtn.disabled =
+                false;
 
             adminLoginBtn.textContent =
                 "Login";
 
-            return;
         }
-
-
-        if (!sessionData?.session) {
-
-            loginMessage.textContent =
-                "Login সম্পন্ন হয়নি। আবার চেষ্টা করুন।";
-
-            loginMessage.style.color =
-                "#dc2626";
-
-            adminLoginBtn.disabled = false;
-
-            adminLoginBtn.textContent =
-                "Login";
-
-            return;
-        }
-
-
-        /* ================================================
-           SUCCESS MESSAGE
-        ================================================= */
-
-        loginMessage.textContent =
-            "✓ Login সফল! Admin Panel খুলছে...";
-
-        loginMessage.style.color =
-            "#16a34a";
-
-
-        adminLoginBtn.textContent =
-            "Success ✓";
-
-
-        /* ================================================
-           LOGIN PAGE HIDE
-        ================================================= */
-
-        adminLogin.hidden = true;
-
-        adminLogin.style.display = "none";
-
-
-        /* ================================================
-           ADMIN PANEL SHOW
-        ================================================= */
-
-        adminApp.hidden = false;
-
-        adminApp.style.display = "block";
-
-
-        document.body.classList.add(
-            "logged-in"
-        );
-
-
-        /* ================================================
-           LOAD ADMIN PANEL
-        ================================================= */
-
-        await initializeAdmin();
-
-
-    } catch (error) {
-
-        console.error(
-            "LOGIN CATCH ERROR:",
-            error
-        );
-
-        loginMessage.textContent =
-            "একটি সমস্যা হয়েছে: " +
-            (error.message || error);
-
-        loginMessage.style.color =
-            "#dc2626";
-
-        adminLoginBtn.disabled = false;
-
-        adminLoginBtn.textContent =
-            "Login";
 
     }
+);
 
-});
 
 /* =========================================================
    LOGOUT
 ========================================================= */
 
-logoutBtn?.addEventListener(
+logoutBtn.addEventListener(
     "click",
     async () => {
 
-        await sb.auth.signOut();
+        logoutBtn.disabled =
+            true;
+
+
+        const {
+            error
+        } =
+            await sb.auth.signOut();
+
+
+        logoutBtn.disabled =
+            false;
+
+
+        if (error) {
+
+            showToast(
+                error.message,
+                "error"
+            );
+
+            return;
+        }
+
+
+        adminInitialized =
+            false;
+
 
         showLogin();
+
+
+        adminEmail.value =
+            "";
+
+        adminPassword.value =
+            "";
+
+        adminLoginBtn.disabled =
+            false;
+
+        adminLoginBtn.textContent =
+            "Login";
+
+        setLoginMessage("");
 
     }
 );
@@ -380,68 +462,27 @@ logoutBtn?.addEventListener(
 async function checkSession() {
 
     /*
-       খুব গুরুত্বপূর্ণ:
-       শুরুতেই Admin App hidden থাকবে।
+       প্রথমেই Login Page দেখানো হবে।
     */
 
     showLogin();
 
 
-    const {
-        data,
-        error
-    } = await sb.auth.getSession();
+    try {
 
-
-    if (error) {
-
-        console.error(
-            "Session error:",
+        const {
+            data,
             error
-        );
-
-        showLogin();
-
-        return;
-    }
+        } =
+            await sb.auth.getSession();
 
 
-    const session = data?.session;
+        if (error) {
 
-
-    if (!session) {
-
-        /*
-           User login করা নেই
-           তাই Login Page-এই থাকবে
-        */
-
-        showLogin();
-
-        return;
-    }
-
-
-    /*
-       User আগে থেকেই login করা আছে।
-       তাই Dashboard দেখানো যাবে।
-    */
-
-    showAdminApp();
-
-    await initializeAdmin();
-
-}
-
-
-/* =========================================================
-   AUTH STATE
-========================================================= */
-
-sb.auth.onAuthStateChange(
-    async (event, session) => {
-
-        if (event === "SIGNED_OUT") {
+            console.error(
+                "Session Error:",
+                error
+            );
 
             showLogin();
 
@@ -449,24 +490,45 @@ sb.auth.onAuthStateChange(
         }
 
 
-        if (
-            event === "SIGNED_IN" &&
-            session
-        ) {
+        if (!data?.session) {
 
-            showAdminApp();
+            showLogin();
 
+            return;
         }
 
+
+        /*
+           আগে থেকেই login করা থাকলে
+           সরাসরি Admin Panel।
+        */
+
+        showAdminApp();
+
+
+        await initializeAdmin();
+
+
+    } catch (error) {
+
+        console.error(
+            "Session Check Error:",
+            error
+        );
+
+        showLogin();
+
     }
-);
+
+}
 
 
 /* =========================================================
    ADMIN INITIALIZE
 ========================================================= */
 
-let adminInitialized = false;
+let adminInitialized =
+    false;
 
 
 async function initializeAdmin() {
@@ -475,38 +537,72 @@ async function initializeAdmin() {
         return;
     }
 
-    adminInitialized = true;
+
+    adminInitialized =
+        true;
 
 
-    const {
-        data
-    } = await sb.auth.getUser();
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await sb.auth.getUser();
 
 
-    if (data?.user) {
+        if (error) {
 
-        const emailDisplay =
-            $("adminEmailDisplay");
-
-        if (emailDisplay) {
-
-            emailDisplay.textContent =
-                data.user.email || "—";
+            console.error(
+                "Get User Error:",
+                error
+            );
 
         }
 
+
+        if (data?.user) {
+
+            const emailDisplay =
+                $("adminEmailDisplay");
+
+
+            if (emailDisplay) {
+
+                emailDisplay.textContent =
+                    data.user.email || "—";
+
+            }
+
+        }
+
+
+        setupNavigation();
+
+        setupSidebar();
+
+        setupRefreshButtons();
+
+
+        await loadDashboard();
+
+        await checkSupabase();
+
+
+    } catch (error) {
+
+        console.error(
+            "Admin Initialization Error:",
+            error
+        );
+
+        /*
+           Initialization error হলেও
+           Login Page-এ ফেরত যাবে না।
+           কারণ login সফল হয়েছে।
+        */
+
     }
-
-
-    setupNavigation();
-
-    setupSidebar();
-
-    setupRefreshButtons();
-
-    await loadDashboard();
-
-    await checkSupabase();
 
 }
 
@@ -529,98 +625,114 @@ function setupNavigation() {
         );
 
 
-    navItems.forEach((item) => {
+    navItems.forEach(
+        (item) => {
 
-        item.addEventListener(
-            "click",
-            async () => {
+            item.addEventListener(
+                "click",
+                async () => {
 
-                const page =
-                    item.dataset.page;
-
-
-                navItems.forEach(
-                    (nav) => {
-
-                        nav.classList.remove(
-                            "active"
-                        );
-
-                    }
-                );
+                    const page =
+                        item.dataset.page;
 
 
-                item.classList.add(
-                    "active"
-                );
+                    navItems.forEach(
+                        (nav) => {
 
+                            nav.classList.remove(
+                                "active"
+                            );
 
-                pages.forEach(
-                    (section) => {
-
-                        section.classList.remove(
-                            "active"
-                        );
-
-                    }
-                );
-
-
-                const target =
-                    document.getElementById(
-                        `page-${page}`
+                        }
                     );
 
 
-                if (target) {
-
-                    target.classList.add(
+                    item.classList.add(
                         "active"
                     );
 
-                }
 
+                    pages.forEach(
+                        (section) => {
 
-                if (page === "dashboard") {
+                            section.classList.remove(
+                                "active"
+                            );
 
-                    await loadDashboard();
-
-                }
-
-
-                if (page === "stores") {
-
-                    await loadStores();
-
-                }
-
-
-                if (page === "products") {
-
-                    await loadProducts();
-
-                }
-
-
-                if (page === "orders") {
-
-                    await loadOrders();
-
-                }
-
-
-                if (window.innerWidth <= 900) {
-
-                    adminSidebar?.classList.remove(
-                        "open"
+                        }
                     );
 
+
+                    const target =
+                        document.getElementById(
+                            `page-${page}`
+                        );
+
+
+                    if (target) {
+
+                        target.classList.add(
+                            "active"
+                        );
+
+                    }
+
+
+                    if (
+                        page === "dashboard"
+                    ) {
+
+                        await loadDashboard();
+
+                    }
+
+
+                    if (
+                        page === "stores"
+                    ) {
+
+                        await loadStores();
+
+                    }
+
+
+                    if (
+                        page === "products"
+                    ) {
+
+                        await loadProducts();
+
+                    }
+
+
+                    if (
+                        page === "orders"
+                    ) {
+
+                        await loadOrders();
+
+                    }
+
+
+                    /*
+                       Mobile sidebar বন্ধ
+                    */
+
+                    if (
+                        window.innerWidth <= 850
+                    ) {
+
+                        adminSidebar.classList.remove(
+                            "open"
+                        );
+
+                    }
+
                 }
+            );
 
-            }
-        );
-
-    });
+        }
+    );
 
 }
 
@@ -631,11 +743,11 @@ function setupNavigation() {
 
 function setupSidebar() {
 
-    sidebarToggle?.addEventListener(
+    sidebarToggle.addEventListener(
         "click",
         () => {
 
-            adminSidebar?.classList.toggle(
+            adminSidebar.classList.toggle(
                 "open"
             );
 
@@ -646,27 +758,30 @@ function setupSidebar() {
 
 
 /* =========================================================
-   REFRESH BUTTONS
+   REFRESH
 ========================================================= */
 
 function setupRefreshButtons() {
 
-    $("refreshStoresBtn")?.addEventListener(
-        "click",
-        loadStores
-    );
+    $("refreshStoresBtn")
+        ?.addEventListener(
+            "click",
+            loadStores
+        );
 
 
-    $("refreshProductsBtn")?.addEventListener(
-        "click",
-        loadProducts
-    );
+    $("refreshProductsBtn")
+        ?.addEventListener(
+            "click",
+            loadProducts
+        );
 
 
-    $("refreshOrdersBtn")?.addEventListener(
-        "click",
-        loadOrders
-    );
+    $("refreshOrdersBtn")
+        ?.addEventListener(
+            "click",
+            loadOrders
+        );
 
 }
 
@@ -727,24 +842,23 @@ async function loadStats() {
         $("totalStores").textContent =
             stores.count ?? 0;
 
+
         $("totalProducts").textContent =
             products.count ?? 0;
+
 
         $("totalOrders").textContent =
             orders.count ?? 0;
 
-        /*
-           Supabase Auth users client-side
-           থেকে নিরাপদভাবে count করা যায় না।
-        */
 
-        $("totalUsers").textContent = "—";
+        $("totalUsers").textContent =
+            "—";
 
 
     } catch (error) {
 
         console.error(
-            "Stats error:",
+            "Stats Error:",
             error
         );
 
@@ -769,22 +883,25 @@ async function loadRecentStores() {
 
 
     container.innerHTML =
-        `<div class="loading">Loading...</div>`;
+        `<div class="loading">
+            Loading...
+        </div>`;
 
 
     const {
         data,
         error
-    } = await sb
-        .from("stores")
-        .select("*")
-        .order(
-            "created_at",
-            {
-                ascending: false
-            }
-        )
-        .limit(5);
+    } =
+        await sb
+            .from("stores")
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            )
+            .limit(5);
 
 
     if (error) {
@@ -811,41 +928,68 @@ async function loadRecentStores() {
 
     container.innerHTML = `
 
-        <div class="simple-list">
+        <table class="admin-table">
 
-            ${data.map(store => `
+            <thead>
 
-                <div class="simple-list-item">
+                <tr>
 
-                    <div>
+                    <th>
+                        Store
+                    </th>
 
-                        <strong>
+                    <th>
+                        Slug
+                    </th>
+
+                    <th>
+                        Created
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                ${data.map(
+                    store => `
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                ${esc(
+                                    store.name ||
+                                    store.store_name ||
+                                    "Unnamed Store"
+                                )}
+                            </strong>
+                        </td>
+
+
+                        <td>
                             ${esc(
-                                store.name ||
-                                store.store_name ||
-                                "Unnamed Store"
+                                store.slug || "—"
                             )}
-                        </strong>
+                        </td>
 
-                        <small>
+
+                        <td>
                             ${dateText(
                                 store.created_at
                             )}
-                        </small>
+                        </td>
 
-                    </div>
+                    </tr>
 
-                    <span>
-                        ${esc(
-                            store.slug || ""
-                        )}
-                    </span>
+                `
+                ).join("")}
 
-                </div>
+            </tbody>
 
-            `).join("")}
-
-        </div>
+        </table>
 
     `;
 
@@ -868,22 +1012,25 @@ async function loadRecentOrders() {
 
 
     container.innerHTML =
-        `<div class="loading">Loading...</div>`;
+        `<div class="loading">
+            Loading...
+        </div>`;
 
 
     const {
         data,
         error
-    } = await sb
-        .from("orders")
-        .select("*")
-        .order(
-            "created_at",
-            {
-                ascending: false
-            }
-        )
-        .limit(5);
+    } =
+        await sb
+            .from("orders")
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            )
+            .limit(5);
 
 
     if (error) {
@@ -910,41 +1057,92 @@ async function loadRecentOrders() {
 
     container.innerHTML = `
 
-        <div class="simple-list">
+        <table class="admin-table">
 
-            ${data.map(order => `
+            <thead>
 
-                <div class="simple-list-item">
+                <tr>
 
-                    <div>
+                    <th>
+                        Order ID
+                    </th>
 
-                        <strong>
-                            Order #${shortId(
-                                order.id
+                    <th>
+                        Total
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Created
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                ${data.map(
+                    order => `
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                #${shortId(
+                                    order.id
+                                )}
+                            </strong>
+                        </td>
+
+
+                        <td>
+                            ${money(
+                                order.total ||
+                                order.subtotal ||
+                                0
                             )}
-                        </strong>
+                        </td>
 
-                        <small>
+
+                        <td>
+
+                            <span class="
+                                status
+                                status-${esc(
+                                    order.status ||
+                                    "pending"
+                                )}
+                            ">
+
+                                ${esc(
+                                    order.status ||
+                                    "pending"
+                                )}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
                             ${dateText(
                                 order.created_at
                             )}
-                        </small>
+                        </td>
 
-                    </div>
+                    </tr>
 
-                    <strong>
-                        ${money(
-                            order.total ||
-                            order.subtotal ||
-                            0
-                        )}
-                    </strong>
+                `
+                ).join("")}
 
-                </div>
+            </tbody>
 
-            `).join("")}
-
-        </div>
+        </table>
 
     `;
 
@@ -967,21 +1165,24 @@ async function loadStores() {
 
 
     container.innerHTML =
-        `<div class="loading">Loading stores...</div>`;
+        `<div class="loading">
+            Loading stores...
+        </div>`;
 
 
     const {
         data,
         error
-    } = await sb
-        .from("stores")
-        .select("*")
-        .order(
-            "created_at",
-            {
-                ascending: false
-            }
-        );
+    } =
+        await sb
+            .from("stores")
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            );
 
 
     if (error) {
@@ -1008,28 +1209,44 @@ async function loadStores() {
 
     container.innerHTML = `
 
-        <div class="table-scroll">
+        <div class="table-wrapper">
 
-            <table>
+            <table class="admin-table">
 
                 <thead>
 
                     <tr>
-                        <th>Store</th>
-                        <th>Slug</th>
-                        <th>Created</th>
-                        <th>Action</th>
+
+                        <th>
+                            Store
+                        </th>
+
+                        <th>
+                            Slug
+                        </th>
+
+                        <th>
+                            Created
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
                     </tr>
 
                 </thead>
 
+
                 <tbody>
 
-                    ${data.map(store => `
+                    ${data.map(
+                        store => `
 
                         <tr>
 
                             <td>
+
                                 <strong>
                                     ${esc(
                                         store.name ||
@@ -1037,7 +1254,9 @@ async function loadStores() {
                                         "Unnamed"
                                     )}
                                 </strong>
+
                             </td>
+
 
                             <td>
                                 ${esc(
@@ -1045,19 +1264,22 @@ async function loadStores() {
                                 )}
                             </td>
 
+
                             <td>
                                 ${dateText(
                                     store.created_at
                                 )}
                             </td>
 
+
                             <td>
 
                                 <button
-                                    class="danger-btn"
+                                    class="action-btn danger"
                                     data-delete-store="${esc(
                                         store.id
                                     )}"
+                                    type="button"
                                 >
                                     Delete
                                 </button>
@@ -1066,7 +1288,8 @@ async function loadStores() {
 
                         </tr>
 
-                    `).join("")}
+                    `
+                    ).join("")}
 
                 </tbody>
 
@@ -1081,59 +1304,64 @@ async function loadStores() {
         .querySelectorAll(
             "[data-delete-store]"
         )
-        .forEach(button => {
+        .forEach(
+            button => {
 
-            button.addEventListener(
-                "click",
-                async () => {
+                button.addEventListener(
+                    "click",
+                    async () => {
 
-                    const id =
-                        button.dataset.deleteStore;
-
-
-                    const ok =
-                        confirm(
-                            "এই Store delete করতে চান?"
-                        );
+                        const id =
+                            button.dataset
+                                .deleteStore;
 
 
-                    if (!ok) {
-                        return;
-                    }
+                        if (
+                            !confirm(
+                                "এই Store delete করতে চান?"
+                            )
+                        ) {
+                            return;
+                        }
 
 
-                    const {
-                        error
-                    } = await sb
-                        .from("stores")
-                        .delete()
-                        .eq("id", id);
+                        const {
+                            error
+                        } =
+                            await sb
+                                .from("stores")
+                                .delete()
+                                .eq(
+                                    "id",
+                                    id
+                                );
 
 
-                    if (error) {
+                        if (error) {
+
+                            showToast(
+                                error.message,
+                                "error"
+                            );
+
+                            return;
+                        }
+
 
                         showToast(
-                            error.message,
-                            "error"
+                            "Store deleted successfully."
                         );
 
-                        return;
+
+                        await loadStores();
+
+                        await loadStats();
+
                     }
+                );
 
-
-                    showToast(
-                        "Store deleted successfully."
-                    );
-
-
-                    await loadStores();
-
-                    await loadStats();
-
-                }
-            );
-
-        });
+            }
+        );
 
 }
 
@@ -1154,21 +1382,24 @@ async function loadProducts() {
 
 
     container.innerHTML =
-        `<div class="loading">Loading products...</div>`;
+        `<div class="loading">
+            Loading products...
+        </div>`;
 
 
     const {
         data,
         error
-    } = await sb
-        .from("products")
-        .select("*")
-        .order(
-            "created_at",
-            {
-                ascending: false
-            }
-        );
+    } =
+        await sb
+            .from("products")
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            );
 
 
     if (error) {
@@ -1195,36 +1426,57 @@ async function loadProducts() {
 
     container.innerHTML = `
 
-        <div class="table-scroll">
+        <div class="table-wrapper">
 
-            <table>
+            <table class="admin-table">
 
                 <thead>
 
                     <tr>
-                        <th>Product</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Created</th>
-                        <th>Action</th>
+
+                        <th>
+                            Product
+                        </th>
+
+                        <th>
+                            Price
+                        </th>
+
+                        <th>
+                            Stock
+                        </th>
+
+                        <th>
+                            Created
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
                     </tr>
 
                 </thead>
 
+
                 <tbody>
 
-                    ${data.map(product => `
+                    ${data.map(
+                        product => `
 
                         <tr>
 
                             <td>
+
                                 <strong>
                                     ${esc(
                                         product.name ||
                                         "Unnamed Product"
                                     )}
                                 </strong>
+
                             </td>
+
 
                             <td>
                                 ${money(
@@ -1232,11 +1484,13 @@ async function loadProducts() {
                                 )}
                             </td>
 
+
                             <td>
                                 ${esc(
                                     product.stock ?? 0
                                 )}
                             </td>
+
 
                             <td>
                                 ${dateText(
@@ -1244,13 +1498,15 @@ async function loadProducts() {
                                 )}
                             </td>
 
+
                             <td>
 
                                 <button
-                                    class="danger-btn"
+                                    class="action-btn danger"
                                     data-delete-product="${esc(
                                         product.id
                                     )}"
+                                    type="button"
                                 >
                                     Delete
                                 </button>
@@ -1259,7 +1515,8 @@ async function loadProducts() {
 
                         </tr>
 
-                    `).join("")}
+                    `
+                    ).join("")}
 
                 </tbody>
 
@@ -1274,59 +1531,64 @@ async function loadProducts() {
         .querySelectorAll(
             "[data-delete-product]"
         )
-        .forEach(button => {
+        .forEach(
+            button => {
 
-            button.addEventListener(
-                "click",
-                async () => {
+                button.addEventListener(
+                    "click",
+                    async () => {
 
-                    const id =
-                        button.dataset.deleteProduct;
-
-
-                    const ok =
-                        confirm(
-                            "এই Product delete করতে চান?"
-                        );
+                        const id =
+                            button.dataset
+                                .deleteProduct;
 
 
-                    if (!ok) {
-                        return;
-                    }
+                        if (
+                            !confirm(
+                                "এই Product delete করতে চান?"
+                            )
+                        ) {
+                            return;
+                        }
 
 
-                    const {
-                        error
-                    } = await sb
-                        .from("products")
-                        .delete()
-                        .eq("id", id);
+                        const {
+                            error
+                        } =
+                            await sb
+                                .from("products")
+                                .delete()
+                                .eq(
+                                    "id",
+                                    id
+                                );
 
 
-                    if (error) {
+                        if (error) {
+
+                            showToast(
+                                error.message,
+                                "error"
+                            );
+
+                            return;
+                        }
+
 
                         showToast(
-                            error.message,
-                            "error"
+                            "Product deleted successfully."
                         );
 
-                        return;
+
+                        await loadProducts();
+
+                        await loadStats();
+
                     }
+                );
 
-
-                    showToast(
-                        "Product deleted successfully."
-                    );
-
-
-                    await loadProducts();
-
-                    await loadStats();
-
-                }
-            );
-
-        });
+            }
+        );
 
 }
 
@@ -1347,21 +1609,24 @@ async function loadOrders() {
 
 
     container.innerHTML =
-        `<div class="loading">Loading orders...</div>`;
+        `<div class="loading">
+            Loading orders...
+        </div>`;
 
 
     const {
         data,
         error
-    } = await sb
-        .from("orders")
-        .select("*")
-        .order(
-            "created_at",
-            {
-                ascending: false
-            }
-        );
+    } =
+        await sb
+            .from("orders")
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            );
 
 
     if (error) {
@@ -1388,35 +1653,56 @@ async function loadOrders() {
 
     container.innerHTML = `
 
-        <div class="table-scroll">
+        <div class="table-wrapper">
 
-            <table>
+            <table class="admin-table">
 
                 <thead>
 
                     <tr>
-                        <th>Order ID</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th>Action</th>
+
+                        <th>
+                            Order ID
+                        </th>
+
+                        <th>
+                            Total
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Created
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
                     </tr>
 
                 </thead>
 
+
                 <tbody>
 
-                    ${data.map(order => `
+                    ${data.map(
+                        order => `
 
                         <tr>
 
                             <td>
+
                                 <strong>
                                     #${shortId(
                                         order.id
                                     )}
                                 </strong>
+
                             </td>
+
 
                             <td>
                                 ${money(
@@ -1426,16 +1712,26 @@ async function loadOrders() {
                                 )}
                             </td>
 
+
                             <td>
 
-                                <span class="status-badge">
+                                <span class="
+                                    status
+                                    status-${esc(
+                                        order.status ||
+                                        "pending"
+                                    )}
+                                ">
+
                                     ${esc(
                                         order.status ||
                                         "pending"
                                     )}
+
                                 </span>
 
                             </td>
+
 
                             <td>
                                 ${dateText(
@@ -1443,13 +1739,15 @@ async function loadOrders() {
                                 )}
                             </td>
 
+
                             <td>
 
                                 <button
-                                    class="action-btn small"
+                                    class="action-btn"
                                     data-view-order="${esc(
                                         order.id
                                     )}"
+                                    type="button"
                                 >
                                     View
                                 </button>
@@ -1458,7 +1756,8 @@ async function loadOrders() {
 
                         </tr>
 
-                    `).join("")}
+                    `
+                    ).join("")}
 
                 </tbody>
 
@@ -1473,49 +1772,56 @@ async function loadOrders() {
         .querySelectorAll(
             "[data-view-order]"
         )
-        .forEach(button => {
+        .forEach(
+            button => {
 
-            button.addEventListener(
-                "click",
-                async () => {
+                button.addEventListener(
+                    "click",
+                    async () => {
 
-                    const id =
-                        button.dataset.viewOrder;
-
-
-                    const {
-                        data,
-                        error
-                    } = await sb
-                        .from("orders")
-                        .select("*")
-                        .eq("id", id)
-                        .single();
+                        const id =
+                            button.dataset
+                                .viewOrder;
 
 
-                    if (error) {
+                        const {
+                            data,
+                            error
+                        } =
+                            await sb
+                                .from("orders")
+                                .select("*")
+                                .eq(
+                                    "id",
+                                    id
+                                )
+                                .single();
 
-                        showToast(
-                            error.message,
-                            "error"
+
+                        if (error) {
+
+                            showToast(
+                                error.message,
+                                "error"
+                            );
+
+                            return;
+                        }
+
+
+                        alert(
+                            JSON.stringify(
+                                data,
+                                null,
+                                2
+                            )
                         );
 
-                        return;
                     }
+                );
 
-
-                    alert(
-                        JSON.stringify(
-                            data,
-                            null,
-                            2
-                        )
-                    );
-
-                }
-            );
-
-        });
+            }
+        );
 
 }
 
@@ -1535,15 +1841,37 @@ async function checkSupabase() {
     }
 
 
-    const {
-        error
-    } = await sb
-        .from("stores")
-        .select("id")
-        .limit(1);
+    try {
+
+        const {
+            error
+        } =
+            await sb
+                .from("stores")
+                .select("id")
+                .limit(1);
 
 
-    if (error) {
+        if (error) {
+
+            element.textContent =
+                "Connection Error";
+
+            element.style.color =
+                "#dc2626";
+
+            return;
+        }
+
+
+        element.textContent =
+            "Connected";
+
+        element.style.color =
+            "#16a34a";
+
+
+    } catch (error) {
 
         element.textContent =
             "Connection Error";
@@ -1551,15 +1879,12 @@ async function checkSupabase() {
         element.style.color =
             "#dc2626";
 
-        return;
+        console.error(
+            "Supabase Check Error:",
+            error
+        );
+
     }
-
-
-    element.textContent =
-        "Connected";
-
-    element.style.color =
-        "#16a34a";
 
 }
 
