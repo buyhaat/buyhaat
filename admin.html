@@ -32,7 +32,6 @@
                 Admin Panel-এ প্রবেশ করুন
             </p>
 
-
             <form id="adminLoginForm">
 
                 <label for="adminEmail">
@@ -47,7 +46,6 @@
                     required
                 >
 
-
                 <label for="adminPassword">
                     Password
                 </label>
@@ -60,14 +58,12 @@
                     required
                 >
 
-
                 <button
                     type="submit"
                     id="adminLoginBtn"
                 >
                     Login
                 </button>
-
 
                 <div
                     id="loginMessage"
@@ -81,8 +77,11 @@
     </main>
 
 
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <!-- Supabase configuration -->
-    <script src="../supabase-config.js"></script>
+    <script src="supabase-config.js"></script>
 
     <!-- Admin authentication -->
     <script src="admin.js"></script>
