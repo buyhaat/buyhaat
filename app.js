@@ -27,6 +27,7 @@ const $ = id => document.getElementById(id);
 let products = [];
 let categories = ["All"];
 let followedStores = [];
+let stores = [];
 
 let currentMyStore = null;
 let currentUser = null;
