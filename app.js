@@ -31,24 +31,52 @@ const esc = (value) =>
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
 
+
 const money = (value) =>
     "৳" +
     Number(value || 0).toLocaleString("en-BD", {
         maximumFractionDigits: 2
     });
 
+
+/* =========================================================
+   CREATE SLUG
+========================================================= */
+
+function createSlug(value) {
+
+    return String(value || "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\u0980-\u09ff]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .replace(/-+/g, "-")
+        .slice(0, 120);
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
 function toast(message) {
+
     const el = $("toast");
 
     if (!el) return;
 
     el.textContent = message;
+
     el.classList.add("show");
 
     clearTimeout(toast.timer);
 
     toast.timer = setTimeout(() => {
+
         el.classList.remove("show");
+
     }, 2400);
 }
 
@@ -63,7 +91,9 @@ async function uploadImage(file, folder) {
     if (!file) return null;
 
     if (!file.type.startsWith("image/")) {
+
         toast("শুধু Image file নির্বাচন করো।");
+
         return null;
     }
 
@@ -75,19 +105,27 @@ async function uploadImage(file, folder) {
     const randomId =
         crypto.randomUUID
             ? crypto.randomUUID()
-            : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+            : `${Date.now()}-${Math.random()
+                .toString(36)
+                .slice(2)}`;
 
     const fileName =
         `${folder}/${randomId}.${ext}`;
 
-    const { error } =
+    const {
+        error
+    } =
         await sb.storage
             .from("store-images")
-            .upload(fileName, file, {
-                cacheControl: "3600",
-                upsert: false,
-                contentType: file.type
-            });
+            .upload(
+                fileName,
+                file,
+                {
+                    cacheControl: "3600",
+                    upsert: false,
+                    contentType: file.type
+                }
+            );
 
     if (error) {
 
@@ -104,7 +142,9 @@ async function uploadImage(file, folder) {
         return null;
     }
 
-    const { data } =
+    const {
+        data
+    } =
         sb.storage
             .from("store-images")
             .getPublicUrl(fileName);
@@ -118,17 +158,23 @@ async function uploadImage(file, folder) {
 ========================================================= */
 
 let products = [];
+
 let stores = [];
+
 let categories = ["All"];
+
 let followedStores = [];
 
 let currentUser = null;
+
 let currentMyStore = null;
 
 let currentCategory = "All";
+
 let authMode = "login";
 
 let editingProductId = null;
+
 let editingProductImageUrl = null;
 
 
@@ -140,6 +186,8 @@ function closeMenu() {
 
     $("sideMenu")?.classList.remove("open");
 
+    $("menuOverlay")?.classList.remove("show");
+
     document.body.classList.remove(
         "menu-open"
     );
@@ -148,14 +196,9 @@ function closeMenu() {
 
 function openMenu() {
 
-    if (
-        (location.hash || "#home") !==
-        "#home"
-    ) {
-        return;
-    }
-
     $("sideMenu")?.classList.add("open");
+
+    $("menuOverlay")?.classList.add("show");
 
     document.body.classList.add(
         "menu-open"
@@ -192,6 +235,7 @@ function route() {
         page = "home";
 
         if (location.hash !== "#home") {
+
             history.replaceState(
                 null,
                 "",
@@ -211,6 +255,7 @@ function route() {
 
         });
 
+
     document
         .querySelectorAll(".bottom button")
         .forEach((el) => {
@@ -222,17 +267,27 @@ function route() {
 
         });
 
+
+    /*
+       Menu button শুধু Home page-এ দেখাবে।
+       তবে Menu নিজে অন্য page থেকেও ভুল করে খোলা
+       থাকলে route() সেটি বন্ধ করে দেবে।
+    */
+
     $("menuBtn")?.classList.toggle(
         "hidden",
         page !== "home"
     );
+
 
     $("headerSearchBtn")?.classList.toggle(
         "hidden",
         page !== "home"
     );
 
+
     closeMenu();
+
 
     if (page === "home") {
 
@@ -244,24 +299,81 @@ function route() {
         );
     }
 
+
     if (page === "following") {
+
         renderFollowing();
     }
 
+
     if (page === "my-store") {
+
         renderMyStore();
     }
 
+
+    if (page === "add-product") {
+
+        updateAddProductNotice();
+    }
+
+
     window.scrollTo({
         top: 0,
-        behavior: "instant"
+        behavior: "auto"
     });
 }
+
 
 window.addEventListener(
     "hashchange",
     route
 );
+
+
+/* =========================================================
+   ADD PRODUCT NOTICE
+========================================================= */
+
+function updateAddProductNotice() {
+
+    const notice =
+        $("addNotice");
+
+    if (!notice) return;
+
+
+    if (!currentUser) {
+
+        notice.innerHTML = `
+            <div class="empty">
+                Product add করতে আগে Login করো।
+            </div>
+        `;
+
+        return;
+    }
+
+
+    if (!currentMyStore) {
+
+        notice.innerHTML = `
+            <div class="empty">
+                Product add করার আগে একটি Store তৈরি করো।
+            </div>
+        `;
+
+        return;
+    }
+
+
+    notice.innerHTML = `
+        <div class="empty">
+            ${esc(currentMyStore.name)} Store-এর জন্য Product add করছো।
+            Admin approval-এর পর Product public হবে।
+        </div>
+    `;
+}
 
 
 /* =========================================================
@@ -275,7 +387,8 @@ async function updateAuth() {
     const {
         data,
         error
-    } = await sb.auth.getSession();
+    } =
+        await sb.auth.getSession();
 
     if (error) {
 
@@ -295,6 +408,8 @@ async function updateAuth() {
     await loadFollowing();
 
     updateAccount();
+
+    updateAddProductNotice();
 }
 
 
@@ -304,24 +419,27 @@ async function loadMyStore() {
 
     if (!currentUser) return;
 
+
     const {
         data,
         error
-    } = await sb
-        .from("stores")
-        .select("*")
-        .eq(
-            "owner_id",
-            currentUser.id
-        )
-        .order(
-            "created_at",
-            {
-                ascending: false
-            }
-        )
-        .limit(1)
-        .maybeSingle();
+    } =
+        await sb
+            .from("stores")
+            .select("*")
+            .eq(
+                "owner_id",
+                currentUser.id
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            )
+            .limit(1)
+            .maybeSingle();
+
 
     if (error) {
 
@@ -332,6 +450,7 @@ async function loadMyStore() {
 
         return;
     }
+
 
     currentMyStore =
         data || null;
@@ -352,19 +471,26 @@ function updateAccount() {
     const createBtn =
         $("createStoreBtn");
 
+
     if (!status) return;
+
 
     if (!currentUser) {
 
         status.innerHTML = `
             <div class="card">
-                <b>Guest user</b><br>
+
+                <b>Guest user</b>
+
+                <br>
 
                 <span class="store-meta">
                     Login করলে Store management ব্যবহার করতে পারবে।
                 </span>
+
             </div>
         `;
+
 
         loginBtn?.classList.remove(
             "hidden"
@@ -381,15 +507,23 @@ function updateAccount() {
         return;
     }
 
+
     status.innerHTML = `
         <div class="card">
-            <b>${esc(currentUser.email)}</b><br>
+
+            <b>
+                ${esc(currentUser.email)}
+            </b>
+
+            <br>
 
             <span class="store-meta">
                 Logged in
             </span>
+
         </div>
     `;
+
 
     loginBtn?.classList.add(
         "hidden"
@@ -398,6 +532,7 @@ function updateAccount() {
     logoutBtn?.classList.remove(
         "hidden"
     );
+
 
     createBtn?.classList.toggle(
         "hidden",
@@ -410,27 +545,33 @@ function openAuth(mode = "login") {
 
     authMode = mode;
 
+
     $("authTitle").textContent =
         mode === "login"
             ? "Login"
             : "Create account";
+
 
     $("authSubtitle").textContent =
         mode === "login"
             ? "তোমার BuyHaat account-এ login করো।"
             : "নতুন BuyHaat account তৈরি করো।";
 
+
     $("authSubmitBtn").textContent =
         mode === "login"
             ? "Login"
             : "Register";
+
 
     $("authSwitchBtn").textContent =
         mode === "login"
             ? "নতুন অ্যাকাউন্ট তৈরি করুন"
             : "আগের অ্যাকাউন্টে Login করুন";
 
+
     $("authMessage").textContent = "";
+
 
     $("authModal").classList.remove(
         "hidden"
@@ -450,13 +591,17 @@ async function authSubmit(event) {
 
     event.preventDefault();
 
+
     const email =
         $("authEmail").value.trim();
+
 
     const password =
         $("authPassword").value;
 
+
     let result;
+
 
     if (authMode === "login") {
 
@@ -475,6 +620,7 @@ async function authSubmit(event) {
             });
     }
 
+
     if (result.error) {
 
         $("authMessage").textContent =
@@ -482,6 +628,7 @@ async function authSubmit(event) {
 
         return;
     }
+
 
     if (
         authMode === "register" &&
@@ -493,6 +640,7 @@ async function authSubmit(event) {
 
         return;
     }
+
 
     closeAuth();
 
@@ -508,7 +656,9 @@ async function logout() {
 
     const {
         error
-    } = await sb.auth.signOut();
+    } =
+        await sb.auth.signOut();
+
 
     if (error) {
 
@@ -517,11 +667,17 @@ async function logout() {
         return;
     }
 
+
     currentUser = null;
+
     currentMyStore = null;
+
     followedStores = [];
 
+
     updateAccount();
+
+    updateAddProductNotice();
 
     closeMenu();
 
@@ -539,39 +695,42 @@ async function loadStores() {
 
     if (!sb) return;
 
+
     const {
         data,
         error
-    } = await sb
-        .from("stores")
-        .select(`
-            id,
-            name,
-            slug,
-            logo_url,
-            cover_url,
-            description,
-            phone,
-            address,
-            is_active,
-            is_approved,
-            owner_id,
-            created_at
-        `)
-        .eq(
-            "is_active",
-            true
-        )
-        .eq(
-            "is_approved",
-            true
-        )
-        .order(
-            "created_at",
-            {
-                ascending: false
-            }
-        );
+    } =
+        await sb
+            .from("stores")
+            .select(`
+                id,
+                name,
+                slug,
+                logo_url,
+                cover_url,
+                description,
+                phone,
+                address,
+                is_active,
+                is_approved,
+                owner_id,
+                created_at
+            `)
+            .eq(
+                "is_active",
+                true
+            )
+            .eq(
+                "is_approved",
+                true
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            );
+
 
     if (error) {
 
@@ -585,6 +744,7 @@ async function loadStores() {
         return;
     }
 
+
     stores = data || [];
 }
 
@@ -597,48 +757,52 @@ async function loadProducts() {
 
     if (!sb) return;
 
+
     const {
         data,
         error
-    } = await sb
-        .from("products")
-        .select(`
-            id,
-            name,
-            price,
-            description,
-            stock,
-            category_id,
-            store_id,
-            image_url,
-            is_active,
-            is_approved,
-            created_at,
-
-            categories(name),
-
-            stores(
+    } =
+        await sb
+            .from("products")
+            .select(`
                 id,
                 name,
                 slug,
+                price,
+                description,
+                stock,
+                category_id,
+                store_id,
+                image_url,
                 is_active,
-                is_approved
+                is_approved,
+                created_at,
+
+                categories(name),
+
+                stores(
+                    id,
+                    name,
+                    slug,
+                    is_active,
+                    is_approved
+                )
+            `)
+            .eq(
+                "is_active",
+                true
             )
-        `)
-        .eq(
-            "is_active",
-            true
-        )
-        .eq(
-            "is_approved",
-            true
-        )
-        .order(
-            "created_at",
-            {
-                ascending: false
-            }
-        );
+            .eq(
+                "is_approved",
+                true
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            );
+
 
     if (error) {
 
@@ -654,6 +818,7 @@ async function loadProducts() {
         return;
     }
 
+
     products =
         (data || [])
             .filter(
@@ -664,11 +829,17 @@ async function loadProducts() {
             )
             .map((p) => ({
 
-                id: p.id,
+                id:
+                    p.id,
 
-                name: p.name,
+                name:
+                    p.name,
 
-                price: Number(p.price),
+                slug:
+                    p.slug || "",
+
+                price:
+                    Number(p.price),
 
                 description:
                     p.description || "",
@@ -694,7 +865,9 @@ async function loadProducts() {
                 image:
                     p.image_url ||
                     null
+
             }));
+
 
     renderProducts(
         currentCategory,
@@ -731,6 +904,7 @@ function storeHTML(store) {
 
             </div>
 
+
             <div class="store-result-info">
 
                 <strong>
@@ -742,6 +916,7 @@ function storeHTML(store) {
                 </span>
 
             </div>
+
 
             <button
                 class="view-store secondary"
@@ -768,13 +943,16 @@ function renderProducts(
     currentCategory =
         category;
 
+
     const q =
         String(query || "")
             .trim()
             .toLowerCase();
 
+
     const clean =
         q.replace(/^@/, "");
+
 
     const productList =
         products.filter((p) => {
@@ -782,6 +960,7 @@ function renderProducts(
             const categoryOK =
                 category === "All" ||
                 p.category === category;
+
 
             const text = [
                 p.name,
@@ -793,16 +972,19 @@ function renderProducts(
                 .join(" ")
                 .toLowerCase();
 
+
             const searchOK =
                 !q ||
                 text.includes(q) ||
                 text.includes(clean);
+
 
             return (
                 categoryOK &&
                 searchOK
             );
         });
+
 
     const storeList =
         q
@@ -819,16 +1001,20 @@ function renderProducts(
                 .slice(0, 8)
             : [];
 
+
     const box =
         $("products");
 
+
     if (!box) return;
+
 
     if ($("productCount")) {
 
         $("productCount").textContent =
             `${productList.length} products`;
     }
+
 
     if (
         !productList.length &&
@@ -843,6 +1029,7 @@ function renderProducts(
 
         return;
     }
+
 
     box.innerHTML =
 
@@ -889,6 +1076,7 @@ function renderProducts(
                                 `
                         }
 
+
                         <div class="product-info">
 
                             <div class="product-name">
@@ -904,11 +1092,13 @@ function renderProducts(
                             </div>
 
                             <div class="stock-text">
+
                                 ${
                                     Number(p.stock) > 0
                                         ? `Stock: ${p.stock}`
                                         : "Out of stock"
                                 }
+
                             </div>
 
                         </div>
@@ -918,6 +1108,7 @@ function renderProducts(
                 `
             )
             .join("");
+
 
     box
         .querySelectorAll(".product-card")
@@ -933,6 +1124,7 @@ function renderProducts(
 
         });
 
+
     box
         .querySelectorAll(".view-store")
         .forEach((button) => {
@@ -941,6 +1133,7 @@ function renderProducts(
                 (event) => {
 
                     event.stopPropagation();
+
 
                     const store =
                         stores.find(
@@ -951,13 +1144,16 @@ function renderProducts(
                                 )
                         );
 
+
                     if (!store) return;
+
 
                     if ($("searchInput")) {
 
                         $("searchInput").value =
                             `@${store.slug}`;
                     }
+
 
                     renderProducts(
                         "All",
@@ -983,7 +1179,9 @@ function openProduct(id) {
                 String(id)
         );
 
+
     if (!product) return;
+
 
     const isFollowing =
         followedStores.some(
@@ -991,6 +1189,7 @@ function openProduct(id) {
                 String(store.id) ===
                 String(product.storeId)
         );
+
 
     $("productDetailContent").innerHTML = `
 
@@ -1001,6 +1200,7 @@ function openProduct(id) {
         >
             ← Back
         </button>
+
 
         <div class="detail">
 
@@ -1015,29 +1215,35 @@ function openProduct(id) {
                     : ""
             }
 
+
             <div class="detail-body">
 
                 <h1>
                     ${esc(product.name)}
                 </h1>
 
+
                 <h2>
                     ${money(product.price)}
                 </h2>
+
 
                 <p>
                     <b>Store:</b>
                     ${esc(product.store)}
                 </p>
 
+
                 <p>
                     <b>Stock:</b>
                     ${product.stock}
                 </p>
 
+
                 <p>
                     ${esc(product.description)}
                 </p>
+
 
                 <div class="detail-actions">
 
@@ -1053,21 +1259,26 @@ function openProduct(id) {
                         }
                     </button>
 
+
                     <button
                         class="primary"
                         type="button"
+
                         ${
                             Number(product.stock) <= 0
                                 ? "disabled"
                                 : ""
                         }
+
                         onclick="createOrder('${esc(product.id)}')"
                     >
+
                         ${
                             Number(product.stock) <= 0
                                 ? "Out of Stock"
                                 : "Buy / Order"
                         }
+
                     </button>
 
                 </div>
@@ -1076,6 +1287,7 @@ function openProduct(id) {
 
         </div>
     `;
+
 
     go("product-detail");
 }
@@ -1098,12 +1310,14 @@ async function createOrder(productId) {
         return;
     }
 
+
     const product =
         products.find(
             (p) =>
                 String(p.id) ===
                 String(productId)
         );
+
 
     if (!product) {
 
@@ -1113,6 +1327,7 @@ async function createOrder(productId) {
 
         return;
     }
+
 
     if (
         Number(product.stock) <= 0
@@ -1124,6 +1339,7 @@ async function createOrder(productId) {
 
         return;
     }
+
 
     if (
         currentMyStore &&
@@ -1138,15 +1354,19 @@ async function createOrder(productId) {
         return;
     }
 
+
     const quantity = 1;
+
 
     const total =
         Number(product.price) *
         quantity;
 
+
     toast(
         "Order তৈরি হচ্ছে..."
     );
+
 
     const {
         data: order,
@@ -1155,6 +1375,7 @@ async function createOrder(productId) {
         await sb
             .from("orders")
             .insert({
+
                 buyer_id:
                     currentUser.id,
 
@@ -1163,9 +1384,11 @@ async function createOrder(productId) {
 
                 status:
                     "pending"
+
             })
             .select()
             .single();
+
 
     if (orderError) {
 
@@ -1181,6 +1404,7 @@ async function createOrder(productId) {
 
         return;
     }
+
 
     const {
         error: itemError
@@ -1200,7 +1424,9 @@ async function createOrder(productId) {
 
                 price:
                     Number(product.price)
+
             });
+
 
     if (itemError) {
 
@@ -1208,6 +1434,7 @@ async function createOrder(productId) {
             "Order item error:",
             itemError
         );
+
 
         await sb
             .from("orders")
@@ -1217,6 +1444,7 @@ async function createOrder(productId) {
                 order.id
             );
 
+
         toast(
             itemError.message ||
             "Order item তৈরি করা যায়নি।"
@@ -1225,9 +1453,11 @@ async function createOrder(productId) {
         return;
     }
 
+
     toast(
         "Order সফলভাবে তৈরি হয়েছে।"
     );
+
 
     await loadProducts();
 
@@ -1243,13 +1473,18 @@ async function loadCategories() {
 
     if (!sb) return;
 
+
     const {
         data,
         error
-    } = await sb
-        .from("categories")
-        .select("id,name")
-        .order("name");
+    } =
+        await sb
+            .from("categories")
+            .select(
+                "id,name"
+            )
+            .order("name");
+
 
     categories =
         error
@@ -1262,6 +1497,7 @@ async function loadCategories() {
                     )
             ];
 
+
     renderCategories();
 
     populateCategory();
@@ -1273,7 +1509,9 @@ function renderCategories() {
     const box =
         $("categories");
 
+
     if (!box) return;
+
 
     box.innerHTML =
         categories
@@ -1296,6 +1534,7 @@ function renderCategories() {
             )
             .join("");
 
+
     box
         .querySelectorAll(".category")
         .forEach((button) => {
@@ -1305,7 +1544,9 @@ function renderCategories() {
                 currentCategory =
                     button.dataset.cat;
 
+
                 renderCategories();
+
 
                 renderProducts(
                     currentCategory,
@@ -1324,7 +1565,9 @@ function populateCategory() {
     const select =
         $("productCategory");
 
+
     if (!select) return;
+
 
     select.innerHTML =
         categories
@@ -1356,7 +1599,9 @@ function openStore() {
         return;
     }
 
+
     $("storeMessage").textContent = "";
+
 
     $("storeModal").classList.remove(
         "hidden"
@@ -1376,6 +1621,7 @@ async function createStore(event) {
 
     event.preventDefault();
 
+
     if (!currentUser) {
 
         openAuth("login");
@@ -1383,10 +1629,12 @@ async function createStore(event) {
         return;
     }
 
+
     const name =
         $("storeName")
             .value
             .trim();
+
 
     if (!name) {
 
@@ -1396,40 +1644,38 @@ async function createStore(event) {
         return;
     }
 
+
     const base =
-        name
-            .toLowerCase()
-            .replace(
-                /[^a-z0-9]+/g,
-                "-"
-            )
-            .replace(
-                /^-+|-+$/g,
-                ""
-            );
+        createSlug(name);
+
 
     const slug =
         `${base || "store"}-${Math.random()
             .toString(36)
             .slice(2, 8)}`;
 
+
     const logoFile =
         $("storeLogoFile")
             ?.files?.[0] ||
         null;
 
+
     let logoUrl = null;
+
 
     if (logoFile) {
 
         $("storeMessage").textContent =
             "Store logo upload হচ্ছে...";
 
+
         logoUrl =
             await uploadImage(
                 logoFile,
                 "store-logos"
             );
+
 
         if (!logoUrl) {
 
@@ -1440,23 +1686,28 @@ async function createStore(event) {
         }
     }
 
+
     const coverFile =
         $("storeCoverFile")
             ?.files?.[0] ||
         null;
 
+
     let coverUrl = null;
+
 
     if (coverFile) {
 
         $("storeMessage").textContent =
             "Store cover upload হচ্ছে...";
 
+
         coverUrl =
             await uploadImage(
                 coverFile,
                 "store-covers"
             );
+
 
         if (!coverUrl) {
 
@@ -1466,6 +1717,7 @@ async function createStore(event) {
             return;
         }
     }
+
 
     const payload = {
 
@@ -1509,8 +1761,10 @@ async function createStore(event) {
             false
     };
 
+
     $("storeMessage").textContent =
         "Store save হচ্ছে...";
+
 
     const {
         data,
@@ -1522,6 +1776,7 @@ async function createStore(event) {
             .select()
             .single();
 
+
     if (error) {
 
         console.error(
@@ -1529,24 +1784,33 @@ async function createStore(event) {
             error
         );
 
+
         $("storeMessage").textContent =
             error.message;
 
         return;
     }
 
+
     currentMyStore =
         data;
 
+
     $("storeForm")?.reset();
+
 
     closeStore();
 
+
     updateAccount();
+
+    updateAddProductNotice();
+
 
     await loadStores();
 
     await renderMyStore();
+
 
     toast(
         "Store created — approval pending"
@@ -1562,12 +1826,14 @@ async function addProduct(event) {
 
     event.preventDefault();
 
+
     if (!currentUser) {
 
         openAuth("login");
 
         return;
     }
+
 
     if (!currentMyStore) {
 
@@ -1576,8 +1842,61 @@ async function addProduct(event) {
         return;
     }
 
+
+    const name =
+        $("productName")
+            .value
+            .trim();
+
+
+    if (!name) {
+
+        $("productMsg").textContent =
+            "Product name দাও।";
+
+        return;
+    }
+
+
+    const price =
+        Number(
+            $("productPrice").value
+        );
+
+
+    const stock =
+        Number(
+            $("productStock").value
+        );
+
+
+    if (
+        !Number.isFinite(price) ||
+        price < 0
+    ) {
+
+        $("productMsg").textContent =
+            "সঠিক Price দাও।";
+
+        return;
+    }
+
+
+    if (
+        !Number.isInteger(stock) ||
+        stock < 0
+    ) {
+
+        $("productMsg").textContent =
+            "সঠিক Stock দাও।";
+
+        return;
+    }
+
+
     const categoryName =
         $("productCategory").value;
+
 
     const {
         data: category,
@@ -1592,6 +1911,7 @@ async function addProduct(event) {
             )
             .maybeSingle();
 
+
     if (
         categoryError ||
         !category
@@ -1604,23 +1924,28 @@ async function addProduct(event) {
         return;
     }
 
+
     const imageFile =
         $("productImageFile")
             ?.files?.[0] ||
         null;
 
+
     let imageUrl = null;
+
 
     if (imageFile) {
 
         $("productMsg").textContent =
             "Product image upload হচ্ছে...";
 
+
         imageUrl =
             await uploadImage(
                 imageFile,
                 "products"
             );
+
 
         if (!imageUrl) {
 
@@ -1631,55 +1956,31 @@ async function addProduct(event) {
         }
     }
 
-    const price =
-        Number(
-            $("productPrice").value
-        );
 
-    const stock =
-        Number(
-            $("productStock").value
-        );
+    /*
+       IMPORTANT:
+       products.slug NOT NULL
+       তাই name থেকে slug তৈরি করে
+       database-এ পাঠানো হচ্ছে।
+    */
 
-    if (
-        !Number.isFinite(price) ||
-        price < 0
-    ) {
+    const baseSlug =
+        createSlug(name);
 
-        $("productMsg").textContent =
-            "সঠিক Price দাও।";
 
-        return;
-    }
+    const slug =
+        `${baseSlug || "product"}-${Math.random()
+            .toString(36)
+            .slice(2, 8)}`;
 
-    if (
-        !Number.isInteger(stock) ||
-        stock < 0
-    ) {
-
-        $("productMsg").textContent =
-            "সঠিক Stock দাও।";
-
-        return;
-    }
-
-    const name =
-        $("productName")
-            .value
-            .trim();
-
-    if (!name) {
-
-        $("productMsg").textContent =
-            "Product name দাও।";
-
-        return;
-    }
 
     const payload = {
 
         name:
             name,
+
+        slug:
+            slug,
 
         price:
             price,
@@ -1709,8 +2010,10 @@ async function addProduct(event) {
             false
     };
 
+
     $("productMsg").textContent =
         "Product save হচ্ছে...";
+
 
     const {
         error
@@ -1719,6 +2022,7 @@ async function addProduct(event) {
             .from("products")
             .insert(payload);
 
+
     if (error) {
 
         console.error(
@@ -1726,24 +2030,31 @@ async function addProduct(event) {
             error
         );
 
+
         $("productMsg").textContent =
             error.message;
 
         return;
     }
 
+
     $("productForm")?.reset();
 
+
     if ($("productStock")) {
+
         $("productStock").value = 1;
     }
+
 
     $("productMsg").textContent =
         "Product added — approval pending.";
 
+
     await loadProducts();
 
     await sellerProducts();
+
 
     toast(
         "Product added successfully"
@@ -1759,7 +2070,9 @@ async function loadFollowing() {
 
     followedStores = [];
 
+
     if (!currentUser) return;
+
 
     const {
         data,
@@ -1781,6 +2094,7 @@ async function loadFollowing() {
                 "user_id",
                 currentUser.id
             );
+
 
     if (!error) {
 
@@ -1814,7 +2128,9 @@ async function toggleFollow(storeId) {
         return;
     }
 
+
     if (!storeId) return;
+
 
     const alreadyFollowing =
         followedStores.some(
@@ -1822,6 +2138,7 @@ async function toggleFollow(storeId) {
                 String(store.id) ===
                 String(storeId)
         );
+
 
     if (alreadyFollowing) {
 
@@ -1840,6 +2157,7 @@ async function toggleFollow(storeId) {
                     storeId
                 );
 
+
         if (error) {
 
             toast(error.message);
@@ -1847,7 +2165,9 @@ async function toggleFollow(storeId) {
             return;
         }
 
+
         await loadFollowing();
+
 
         toast(
             "Store unfollowed"
@@ -1867,7 +2187,9 @@ async function toggleFollow(storeId) {
 
                     store_id:
                         storeId
+
                 });
+
 
         if (error) {
 
@@ -1876,36 +2198,43 @@ async function toggleFollow(storeId) {
             return;
         }
 
+
         await loadFollowing();
+
 
         toast(
             "Store followed"
         );
     }
 
-    const hash =
-        location.hash;
 
     if (
-        hash ===
+        location.hash ===
         "#product-detail"
     ) {
 
-        const productId =
+        const product =
             products.find(
                 (p) =>
                     String(p.storeId) ===
                     String(storeId)
-            )?.id;
+            );
 
-        if (productId) {
-            openProduct(productId);
+
+        if (product) {
+
+            openProduct(
+                product.id
+            );
         }
     }
 
+
     if (
-        hash === "#following"
+        location.hash ===
+        "#following"
     ) {
+
         renderFollowing();
     }
 }
@@ -1916,7 +2245,9 @@ function renderFollowing() {
     const box =
         $("followingList");
 
+
     if (!box) return;
+
 
     if (!currentUser) {
 
@@ -1929,6 +2260,7 @@ function renderFollowing() {
         return;
     }
 
+
     if (!followedStores.length) {
 
         box.innerHTML = `
@@ -1939,6 +2271,7 @@ function renderFollowing() {
 
         return;
     }
+
 
     box.innerHTML =
         followedStores
@@ -1966,6 +2299,7 @@ function renderFollowing() {
 
                         </div>
 
+
                         <div>
 
                             <b>
@@ -1979,6 +2313,7 @@ function renderFollowing() {
                             </span>
 
                         </div>
+
 
                         <button
                             class="secondary unfollow-btn"
@@ -1994,6 +2329,7 @@ function renderFollowing() {
             )
             .join("");
 
+
     box
         .querySelectorAll(".store-card")
         .forEach((card) => {
@@ -2003,6 +2339,7 @@ function renderFollowing() {
                 const storeId =
                     card.dataset.storeId;
 
+
                 const store =
                     stores.find(
                         (s) =>
@@ -2010,14 +2347,19 @@ function renderFollowing() {
                             String(storeId)
                     );
 
+
                 if (!store) return;
+
 
                 go("home");
 
+
                 if ($("searchInput")) {
+
                     $("searchInput").value =
                         `@${store.slug}`;
                 }
+
 
                 renderProducts(
                     "All",
@@ -2025,6 +2367,7 @@ function renderFollowing() {
                 );
             };
         });
+
 
     box
         .querySelectorAll(".unfollow-btn")
@@ -2038,6 +2381,7 @@ function renderFollowing() {
                     await toggleFollow(
                         button.dataset.id
                     );
+
                 };
         });
 }
@@ -2051,13 +2395,17 @@ async function renderMyStore() {
 
     updateAccount();
 
+
     const box =
         $("myStoreContent");
+
 
     const manager =
         $("storeManagerCard");
 
+
     if (!box || !manager) return;
+
 
     if (!currentUser) {
 
@@ -2067,12 +2415,15 @@ async function renderMyStore() {
             </div>
         `;
 
+
         manager.classList.add(
             "hidden"
         );
 
+
         return;
     }
+
 
     if (!currentMyStore) {
 
@@ -2082,15 +2433,19 @@ async function renderMyStore() {
             </div>
         `;
 
+
         manager.classList.add(
             "hidden"
         );
 
+
         return;
     }
 
+
     const store =
         currentMyStore;
+
 
     box.innerHTML = `
 
@@ -2107,6 +2462,7 @@ async function renderMyStore() {
                     `
                     : ""
             }
+
 
             <div class="store-profile-row">
 
@@ -2126,27 +2482,33 @@ async function renderMyStore() {
 
                 </div>
 
+
                 <div>
 
                     <h2>
                         ${esc(store.name)}
                     </h2>
 
+
                     <p>
                         @${esc(store.slug)}
                     </p>
 
+
                     <small>
+
                         ${
                             store.is_approved
                                 ? "Approved"
                                 : "Pending approval"
                         }
+
                     </small>
 
                 </div>
 
             </div>
+
 
             <p>
                 ${esc(
@@ -2154,6 +2516,7 @@ async function renderMyStore() {
                     "No description"
                 )}
             </p>
+
 
             ${
                 store.phone
@@ -2165,6 +2528,7 @@ async function renderMyStore() {
                     `
                     : ""
             }
+
 
             ${
                 store.address
@@ -2181,9 +2545,11 @@ async function renderMyStore() {
 
     `;
 
+
     manager.classList.remove(
         "hidden"
     );
+
 
     await sellerProducts();
 
@@ -2202,12 +2568,14 @@ async function sellerProducts() {
     const box =
         $("sellerProductsTab");
 
+
     if (
         !box ||
         !currentMyStore
     ) {
         return;
     }
+
 
     const {
         data,
@@ -2218,6 +2586,7 @@ async function sellerProducts() {
             .select(`
                 id,
                 name,
+                slug,
                 price,
                 stock,
                 description,
@@ -2239,6 +2608,7 @@ async function sellerProducts() {
                 }
             );
 
+
     if (error) {
 
         box.innerHTML = `
@@ -2250,6 +2620,7 @@ async function sellerProducts() {
         return;
     }
 
+
     if (!data?.length) {
 
         box.innerHTML = `
@@ -2260,6 +2631,7 @@ async function sellerProducts() {
 
         return;
     }
+
 
     box.innerHTML =
         data
@@ -2291,13 +2663,16 @@ async function sellerProducts() {
                                 `
                         }
 
+
                         <div class="manage-info">
 
                             <b>
                                 ${esc(product.name)}
                             </b>
 
+
                             <br>
+
 
                             <small>
 
@@ -2326,6 +2701,7 @@ async function sellerProducts() {
 
                         </div>
 
+
                         <button
                             class="small edit"
                             data-id="${esc(product.id)}"
@@ -2333,6 +2709,7 @@ async function sellerProducts() {
                         >
                             Edit
                         </button>
+
 
                         <button
                             class="small del"
@@ -2348,6 +2725,7 @@ async function sellerProducts() {
             )
             .join("");
 
+
     box
         .querySelectorAll(".edit")
         .forEach((button) => {
@@ -2361,6 +2739,7 @@ async function sellerProducts() {
             };
 
         });
+
 
     box
         .querySelectorAll(".del")
@@ -2387,28 +2766,36 @@ function openProductEditor(product) {
     editingProductId =
         product.id;
 
+
     editingProductImageUrl =
         product.image_url ||
         null;
 
+
     $("editProductId").value =
         product.id;
+
 
     $("editProductName").value =
         product.name || "";
 
+
     $("editProductPrice").value =
         product.price ?? "";
+
 
     $("editProductStock").value =
         product.stock ?? 0;
 
+
     $("editProductDescription").value =
         product.description || "";
+
 
     const category =
         product.categories?.name ||
         "";
+
 
     $("editProductCategory").innerHTML =
         categories
@@ -2432,13 +2819,17 @@ function openProductEditor(product) {
             )
             .join("");
 
+
     if ($("editProductImageFile")) {
+
         $("editProductImageFile").value =
             "";
     }
 
+
     $("editProductMessage").textContent =
         "";
+
 
     $("productEditModal")
         .classList
@@ -2451,6 +2842,7 @@ function closeProductEditor() {
     editingProductId = null;
 
     editingProductImageUrl = null;
+
 
     $("productEditModal")
         ?.classList
@@ -2465,6 +2857,7 @@ function closeProductEditor() {
 async function editProduct(id) {
 
     if (!currentMyStore) return;
+
 
     const {
         data,
@@ -2486,6 +2879,7 @@ async function editProduct(id) {
             )
             .single();
 
+
     if (error) {
 
         toast(
@@ -2494,6 +2888,7 @@ async function editProduct(id) {
 
         return;
     }
+
 
     openProductEditor(data);
 }
@@ -2507,6 +2902,7 @@ async function saveProductEdit(event) {
 
     event.preventDefault();
 
+
     if (
         !editingProductId ||
         !currentMyStore
@@ -2514,9 +2910,11 @@ async function saveProductEdit(event) {
         return;
     }
 
+
     const categoryName =
         $("editProductCategory")
             .value;
+
 
     const {
         data: category,
@@ -2531,6 +2929,7 @@ async function saveProductEdit(event) {
             )
             .maybeSingle();
 
+
     if (
         categoryError ||
         !category
@@ -2544,19 +2943,23 @@ async function saveProductEdit(event) {
         return;
     }
 
+
     const imageFile =
         $("editProductImageFile")
             ?.files?.[0] ||
         null;
 
+
     let imageUrl =
         editingProductImageUrl;
+
 
     if (imageFile) {
 
         $("editProductMessage")
             .textContent =
-                "নতুন Product image upload হচ্ছে...";
+            "নতুন Product image upload হচ্ছে...";
+
 
         imageUrl =
             await uploadImage(
@@ -2564,15 +2967,17 @@ async function saveProductEdit(event) {
                 "products"
             );
 
+
         if (!imageUrl) {
 
             $("editProductMessage")
                 .textContent =
-                    "নতুন Product image upload করা যায়নি।";
+                "নতুন Product image upload করা যায়নি।";
 
             return;
         }
     }
+
 
     const price =
         Number(
@@ -2580,11 +2985,13 @@ async function saveProductEdit(event) {
                 .value
         );
 
+
     const stock =
         Number(
             $("editProductStock")
                 .value
         );
+
 
     if (
         !Number.isFinite(price) ||
@@ -2593,10 +3000,11 @@ async function saveProductEdit(event) {
 
         $("editProductMessage")
             .textContent =
-                "সঠিক Price দাও।";
+            "সঠিক Price দাও।";
 
         return;
     }
+
 
     if (
         !Number.isInteger(stock) ||
@@ -2605,17 +3013,40 @@ async function saveProductEdit(event) {
 
         $("editProductMessage")
             .textContent =
-                "সঠিক Stock দাও।";
+            "সঠিক Stock দাও।";
 
         return;
     }
 
+
+    const name =
+        $("editProductName")
+            .value
+            .trim();
+
+
+    if (!name) {
+
+        $("editProductMessage")
+            .textContent =
+            "Product name দাও।";
+
+        return;
+    }
+
+
     const updates = {
 
         name:
-            $("editProductName")
-                .value
-                .trim(),
+            name,
+
+        /*
+           Existing product-এর slug-ও
+           name পরিবর্তন হলে update হবে।
+        */
+
+        slug:
+            `${createSlug(name) || "product"}-${String(editingProductId).slice(0, 6)}`,
 
         price:
             price,
@@ -2636,9 +3067,11 @@ async function saveProductEdit(event) {
             category.id
     };
 
+
     $("editProductMessage")
         .textContent =
-            "Product save হচ্ছে...";
+        "Product save হচ্ছে...";
+
 
     const {
         error
@@ -2655,20 +3088,24 @@ async function saveProductEdit(event) {
                 currentMyStore.id
             );
 
+
     if (error) {
 
         $("editProductMessage")
             .textContent =
-                error.message;
+            error.message;
 
         return;
     }
 
+
     closeProductEditor();
+
 
     await loadProducts();
 
     await sellerProducts();
+
 
     toast(
         "Product updated"
@@ -2684,6 +3121,7 @@ async function deleteProduct(id) {
 
     if (!currentMyStore) return;
 
+
     if (
         !confirm(
             "এই product remove করতে চাও?"
@@ -2691,6 +3129,7 @@ async function deleteProduct(id) {
     ) {
         return;
     }
+
 
     const {
         error
@@ -2709,6 +3148,7 @@ async function deleteProduct(id) {
                 currentMyStore.id
             );
 
+
     if (error) {
 
         toast(
@@ -2718,9 +3158,11 @@ async function deleteProduct(id) {
         return;
     }
 
+
     await loadProducts();
 
     await sellerProducts();
+
 
     toast(
         "Product removed"
@@ -2737,12 +3179,14 @@ async function sellerOrders() {
     const box =
         $("sellerOrdersTab");
 
+
     if (
         !box ||
         !currentMyStore
     ) {
         return;
     }
+
 
     const {
         data,
@@ -2774,6 +3218,7 @@ async function sellerOrders() {
                 currentMyStore.id
             );
 
+
     if (error) {
 
         box.innerHTML = `
@@ -2784,6 +3229,7 @@ async function sellerOrders() {
 
         return;
     }
+
 
     if (!data?.length) {
 
@@ -2796,6 +3242,7 @@ async function sellerOrders() {
         return;
     }
 
+
     const sorted =
         [...data].sort(
             (a, b) =>
@@ -2806,6 +3253,7 @@ async function sellerOrders() {
                     a.orders?.created_at || 0
                 )
         );
+
 
     box.innerHTML =
         sorted
@@ -2819,6 +3267,7 @@ async function sellerOrders() {
                                 item.order_id
                             )}
                         </b>
+
 
                         <p>
 
@@ -2835,17 +3284,23 @@ async function sellerOrders() {
 
                         </p>
 
+
                         <p>
+
                             Price:
+
                             ${money(
                                 Number(item.price || 0) *
                                 Number(item.quantity || 0)
                             )}
+
                         </p>
+
 
                         <small>
 
                             Status:
+
                             ${esc(
                                 item.orders?.status ||
                                 "pending"
@@ -2870,6 +3325,7 @@ function sellerSettings() {
     const box =
         $("sellerSettingsTab");
 
+
     if (
         !box ||
         !currentMyStore
@@ -2877,8 +3333,10 @@ function sellerSettings() {
         return;
     }
 
+
     const store =
         currentMyStore;
+
 
     box.innerHTML = `
 
@@ -2895,6 +3353,7 @@ function sellerSettings() {
 
             </label>
 
+
             <label>
 
                 Description
@@ -2906,6 +3365,7 @@ function sellerSettings() {
                 )}</textarea>
 
             </label>
+
 
             <label>
 
@@ -2920,6 +3380,7 @@ function sellerSettings() {
 
             </label>
 
+
             <label>
 
                 Address
@@ -2933,6 +3394,7 @@ function sellerSettings() {
 
             </label>
 
+
             <label>
 
                 Store Logo
@@ -2945,6 +3407,7 @@ function sellerSettings() {
 
             </label>
 
+
             ${
                 store.logo_url
                     ? `
@@ -2954,6 +3417,7 @@ function sellerSettings() {
                     `
                     : ""
             }
+
 
             <label>
 
@@ -2967,6 +3431,7 @@ function sellerSettings() {
 
             </label>
 
+
             ${
                 store.cover_url
                     ? `
@@ -2977,6 +3442,7 @@ function sellerSettings() {
                     : ""
             }
 
+
             <button
                 id="saveStore"
                 class="primary"
@@ -2985,10 +3451,13 @@ function sellerSettings() {
                 Save Store
             </button>
 
+
             <p id="storeSettingsMessage"></p>
 
         </div>
+
     `;
+
 
     $("saveStore").onclick =
         saveStoreSettings;
@@ -3008,13 +3477,16 @@ async function saveStoreSettings() {
         return;
     }
 
+
     const message =
         $("storeSettingsMessage");
+
 
     const name =
         $("setName")
             .value
             .trim();
+
 
     if (!name) {
 
@@ -3024,29 +3496,35 @@ async function saveStoreSettings() {
         return;
     }
 
+
     let logoUrl =
         currentMyStore.logo_url ||
         null;
 
+
     let coverUrl =
         currentMyStore.cover_url ||
         null;
+
 
     const logoFile =
         $("setLogoFile")
             ?.files?.[0] ||
         null;
 
+
     if (logoFile) {
 
         message.textContent =
             "নতুন Logo upload হচ্ছে...";
+
 
         logoUrl =
             await uploadImage(
                 logoFile,
                 "store-logos"
             );
+
 
         if (!logoUrl) {
 
@@ -3057,21 +3535,25 @@ async function saveStoreSettings() {
         }
     }
 
+
     const coverFile =
         $("setCoverFile")
             ?.files?.[0] ||
         null;
+
 
     if (coverFile) {
 
         message.textContent =
             "নতুন Cover upload হচ্ছে...";
 
+
         coverUrl =
             await uploadImage(
                 coverFile,
                 "store-covers"
             );
+
 
         if (!coverUrl) {
 
@@ -3081,6 +3563,7 @@ async function saveStoreSettings() {
             return;
         }
     }
+
 
     const updates = {
 
@@ -3111,8 +3594,10 @@ async function saveStoreSettings() {
             coverUrl
     };
 
+
     message.textContent =
         "Store save হচ্ছে...";
+
 
     const {
         data,
@@ -3132,6 +3617,7 @@ async function saveStoreSettings() {
             .select()
             .single();
 
+
     if (error) {
 
         console.error(
@@ -3139,18 +3625,25 @@ async function saveStoreSettings() {
             error
         );
 
+
         message.textContent =
             error.message;
 
         return;
     }
 
+
     currentMyStore =
         data;
+
 
     await loadStores();
 
     await renderMyStore();
+
+
+    updateAddProductNotice();
+
 
     toast(
         "Store updated"
@@ -3163,6 +3656,7 @@ async function saveStoreSettings() {
 ========================================================= */
 
 function init() {
+
 
     /* -----------------------------
        Navigation
@@ -3195,11 +3689,13 @@ function init() {
             openMenu
         );
 
+
     $("closeMenuBtn")
         ?.addEventListener(
             "click",
             closeMenu
         );
+
 
     $("menuOverlay")
         ?.addEventListener(
@@ -3219,11 +3715,13 @@ function init() {
                 openAuth("login")
         );
 
+
     $("logoutBtn")
         ?.addEventListener(
             "click",
             logout
         );
+
 
     $("createStoreBtn")
         ?.addEventListener(
@@ -3242,6 +3740,7 @@ function init() {
             closeAuth
         );
 
+
     $("authSwitchBtn")
         ?.addEventListener(
             "click",
@@ -3252,6 +3751,7 @@ function init() {
                         : "login"
                 )
         );
+
 
     $("authForm")
         ?.addEventListener(
@@ -3270,6 +3770,7 @@ function init() {
             closeStore
         );
 
+
     $("storeForm")
         ?.addEventListener(
             "submit",
@@ -3287,11 +3788,13 @@ function init() {
             addProduct
         );
 
+
     $("closeProductEditBtn")
         ?.addEventListener(
             "click",
             closeProductEditor
         );
+
 
     $("productEditForm")
         ?.addEventListener(
@@ -3318,6 +3821,7 @@ function init() {
             }
         );
 
+
     $("searchBtn")
         ?.addEventListener(
             "click",
@@ -3334,12 +3838,14 @@ function init() {
             }
         );
 
+
     $("headerSearchBtn")
         ?.addEventListener(
             "click",
             () => {
 
                 go("home");
+
 
                 setTimeout(
                     () =>
@@ -3370,12 +3876,15 @@ function init() {
                         )
                     );
 
+
                 tab.classList.add(
                     "active"
                 );
 
+
                 const tabName =
                     tab.dataset.tab;
+
 
                 $("sellerProductsTab")
                     ?.classList.toggle(
@@ -3384,12 +3893,14 @@ function init() {
                         "products"
                     );
 
+
                 $("sellerOrdersTab")
                     ?.classList.toggle(
                         "hidden",
                         tabName !==
                         "orders"
                     );
+
 
                 $("sellerSettingsTab")
                     ?.classList.toggle(
@@ -3414,12 +3925,14 @@ function init() {
             closeAuth
         );
 
+
     $("storeModal")
         ?.querySelector(".shade")
         ?.addEventListener(
             "click",
             closeStore
         );
+
 
     $("productEditModal")
         ?.querySelector(".shade")
@@ -3470,6 +3983,7 @@ if (sb?.auth) {
         async () => {
 
             await updateAuth();
+
 
             if (
                 location.hash ===
