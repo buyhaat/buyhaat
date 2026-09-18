@@ -619,13 +619,6 @@ if ($("searchBtn")) {
    TEMP BUTTONS
    ========================================================= */
 
-$("loginBtn")?.addEventListener(
-  "click",
-  () => showToast(
-    "Login system পরের ধাপে যুক্ত হবে"
-  )
-);
-
 
 $("createStoreBtn")?.addEventListener(
   "click",
@@ -688,3 +681,281 @@ window.addEventListener(
   "hashchange",
   route
 );
+
+/* =========================================================
+   AUTHENTICATION
+   ========================================================= */
+
+let isRegisterMode = false;
+
+
+/* ---------- AUTH ELEMENTS ---------- */
+
+const authModal = $("authModal");
+const authForm = $("authForm");
+const authEmail = $("authEmail");
+const authPassword = $("authPassword");
+const authTitle = $("authTitle");
+const authSubtitle = $("authSubtitle");
+const authSubmitBtn = $("authSubmitBtn");
+const authSwitchBtn = $("authSwitchBtn");
+const authMessage = $("authMessage");
+const closeAuthBtn = $("closeAuthBtn");
+const logoutBtn = $("logoutBtn");
+const accountStatus = $("accountStatus");
+
+
+/* ---------- OPEN LOGIN ---------- */
+
+$("loginBtn")?.addEventListener("click", () => {
+
+  isRegisterMode = false;
+
+  updateAuthUI();
+
+  authModal?.classList.add("show");
+
+});
+
+
+/* ---------- CLOSE ---------- */
+
+closeAuthBtn?.addEventListener("click", () => {
+
+  authModal?.classList.remove("show");
+
+});
+
+
+/* ---------- SWITCH LOGIN / REGISTER ---------- */
+
+authSwitchBtn?.addEventListener("click", () => {
+
+  isRegisterMode = !isRegisterMode;
+
+  updateAuthUI();
+
+});
+
+
+/* ---------- AUTH UI ---------- */
+
+function updateAuthUI() {
+
+  if (!authTitle) return;
+
+
+  authTitle.textContent =
+    isRegisterMode
+      ? "Create Account"
+      : "Login";
+
+
+  authSubtitle.textContent =
+    isRegisterMode
+      ? "নতুন BuyHaat account তৈরি করুন।"
+      : "আপনার BuyHaat account-এ Login করুন।";
+
+
+  authSubmitBtn.textContent =
+    isRegisterMode
+      ? "Create Account"
+      : "Login";
+
+
+  authSwitchBtn.textContent =
+    isRegisterMode
+      ? "আগে থেকেই account আছে? Login করুন"
+      : "নতুন account তৈরি করুন";
+
+
+  authMessage.textContent = "";
+
+}
+
+
+/* ---------- LOGIN / REGISTER ---------- */
+
+authForm?.addEventListener("submit", async (e) => {
+
+  e.preventDefault();
+
+
+  const email =
+    authEmail.value.trim();
+
+  const password =
+    authPassword.value;
+
+
+  if (!email || !password) {
+
+    authMessage.textContent =
+      "Email এবং password দিন।";
+
+    return;
+  }
+
+
+  authSubmitBtn.disabled = true;
+
+  authSubmitBtn.textContent =
+    isRegisterMode
+      ? "Creating..."
+      : "Logging in...";
+
+
+  try {
+
+    if (isRegisterMode) {
+
+      const { data, error } =
+        await sb.auth.signUp({
+          email,
+          password
+        });
+
+
+      if (error) throw error;
+
+
+      if (data.user) {
+
+        authMessage.textContent =
+          "Account তৈরি হয়েছে। Email verification প্রয়োজন হতে পারে।";
+
+      }
+
+    } else {
+
+      const { data, error } =
+        await sb.auth.signInWithPassword({
+          email,
+          password
+        });
+
+
+      if (error) throw error;
+
+
+      authModal.classList.remove("show");
+
+      showToast("Login সফল হয়েছে");
+
+      await updateAuthState();
+
+    }
+
+  } catch (error) {
+
+    console.error("Auth error:", error);
+
+    authMessage.textContent =
+      error.message || "Authentication failed.";
+
+  }
+
+
+  authSubmitBtn.disabled = false;
+
+  updateAuthUI();
+
+});
+
+
+/* ---------- LOGOUT ---------- */
+
+logoutBtn?.addEventListener("click", async () => {
+
+  const { error } =
+    await sb.auth.signOut();
+
+
+  if (error) {
+
+    console.error(error);
+
+    showToast("Logout করা যায়নি");
+
+    return;
+  }
+
+
+  showToast("Logout সফল হয়েছে");
+
+  await updateAuthState();
+
+});
+
+
+/* ---------- AUTH STATE ---------- */
+
+async function updateAuthState() {
+
+  const {
+    data: { user }
+  } = await sb.auth.getUser();
+
+
+  if (user) {
+
+    if ($("loginBtn")) {
+      $("loginBtn").style.display = "none";
+    }
+
+
+    if (logoutBtn) {
+      logoutBtn.style.display = "inline-flex";
+    }
+
+
+    if (accountStatus) {
+
+      accountStatus.textContent =
+        `Logged in: ${user.email}`;
+
+    }
+
+  } else {
+
+    if ($("loginBtn")) {
+      $("loginBtn").style.display = "inline-flex";
+    }
+
+
+    if (logoutBtn) {
+      logoutBtn.style.display = "none";
+    }
+
+
+    if (accountStatus) {
+
+      accountStatus.textContent =
+        "Buyer account, seller account এবং Store management এখানে থাকবে।";
+
+    }
+
+  }
+
+}
+
+
+/* ---------- LISTEN FOR SESSION CHANGES ---------- */
+
+sb.auth.onAuthStateChange(
+  async (event, session) => {
+
+    console.log(
+      "Auth event:",
+      event
+    );
+
+    await updateAuthState();
+
+  }
+);
+
+
+/* ---------- INITIAL AUTH CHECK ---------- */
+
+updateAuthState();
