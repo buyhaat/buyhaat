@@ -117,3 +117,174 @@ main{max-width:1180px;margin:auto;padding:20px 16px 30px}
   padding: 10px;
   font-size: 14px;
 }
+
+/* =========================================================
+   CREATE STORE MODAL
+   ========================================================= */
+
+.store-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition: 0.2s ease;
+}
+
+
+.store-modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+
+.store-modal-card {
+  position: relative;
+
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  background: #ffffff;
+  color: #222;
+
+  border-radius: 18px;
+
+  padding: 25px;
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.25);
+
+  transform: translateY(20px);
+
+  transition: 0.2s ease;
+}
+
+
+.store-modal.show .store-modal-card {
+  transform: translateY(0);
+}
+
+
+.store-modal-card h2 {
+  margin: 0 35px 6px 0;
+}
+
+
+.store-modal-subtitle {
+  margin: 0 0 22px;
+  color: #777;
+}
+
+
+.store-modal-close {
+  position: absolute;
+
+  top: 12px;
+  right: 14px;
+
+  width: 36px;
+  height: 36px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #f1f1f1;
+
+  font-size: 25px;
+
+  cursor: pointer;
+}
+
+
+#createStoreForm label {
+  display: block;
+
+  margin-bottom: 15px;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+#createStoreForm input,
+#createStoreForm textarea {
+  display: block;
+
+  width: 100%;
+
+  margin-top: 7px;
+
+  padding: 12px 13px;
+
+  border: 1px solid #ddd;
+  border-radius: 10px;
+
+  background: #fff;
+
+  font: inherit;
+
+  outline: none;
+
+  box-sizing: border-box;
+}
+
+
+#createStoreForm input:focus,
+#createStoreForm textarea:focus {
+  border-color: #111;
+}
+
+
+#createStoreForm textarea {
+  resize: vertical;
+}
+
+
+.primary-store-btn {
+  width: 100%;
+
+  margin-top: 5px;
+
+  padding: 13px;
+
+  border: 0;
+  border-radius: 11px;
+
+  background: #111;
+  color: #fff;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+
+.primary-store-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+.store-form-message {
+  min-height: 20px;
+
+  margin: 12px 0 0;
+
+  text-align: center;
+
+  font-size: 14px;
+}
