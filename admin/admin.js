@@ -104,22 +104,24 @@ const adminSidebar = $("adminSidebar");
 
 function showLogin() {
 
-    adminLogin.style.display = "flex";
+    adminLogin.hidden = false;
 
-    adminApp.style.display = "none";
+    adminApp.hidden = true;
 
     document.body.classList.remove("logged-in");
+}
 
 }
 
 
 function showAdminApp() {
 
-    adminLogin.style.display = "none";
+    adminLogin.hidden = true;
 
-    adminApp.style.display = "block";
+    adminApp.hidden = false;
 
     document.body.classList.add("logged-in");
+}
 
 }
 
