@@ -620,13 +620,272 @@ if ($("searchBtn")) {
    ========================================================= */
 
 
-$("createStoreBtn")?.addEventListener(
-  "click",
-  () => showToast(
-    "Store creation পরের ধাপে যুক্ত হবে"
-  )
-);
+/* =========================================================
+   CREATE STORE
+   ========================================================= */
 
+$("createStoreBtn")?.addEventListener("click", async () => {
+
+  const {
+    data: { user }
+  } = await sb.auth.getUser();
+
+  if (!user) {
+    showToast("আগে Login করুন");
+    return;
+  }
+
+  const existing = $("createStoreModal");
+
+  if (existing) {
+    existing.classList.add("show");
+    return;
+  }
+
+  const modal = document.createElement("div");
+
+  modal.id = "createStoreModal";
+  modal.className = "store-modal";
+
+  modal.innerHTML = `
+    <div class="store-modal-card">
+
+      <button
+        type="button"
+        class="store-modal-close"
+        id="closeCreateStore">
+        ×
+      </button>
+
+      <h2>Create Your Store</h2>
+
+      <p class="store-modal-subtitle">
+        আপনার BuyHaat store তৈরি করুন
+      </p>
+
+      <form id="createStoreForm">
+
+        <label>
+          Store Name
+          <input
+            type="text"
+            id="storeName"
+            placeholder="যেমন: Limon Fashion"
+            required
+            maxlength="100"
+          >
+        </label>
+
+        <label>
+          Description
+          <textarea
+            id="storeDescription"
+            placeholder="আপনার store সম্পর্কে সংক্ষেপে লিখুন"
+            rows="3"
+            maxlength="500"
+          ></textarea>
+        </label>
+
+        <label>
+          Phone
+          <input
+            type="tel"
+            id="storePhone"
+            placeholder="01XXXXXXXXX"
+            maxlength="20"
+          >
+        </label>
+
+        <label>
+          Address
+          <textarea
+            id="storeAddress"
+            placeholder="আপনার দোকান/ব্যবসার ঠিকানা"
+            rows="2"
+            maxlength="300"
+          ></textarea>
+        </label>
+
+        <label>
+          Logo URL
+          <input
+            type="url"
+            id="storeLogo"
+            placeholder="https://..."
+          >
+        </label>
+
+        <label>
+          Cover Image URL
+          <input
+            type="url"
+            id="storeCover"
+            placeholder="https://..."
+          >
+        </label>
+
+        <button
+          type="submit"
+          id="saveStoreBtn"
+          class="primary-store-btn">
+          Create Store
+        </button>
+
+        <p
+          id="storeFormMessage"
+          class="store-form-message">
+        </p>
+
+      </form>
+
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.classList.add("show");
+
+  $("closeCreateStore").addEventListener("click", () => {
+    modal.remove();
+  });
+
+  modal.addEventListener("click", (e) => {
+
+    if (e.target === modal) {
+      modal.remove();
+    }
+
+  });
+
+
+  $("createStoreForm").addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const saveBtn = $("saveStoreBtn");
+    const message = $("storeFormMessage");
+
+    const name = $("storeName").value.trim();
+    const description = $("storeDescription").value.trim();
+    const phone = $("storePhone").value.trim();
+    const address = $("storeAddress").value.trim();
+    const logo_url = $("storeLogo").value.trim();
+    const cover_url = $("storeCover").value.trim();
+
+
+    if (!name) {
+      message.textContent = "Store name দিন।";
+      return;
+    }
+
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Creating...";
+
+    message.textContent = "";
+
+
+    try {
+
+      /*
+       * Store slug তৈরি
+       */
+
+      const slug = name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        + "-" +
+        Math.random()
+          .toString(36)
+          .substring(2, 7);
+
+
+      const { data, error } = await sb
+        .from("stores")
+        .insert({
+
+          owner_id: user.id,
+
+          name: name,
+
+          slug: slug,
+
+          description:
+            description || null,
+
+          logo_url:
+            logo_url || null,
+
+          cover_url:
+            cover_url || null,
+
+          phone:
+            phone || null,
+
+          address:
+            address || null,
+
+          is_active: true,
+
+          is_approved: false
+
+        })
+        .select()
+        .single();
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      console.log(
+        "Store created:",
+        data
+      );
+
+
+      message.textContent =
+        "Store সফলভাবে তৈরি হয়েছে।";
+
+      showToast(
+        "Store তৈরি হয়েছে"
+      );
+
+
+      setTimeout(() => {
+
+        modal.remove();
+
+        location.hash = "my-store";
+
+      }, 700);
+
+
+    } catch (error) {
+
+      console.error(
+        "Create store error:",
+        error
+      );
+
+      message.textContent =
+        error.message ||
+        "Store তৈরি করা যায়নি।";
+
+    }
+
+
+    saveBtn.disabled = false;
+
+    saveBtn.textContent =
+      "Create Store";
+
+  });
+
+});
 
 $("menuBtn")?.addEventListener(
   "click",
