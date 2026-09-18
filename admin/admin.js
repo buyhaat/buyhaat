@@ -1,11 +1,6 @@
 /* =========================================================
    BUYHAAT ADMIN PANEL
-
-   Vercel path:
-   /admin
-
-   Supabase:
-   ../supabase-config.js
+   Login → Dashboard
 ========================================================= */
 
 
@@ -23,39 +18,33 @@ const sb = window.supabase.createClient(
    HELPERS
 ========================================================= */
 
-const $ = (id) =>
-    document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 
 
-function esc(value) {
+const esc = (value) => {
 
-    if (
-        value === null ||
-        value === undefined
-    ) {
+    if (value === null || value === undefined) {
         return "";
     }
 
     return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+};
 
 
-function money(value) {
+const money = (value) => {
 
-    const number =
-        Number(value || 0);
+    const number = Number(value || 0);
 
-    return "৳" +
-        number.toLocaleString("en-BD");
-}
+    return `৳${number.toLocaleString("en-BD")}`;
+};
 
 
-function dateText(value) {
+const dateText = (value) => {
 
     if (!value) {
         return "—";
@@ -63,161 +52,220 @@ function dateText(value) {
 
     try {
 
-        return new Date(value)
-            .toLocaleString(
-                "en-BD",
-                {
-                    dateStyle: "medium",
-                    timeStyle: "short"
-                }
-            );
+        return new Date(value).toLocaleString(
+            "en-BD",
+            {
+                dateStyle: "medium",
+                timeStyle: "short"
+            }
+        );
 
     } catch {
 
-        return String(value);
-
+        return value;
     }
+};
 
-}
 
-
-function shortId(value) {
+const shortId = (value) => {
 
     if (!value) {
         return "—";
     }
 
-    return String(value)
-        .slice(0, 12);
+    return String(value).slice(0, 8);
+};
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const adminLogin = $("adminLogin");
+const adminApp = $("adminApp");
+
+const adminLoginForm = $("adminLoginForm");
+const adminEmail = $("adminEmail");
+const adminPassword = $("adminPassword");
+const adminLoginBtn = $("adminLoginBtn");
+const loginMessage = $("loginMessage");
+
+const logoutBtn = $("logoutBtn");
+
+const sidebarToggle = $("sidebarToggle");
+const adminSidebar = $("adminSidebar");
+
+
+/* =========================================================
+   INITIAL STATE
+   Login page visible
+   Admin app hidden
+========================================================= */
+
+function showLogin() {
+
+    adminLogin.style.display = "flex";
+
+    adminApp.style.display = "none";
+
+    document.body.classList.remove("logged-in");
+
 }
 
 
-function showToast(message) {
+function showAdminApp() {
 
-    const toast =
-        $("toast");
+    adminLogin.style.display = "none";
+
+    adminApp.style.display = "block";
+
+    document.body.classList.add("logged-in");
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function showToast(message, type = "success") {
+
+    const toast = $("toast");
 
     if (!toast) {
         return;
     }
 
-    toast.textContent =
-        message;
+    toast.textContent = message;
 
-    toast.classList.add(
-        "show"
-    );
+    toast.className = `toast ${type}`;
 
-    clearTimeout(
-        window.__toastTimer
-    );
+    toast.classList.add("show");
 
-    window.__toastTimer =
-        setTimeout(() => {
+    setTimeout(() => {
 
-            toast.classList.remove(
-                "show"
-            );
+        toast.classList.remove("show");
 
-        }, 2500);
-
+    }, 3000);
 }
 
 
 /* =========================================================
-   STATE
+   LOGIN
 ========================================================= */
 
-let currentUser = null;
+adminLoginForm?.addEventListener(
+    "submit",
+    async (event) => {
 
-let currentPage =
-    "dashboard";
+        event.preventDefault();
+
+        const email = adminEmail.value.trim();
+
+        const password = adminPassword.value;
+
+        if (!email || !password) {
+
+            loginMessage.textContent =
+                "Email এবং Password দিন।";
+
+            return;
+        }
+
+
+        adminLoginBtn.disabled = true;
+
+        adminLoginBtn.textContent = "Logging in...";
+
+        loginMessage.textContent = "";
+
+
+        const { data, error } =
+            await sb.auth.signInWithPassword({
+                email,
+                password
+            });
+
+
+        if (error) {
+
+            loginMessage.textContent =
+                error.message ||
+                "Login failed.";
+
+            adminLoginBtn.disabled = false;
+
+            adminLoginBtn.textContent = "Login";
+
+            return;
+        }
+
+
+        if (!data?.session) {
+
+            loginMessage.textContent =
+                "Login session তৈরি হয়নি।";
+
+            adminLoginBtn.disabled = false;
+
+            adminLoginBtn.textContent = "Login";
+
+            return;
+        }
+
+
+        loginMessage.textContent = "";
+
+        adminLoginBtn.disabled = false;
+
+        adminLoginBtn.textContent = "Login";
+
+
+        showAdminApp();
+
+        await initializeAdmin();
+
+    }
+);
 
 
 /* =========================================================
-   SHOW LOGIN
+   LOGOUT
 ========================================================= */
 
-function showLogin() {
+logoutBtn?.addEventListener(
+    "click",
+    async () => {
 
-    $("adminApp")
-        .classList.add("hidden");
+        await sb.auth.signOut();
 
-    $("adminLogin")
-        .classList.remove("hidden");
+        showLogin();
 
-}
+    }
+);
 
 
 /* =========================================================
-   START ADMIN
-========================================================= */
-
-async function startAdmin() {
-
-    $("adminLogin")
-        .classList.add("hidden");
-
-    $("adminApp")
-        .classList.remove("hidden");
-
-
-    $("adminEmailDisplay")
-        .textContent =
-        currentUser?.email || "—";
-
-
-    $("supabaseStatus")
-        .textContent =
-        "Connected";
-
-
-    await loadDashboard();
-
-}
-
-
-/* =========================================================
-   SESSION
+   SESSION CHECK
 ========================================================= */
 
 async function checkSession() {
 
-    try {
+    /*
+       খুব গুরুত্বপূর্ণ:
+       শুরুতেই Admin App hidden থাকবে।
+    */
 
-        const {
-            data,
-            error
-        } =
-            await sb.auth.getSession();
-
-
-        if (error) {
-            throw error;
-        }
+    showLogin();
 
 
-        const session =
-            data?.session;
+    const {
+        data,
+        error
+    } = await sb.auth.getSession();
 
 
-        if (
-            session &&
-            session.user
-        ) {
-
-            currentUser =
-                session.user;
-
-            await startAdmin();
-
-        } else {
-
-            showLogin();
-
-        }
-
-    } catch (error) {
+    if (error) {
 
         console.error(
             "Session error:",
@@ -226,147 +274,36 @@ async function checkSession() {
 
         showLogin();
 
+        return;
     }
 
+
+    const session = data?.session;
+
+
+    if (!session) {
+
+        /*
+           User login করা নেই
+           তাই Login Page-এই থাকবে
+        */
+
+        showLogin();
+
+        return;
+    }
+
+
+    /*
+       User আগে থেকেই login করা আছে।
+       তাই Dashboard দেখানো যাবে।
+    */
+
+    showAdminApp();
+
+    await initializeAdmin();
+
 }
-
-
-/* =========================================================
-   LOGIN
-========================================================= */
-
-$("adminLoginForm")
-    .addEventListener(
-        "submit",
-        async (event) => {
-
-            event.preventDefault();
-
-
-            const email =
-                $("adminEmail")
-                    .value
-                    .trim();
-
-
-            const password =
-                $("adminPassword")
-                    .value;
-
-
-            const button =
-                $("adminLoginBtn");
-
-
-            const message =
-                $("loginMessage");
-
-
-            button.disabled =
-                true;
-
-            button.textContent =
-                "Logging in...";
-
-
-            message.textContent =
-                "";
-
-
-            try {
-
-                const {
-                    data,
-                    error
-                } =
-                    await sb.auth
-                        .signInWithPassword({
-                            email,
-                            password
-                        });
-
-
-                if (error) {
-                    throw error;
-                }
-
-
-                currentUser =
-                    data.user;
-
-
-                await startAdmin();
-
-
-            } catch (error) {
-
-                console.error(
-                    "Login error:",
-                    error
-                );
-
-
-                message.textContent =
-                    error.message ||
-                    "Login failed.";
-
-
-            } finally {
-
-                button.disabled =
-                    false;
-
-                button.textContent =
-                    "Login";
-
-            }
-
-        }
-    );
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-$("logoutBtn")
-    .addEventListener(
-        "click",
-        async () => {
-
-            try {
-
-                await sb.auth
-                    .signOut();
-
-            } catch (error) {
-
-                console.error(error);
-
-            }
-
-
-            currentUser =
-                null;
-
-
-            $("adminApp")
-                .classList.add(
-                    "hidden"
-                );
-
-
-            $("adminLogin")
-                .classList.remove(
-                    "hidden"
-                );
-
-
-            $("adminPassword")
-                .value = "";
-
-        }
-    );
 
 
 /* =========================================================
@@ -374,16 +311,22 @@ $("logoutBtn")
 ========================================================= */
 
 sb.auth.onAuthStateChange(
-    (event, session) => {
+    async (event, session) => {
 
-        if (
-            event === "SIGNED_OUT"
-        ) {
-
-            currentUser =
-                null;
+        if (event === "SIGNED_OUT") {
 
             showLogin();
+
+            return;
+        }
+
+
+        if (
+            event === "SIGNED_IN" &&
+            session
+        ) {
+
+            showAdminApp();
 
         }
 
@@ -392,32 +335,157 @@ sb.auth.onAuthStateChange(
 
 
 /* =========================================================
+   ADMIN INITIALIZE
+========================================================= */
+
+let adminInitialized = false;
+
+
+async function initializeAdmin() {
+
+    if (adminInitialized) {
+        return;
+    }
+
+    adminInitialized = true;
+
+
+    const {
+        data
+    } = await sb.auth.getUser();
+
+
+    if (data?.user) {
+
+        const emailDisplay =
+            $("adminEmailDisplay");
+
+        if (emailDisplay) {
+
+            emailDisplay.textContent =
+                data.user.email || "—";
+
+        }
+
+    }
+
+
+    setupNavigation();
+
+    setupSidebar();
+
+    setupRefreshButtons();
+
+    await loadDashboard();
+
+    await checkSupabase();
+
+}
+
+
+/* =========================================================
    NAVIGATION
 ========================================================= */
 
-document
-    .querySelectorAll(
-        ".nav-item"
-    )
-    .forEach((button) => {
+function setupNavigation() {
 
-        button.addEventListener(
+    const navItems =
+        document.querySelectorAll(
+            ".nav-item"
+        );
+
+
+    const pages =
+        document.querySelectorAll(
+            ".admin-page-section"
+        );
+
+
+    navItems.forEach((item) => {
+
+        item.addEventListener(
             "click",
-            () => {
+            async () => {
 
-                openPage(
-                    button.dataset.page
+                const page =
+                    item.dataset.page;
+
+
+                navItems.forEach(
+                    (nav) => {
+
+                        nav.classList.remove(
+                            "active"
+                        );
+
+                    }
                 );
 
 
-                if (
-                    window.innerWidth <=
-                    850
-                ) {
+                item.classList.add(
+                    "active"
+                );
 
-                    $("adminSidebar")
-                        .classList
-                        .remove("open");
+
+                pages.forEach(
+                    (section) => {
+
+                        section.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                const target =
+                    document.getElementById(
+                        `page-${page}`
+                    );
+
+
+                if (target) {
+
+                    target.classList.add(
+                        "active"
+                    );
+
+                }
+
+
+                if (page === "dashboard") {
+
+                    await loadDashboard();
+
+                }
+
+
+                if (page === "stores") {
+
+                    await loadStores();
+
+                }
+
+
+                if (page === "products") {
+
+                    await loadProducts();
+
+                }
+
+
+                if (page === "orders") {
+
+                    await loadOrders();
+
+                }
+
+
+                if (window.innerWidth <= 900) {
+
+                    adminSidebar?.classList.remove(
+                        "open"
+                    );
 
                 }
 
@@ -426,134 +494,53 @@ document
 
     });
 
-
-document
-    .querySelectorAll(
-        "[data-page]"
-    )
-    .forEach((button) => {
-
-        if (
-            button.classList
-                .contains("nav-item")
-        ) {
-            return;
-        }
+}
 
 
-        button.addEventListener(
-            "click",
-            () => {
+/* =========================================================
+   SIDEBAR
+========================================================= */
 
-                openPage(
-                    button.dataset.page
-                );
+function setupSidebar() {
 
-            }
-        );
+    sidebarToggle?.addEventListener(
+        "click",
+        () => {
 
-    });
-
-
-function openPage(page) {
-
-    currentPage =
-        page;
-
-
-    document
-        .querySelectorAll(
-            ".admin-page"
-        )
-        .forEach((section) => {
-
-            section.classList
-                .add("hidden");
-
-        });
-
-
-    const target =
-        $("page-" + page);
-
-
-    if (target) {
-
-        target.classList
-            .remove("hidden");
-
-    }
-
-
-    document
-        .querySelectorAll(
-            ".nav-item"
-        )
-        .forEach((button) => {
-
-            button.classList.toggle(
-                "active",
-                button.dataset.page ===
-                page
+            adminSidebar?.classList.toggle(
+                "open"
             );
 
-        });
-
-
-    if (
-        page === "dashboard"
-    ) {
-
-        loadDashboard();
-
-    }
-
-
-    if (
-        page === "stores"
-    ) {
-
-        loadStores();
-
-    }
-
-
-    if (
-        page === "products"
-    ) {
-
-        loadProducts();
-
-    }
-
-
-    if (
-        page === "orders"
-    ) {
-
-        loadOrders();
-
-    }
+        }
+    );
 
 }
 
 
 /* =========================================================
-   MOBILE SIDEBAR
+   REFRESH BUTTONS
 ========================================================= */
 
-$("sidebarToggle")
-    .addEventListener(
+function setupRefreshButtons() {
+
+    $("refreshStoresBtn")?.addEventListener(
         "click",
-        () => {
-
-            $("adminSidebar")
-                .classList.toggle(
-                    "open"
-                );
-
-        }
+        loadStores
     );
+
+
+    $("refreshProductsBtn")?.addEventListener(
+        "click",
+        loadProducts
+    );
+
+
+    $("refreshOrdersBtn")?.addEventListener(
+        "click",
+        loadOrders
+    );
+
+}
 
 
 /* =========================================================
@@ -562,127 +549,75 @@ $("sidebarToggle")
 
 async function loadDashboard() {
 
+    await Promise.all([
+        loadStats(),
+        loadRecentOrders(),
+        loadRecentStores()
+    ]);
+
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+async function loadStats() {
+
     try {
 
         const [
-            storesResult,
-            productsResult,
-            ordersResult
-        ] =
-            await Promise.all([
+            stores,
+            products,
+            orders
+        ] = await Promise.all([
 
-                sb
-                    .from("stores")
-                    .select(
-                        "*",
-                        {
-                            count:
-                                "exact",
-                            head:
-                                true
-                        }
-                    ),
+            sb
+                .from("stores")
+                .select("*", {
+                    count: "exact",
+                    head: true
+                }),
 
-                sb
-                    .from("products")
-                    .select(
-                        "*",
-                        {
-                            count:
-                                "exact",
-                            head:
-                                true
-                        }
-                    ),
+            sb
+                .from("products")
+                .select("*", {
+                    count: "exact",
+                    head: true
+                }),
 
-                sb
-                    .from("orders")
-                    .select(
-                        "*",
-                        {
-                            count:
-                                "exact",
-                            head:
-                                true
-                        }
-                    )
+            sb
+                .from("orders")
+                .select("*", {
+                    count: "exact",
+                    head: true
+                })
 
-            ]);
+        ]);
 
 
-        if (
-            storesResult.error
-        ) {
-            console.error(
-                storesResult.error
-            );
-        }
+        $("totalStores").textContent =
+            stores.count ?? 0;
 
+        $("totalProducts").textContent =
+            products.count ?? 0;
 
-        if (
-            productsResult.error
-        ) {
-            console.error(
-                productsResult.error
-            );
-        }
-
-
-        if (
-            ordersResult.error
-        ) {
-            console.error(
-                ordersResult.error
-            );
-        }
-
-
-        $("totalStores")
-            .textContent =
-            storesResult.count || 0;
-
-
-        $("totalProducts")
-            .textContent =
-            productsResult.count || 0;
-
-
-        $("totalOrders")
-            .textContent =
-            ordersResult.count || 0;
-
+        $("totalOrders").textContent =
+            orders.count ?? 0;
 
         /*
-         * Supabase Auth users
-         * client-side থেকে সরাসরি
-         * count করা নিরাপদ নয়।
-         *
-         * তাই Users অংশটি পরবর্তী
-         * secure backend/RPC দিয়ে
-         * যুক্ত করা হবে।
-         */
+           Supabase Auth users client-side
+           থেকে নিরাপদভাবে count করা যায় না।
+        */
 
-        $("totalUsers")
-            .textContent =
-            "—";
-
-
-        await loadRecentStores();
-
-        await loadRecentOrders();
+        $("totalUsers").textContent = "—";
 
 
     } catch (error) {
 
         console.error(
-            "Dashboard error:",
+            "Stats error:",
             error
-        );
-
-
-        showToast(
-            error.message ||
-            "Dashboard load failed"
         );
 
     }
@@ -696,112 +631,94 @@ async function loadDashboard() {
 
 async function loadRecentStores() {
 
-    const box =
+    const container =
         $("recentStores");
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML =
+        `<div class="loading">Loading...</div>`;
 
 
     const {
         data,
         error
-    } =
-        await sb
-            .from("stores")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending:
-                        false
-                }
-            )
-            .limit(5);
+    } = await sb
+        .from("stores")
+        .select("*")
+        .order(
+            "created_at",
+            {
+                ascending: false
+            }
+        )
+        .limit(5);
 
 
     if (error) {
 
-        console.error(error);
-
-
-        box.innerHTML = `
-            <div class="empty-state">
-                Store load করা যায়নি।
-            </div>
-        `;
+        container.innerHTML =
+            `<div class="empty-state">
+                ${esc(error.message)}
+            </div>`;
 
         return;
-
     }
 
 
-    if (
-        !data ||
-        data.length === 0
-    ) {
+    if (!data?.length) {
 
-        box.innerHTML = `
-            <div class="empty-state">
-                কোনো Store পাওয়া যায়নি।
-            </div>
-        `;
+        container.innerHTML =
+            `<div class="empty-state">
+                কোনো Store নেই।
+            </div>`;
 
         return;
-
     }
 
 
-    box.innerHTML = `
+    container.innerHTML = `
 
-        <table class="admin-table">
+        <div class="simple-list">
 
-            <thead>
+            ${data.map(store => `
 
-                <tr>
-                    <th>Store</th>
-                    <th>Slug</th>
-                    <th>Created</th>
-                </tr>
+                <div class="simple-list-item">
 
-            </thead>
+                    <div>
 
-            <tbody>
-
-                ${data
-                    .map(
-                        (store) => `
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                ${esc(
-                                    store.name ||
-                                    "Unnamed"
-                                )}
-                            </strong>
-                        </td>
-
-                        <td>
+                        <strong>
                             ${esc(
-                                store.slug ||
-                                "—"
+                                store.name ||
+                                store.store_name ||
+                                "Unnamed Store"
                             )}
-                        </td>
+                        </strong>
 
-                        <td>
+                        <small>
                             ${dateText(
                                 store.created_at
                             )}
-                        </td>
+                        </small>
 
-                    </tr>
+                    </div>
 
-                `
-                    )
-                    .join("")}
+                    <span>
+                        ${esc(
+                            store.slug || ""
+                        )}
+                    </span>
 
-            </tbody>
+                </div>
 
-        </table>
+            `).join("")}
+
+        </div>
+
     `;
 
 }
@@ -813,110 +730,94 @@ async function loadRecentStores() {
 
 async function loadRecentOrders() {
 
-    const box =
+    const container =
         $("recentOrders");
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML =
+        `<div class="loading">Loading...</div>`;
 
 
     const {
         data,
         error
-    } =
-        await sb
-            .from("orders")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending:
-                        false
-                }
-            )
-            .limit(5);
+    } = await sb
+        .from("orders")
+        .select("*")
+        .order(
+            "created_at",
+            {
+                ascending: false
+            }
+        )
+        .limit(5);
 
 
     if (error) {
 
-        console.error(error);
-
-
-        box.innerHTML = `
-            <div class="empty-state">
-                Order load করা যায়নি।
-            </div>
-        `;
+        container.innerHTML =
+            `<div class="empty-state">
+                ${esc(error.message)}
+            </div>`;
 
         return;
-
     }
 
 
-    if (
-        !data ||
-        data.length === 0
-    ) {
+    if (!data?.length) {
 
-        box.innerHTML = `
-            <div class="empty-state">
-                কোনো Order পাওয়া যায়নি।
-            </div>
-        `;
+        container.innerHTML =
+            `<div class="empty-state">
+                কোনো Order নেই।
+            </div>`;
 
         return;
-
     }
 
 
-    box.innerHTML = `
+    container.innerHTML = `
 
-        <table class="admin-table">
+        <div class="simple-list">
 
-            <thead>
+            ${data.map(order => `
 
-                <tr>
-                    <th>Order ID</th>
-                    <th>Total</th>
-                    <th>Created</th>
-                </tr>
+                <div class="simple-list-item">
 
-            </thead>
+                    <div>
 
-            <tbody>
-
-                ${data
-                    .map(
-                        (order) => `
-
-                    <tr>
-
-                        <td>
-                            ${esc(
-                                shortId(
-                                    order.id
-                                )
+                        <strong>
+                            Order #${shortId(
+                                order.id
                             )}
-                        </td>
+                        </strong>
 
-                        <td>
-                            ${money(
-                                order.total_amount
-                            )}
-                        </td>
-
-                        <td>
+                        <small>
                             ${dateText(
                                 order.created_at
                             )}
-                        </td>
+                        </small>
 
-                    </tr>
+                    </div>
 
-                `
-                    )
-                    .join("")}
+                    <strong>
+                        ${money(
+                            order.total ||
+                            order.subtotal ||
+                            0
+                        )}
+                    </strong>
 
-            </tbody>
+                </div>
 
-        </table>
+            `).join("")}
+
+        </div>
+
     `;
 
 }
@@ -928,200 +829,183 @@ async function loadRecentOrders() {
 
 async function loadStores() {
 
-    const box =
+    const container =
         $("storesTable");
 
 
-    box.innerHTML =
-        `<div class="loading">
-            Loading...
-        </div>`;
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML =
+        `<div class="loading">Loading stores...</div>`;
 
 
     const {
         data,
         error
-    } =
-        await sb
-            .from("stores")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending:
-                        false
+    } = await sb
+        .from("stores")
+        .select("*")
+        .order(
+            "created_at",
+            {
+                ascending: false
+            }
+        );
+
+
+    if (error) {
+
+        container.innerHTML =
+            `<div class="empty-state">
+                ${esc(error.message)}
+            </div>`;
+
+        return;
+    }
+
+
+    if (!data?.length) {
+
+        container.innerHTML =
+            `<div class="empty-state">
+                কোনো Store পাওয়া যায়নি।
+            </div>`;
+
+        return;
+    }
+
+
+    container.innerHTML = `
+
+        <div class="table-scroll">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Store</th>
+                        <th>Slug</th>
+                        <th>Created</th>
+                        <th>Action</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    ${data.map(store => `
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    ${esc(
+                                        store.name ||
+                                        store.store_name ||
+                                        "Unnamed"
+                                    )}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${esc(
+                                    store.slug || "—"
+                                )}
+                            </td>
+
+                            <td>
+                                ${dateText(
+                                    store.created_at
+                                )}
+                            </td>
+
+                            <td>
+
+                                <button
+                                    class="danger-btn"
+                                    data-delete-store="${esc(
+                                        store.id
+                                    )}"
+                                >
+                                    Delete
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                    `).join("")}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    `;
+
+
+    container
+        .querySelectorAll(
+            "[data-delete-store]"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                async () => {
+
+                    const id =
+                        button.dataset.deleteStore;
+
+
+                    const ok =
+                        confirm(
+                            "এই Store delete করতে চান?"
+                        );
+
+
+                    if (!ok) {
+                        return;
+                    }
+
+
+                    const {
+                        error
+                    } = await sb
+                        .from("stores")
+                        .delete()
+                        .eq("id", id);
+
+
+                    if (error) {
+
+                        showToast(
+                            error.message,
+                            "error"
+                        );
+
+                        return;
+                    }
+
+
+                    showToast(
+                        "Store deleted successfully."
+                    );
+
+
+                    await loadStores();
+
+                    await loadStats();
+
                 }
             );
 
-
-    if (error) {
-
-        console.error(error);
-
-
-        box.innerHTML = `
-            <div class="empty-state">
-                ${esc(
-                    error.message
-                )}
-            </div>
-        `;
-
-        return;
-
-    }
-
-
-    if (
-        !data ||
-        data.length === 0
-    ) {
-
-        box.innerHTML = `
-            <div class="empty-state">
-                কোনো Store পাওয়া যায়নি।
-            </div>
-        `;
-
-        return;
-
-    }
-
-
-    box.innerHTML = `
-
-        <table class="admin-table">
-
-            <thead>
-
-                <tr>
-                    <th>Store</th>
-                    <th>Owner</th>
-                    <th>Slug</th>
-                    <th>Created</th>
-                    <th>Action</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${data
-                    .map(
-                        (store) => `
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                ${esc(
-                                    store.name ||
-                                    "Unnamed"
-                                )}
-                            </strong>
-                        </td>
-
-                        <td>
-                            ${esc(
-                                store.owner_id ||
-                                store.user_id ||
-                                "—"
-                            )}
-                        </td>
-
-                        <td>
-                            ${esc(
-                                store.slug ||
-                                "—"
-                            )}
-                        </td>
-
-                        <td>
-                            ${dateText(
-                                store.created_at
-                            )}
-                        </td>
-
-                        <td>
-
-                            <button
-                                class="action-btn danger"
-                                onclick="deleteStore('${esc(
-                                    store.id
-                                )}')"
-                                type="button"
-                            >
-                                Delete
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                `
-                    )
-                    .join("")}
-
-            </tbody>
-
-        </table>
-    `;
-
-}
-
-
-/* =========================================================
-   DELETE STORE
-========================================================= */
-
-async function deleteStore(id) {
-
-    const ok =
-        confirm(
-            "এই Store delete করতে চান?"
-        );
-
-
-    if (!ok) {
-        return;
-    }
-
-
-    const {
-        error
-    } =
-        await sb
-            .from("stores")
-            .delete()
-            .eq(
-                "id",
-                id
-            );
-
-
-    if (error) {
-
-        console.error(error);
-
-
-        showToast(
-            error.message ||
-            "Store delete করা যায়নি"
-        );
-
-        return;
-
-    }
-
-
-    showToast(
-        "Store deleted"
-    );
-
-
-    await loadStores();
-
-    await loadDashboard();
+        });
 
 }
 
@@ -1132,206 +1016,189 @@ async function deleteStore(id) {
 
 async function loadProducts() {
 
-    const box =
+    const container =
         $("productsTable");
 
 
-    box.innerHTML =
-        `<div class="loading">
-            Loading...
-        </div>`;
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML =
+        `<div class="loading">Loading products...</div>`;
 
 
     const {
         data,
         error
-    } =
-        await sb
-            .from("products")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending:
-                        false
+    } = await sb
+        .from("products")
+        .select("*")
+        .order(
+            "created_at",
+            {
+                ascending: false
+            }
+        );
+
+
+    if (error) {
+
+        container.innerHTML =
+            `<div class="empty-state">
+                ${esc(error.message)}
+            </div>`;
+
+        return;
+    }
+
+
+    if (!data?.length) {
+
+        container.innerHTML =
+            `<div class="empty-state">
+                কোনো Product পাওয়া যায়নি।
+            </div>`;
+
+        return;
+    }
+
+
+    container.innerHTML = `
+
+        <div class="table-scroll">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Created</th>
+                        <th>Action</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    ${data.map(product => `
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    ${esc(
+                                        product.name ||
+                                        "Unnamed Product"
+                                    )}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${money(
+                                    product.price
+                                )}
+                            </td>
+
+                            <td>
+                                ${esc(
+                                    product.stock ?? 0
+                                )}
+                            </td>
+
+                            <td>
+                                ${dateText(
+                                    product.created_at
+                                )}
+                            </td>
+
+                            <td>
+
+                                <button
+                                    class="danger-btn"
+                                    data-delete-product="${esc(
+                                        product.id
+                                    )}"
+                                >
+                                    Delete
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                    `).join("")}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    `;
+
+
+    container
+        .querySelectorAll(
+            "[data-delete-product]"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                async () => {
+
+                    const id =
+                        button.dataset.deleteProduct;
+
+
+                    const ok =
+                        confirm(
+                            "এই Product delete করতে চান?"
+                        );
+
+
+                    if (!ok) {
+                        return;
+                    }
+
+
+                    const {
+                        error
+                    } = await sb
+                        .from("products")
+                        .delete()
+                        .eq("id", id);
+
+
+                    if (error) {
+
+                        showToast(
+                            error.message,
+                            "error"
+                        );
+
+                        return;
+                    }
+
+
+                    showToast(
+                        "Product deleted successfully."
+                    );
+
+
+                    await loadProducts();
+
+                    await loadStats();
+
                 }
             );
 
-
-    if (error) {
-
-        console.error(error);
-
-
-        box.innerHTML = `
-            <div class="empty-state">
-                ${esc(
-                    error.message
-                )}
-            </div>
-        `;
-
-        return;
-
-    }
-
-
-    if (
-        !data ||
-        data.length === 0
-    ) {
-
-        box.innerHTML = `
-            <div class="empty-state">
-                কোনো Product পাওয়া যায়নি।
-            </div>
-        `;
-
-        return;
-
-    }
-
-
-    box.innerHTML = `
-
-        <table class="admin-table">
-
-            <thead>
-
-                <tr>
-                    <th>Product</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th>Store</th>
-                    <th>Created</th>
-                    <th>Action</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${data
-                    .map(
-                        (product) => `
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                ${esc(
-                                    product.name ||
-                                    "Unnamed"
-                                )}
-                            </strong>
-                        </td>
-
-                        <td>
-                            ${money(
-                                product.price
-                            )}
-                        </td>
-
-                        <td>
-                            ${esc(
-                                product.stock ??
-                                "—"
-                            )}
-                        </td>
-
-                        <td>
-                            ${esc(
-                                product.store_id ||
-                                "—"
-                            )}
-                        </td>
-
-                        <td>
-                            ${dateText(
-                                product.created_at
-                            )}
-                        </td>
-
-                        <td>
-
-                            <button
-                                class="action-btn danger"
-                                onclick="deleteProduct('${esc(
-                                    product.id
-                                )}')"
-                                type="button"
-                            >
-                                Delete
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                `
-                    )
-                    .join("")}
-
-            </tbody>
-
-        </table>
-    `;
-
-}
-
-
-/* =========================================================
-   DELETE PRODUCT
-========================================================= */
-
-async function deleteProduct(id) {
-
-    const ok =
-        confirm(
-            "এই Product delete করতে চান?"
-        );
-
-
-    if (!ok) {
-        return;
-    }
-
-
-    const {
-        error
-    } =
-        await sb
-            .from("products")
-            .delete()
-            .eq(
-                "id",
-                id
-            );
-
-
-    if (error) {
-
-        console.error(error);
-
-
-        showToast(
-            error.message ||
-            "Product delete করা যায়নি"
-        );
-
-        return;
-
-    }
-
-
-    showToast(
-        "Product deleted"
-    );
-
-
-    await loadProducts();
-
-    await loadDashboard();
+        });
 
 }
 
@@ -1342,208 +1209,231 @@ async function deleteProduct(id) {
 
 async function loadOrders() {
 
-    const box =
+    const container =
         $("ordersTable");
 
 
-    box.innerHTML =
-        `<div class="loading">
-            Loading...
-        </div>`;
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML =
+        `<div class="loading">Loading orders...</div>`;
 
 
     const {
         data,
         error
-    } =
-        await sb
-            .from("orders")
-            .select("*")
-            .order(
-                "created_at",
-                {
-                    ascending:
-                        false
+    } = await sb
+        .from("orders")
+        .select("*")
+        .order(
+            "created_at",
+            {
+                ascending: false
+            }
+        );
+
+
+    if (error) {
+
+        container.innerHTML =
+            `<div class="empty-state">
+                ${esc(error.message)}
+            </div>`;
+
+        return;
+    }
+
+
+    if (!data?.length) {
+
+        container.innerHTML =
+            `<div class="empty-state">
+                কোনো Order পাওয়া যায়নি।
+            </div>`;
+
+        return;
+    }
+
+
+    container.innerHTML = `
+
+        <div class="table-scroll">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Action</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    ${data.map(order => `
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    #${shortId(
+                                        order.id
+                                    )}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${money(
+                                    order.total ||
+                                    order.subtotal ||
+                                    0
+                                )}
+                            </td>
+
+                            <td>
+
+                                <span class="status-badge">
+                                    ${esc(
+                                        order.status ||
+                                        "pending"
+                                    )}
+                                </span>
+
+                            </td>
+
+                            <td>
+                                ${dateText(
+                                    order.created_at
+                                )}
+                            </td>
+
+                            <td>
+
+                                <button
+                                    class="action-btn small"
+                                    data-view-order="${esc(
+                                        order.id
+                                    )}"
+                                >
+                                    View
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                    `).join("")}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    `;
+
+
+    container
+        .querySelectorAll(
+            "[data-view-order]"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                async () => {
+
+                    const id =
+                        button.dataset.viewOrder;
+
+
+                    const {
+                        data,
+                        error
+                    } = await sb
+                        .from("orders")
+                        .select("*")
+                        .eq("id", id)
+                        .single();
+
+
+                    if (error) {
+
+                        showToast(
+                            error.message,
+                            "error"
+                        );
+
+                        return;
+                    }
+
+
+                    alert(
+                        JSON.stringify(
+                            data,
+                            null,
+                            2
+                        )
+                    );
+
                 }
             );
 
-
-    if (error) {
-
-        console.error(error);
-
-
-        box.innerHTML = `
-            <div class="empty-state">
-                ${esc(
-                    error.message
-                )}
-            </div>
-        `;
-
-        return;
-
-    }
-
-
-    if (
-        !data ||
-        data.length === 0
-    ) {
-
-        box.innerHTML = `
-            <div class="empty-state">
-                কোনো Order পাওয়া যায়নি।
-            </div>
-        `;
-
-        return;
-
-    }
-
-
-    box.innerHTML = `
-
-        <table class="admin-table">
-
-            <thead>
-
-                <tr>
-                    <th>Order ID</th>
-                    <th>Total</th>
-                    <th>Created</th>
-                    <th>Action</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${data
-                    .map(
-                        (order) => `
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                ${esc(
-                                    shortId(
-                                        order.id
-                                    )
-                                )}
-                            </strong>
-                        </td>
-
-                        <td>
-                            ${money(
-                                order.total_amount
-                            )}
-                        </td>
-
-                        <td>
-                            ${dateText(
-                                order.created_at
-                            )}
-                        </td>
-
-                        <td>
-
-                            <button
-                                class="action-btn"
-                                onclick="viewOrder('${esc(
-                                    order.id
-                                )}')"
-                                type="button"
-                            >
-                                View
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                `
-                    )
-                    .join("")}
-
-            </tbody>
-
-        </table>
-    `;
+        });
 
 }
 
 
 /* =========================================================
-   VIEW ORDER
+   SUPABASE STATUS
 ========================================================= */
 
-async function viewOrder(id) {
+async function checkSupabase() {
+
+    const element =
+        $("supabaseStatus");
+
+
+    if (!element) {
+        return;
+    }
+
 
     const {
-        data,
         error
-    } =
-        await sb
-            .from("orders")
-            .select("*")
-            .eq(
-                "id",
-                id
-            )
-            .single();
+    } = await sb
+        .from("stores")
+        .select("id")
+        .limit(1);
 
 
     if (error) {
 
-        console.error(error);
+        element.textContent =
+            "Connection Error";
 
-
-        showToast(
-            error.message ||
-            "Order পাওয়া যায়নি"
-        );
+        element.style.color =
+            "#dc2626";
 
         return;
-
     }
 
 
-    alert(
-        JSON.stringify(
-            data,
-            null,
-            2
-        )
-    );
+    element.textContent =
+        "Connected";
+
+    element.style.color =
+        "#16a34a";
 
 }
-
-
-/* =========================================================
-   REFRESH BUTTONS
-========================================================= */
-
-$("refreshStoresBtn")
-    .addEventListener(
-        "click",
-        loadStores
-    );
-
-
-$("refreshProductsBtn")
-    .addEventListener(
-        "click",
-        loadProducts
-    );
-
-
-$("refreshOrdersBtn")
-    .addEventListener(
-        "click",
-        loadOrders
-    );
 
 
 /* =========================================================
