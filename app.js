@@ -635,7 +635,7 @@ function renderProducts(
           )
           .join("")
 /* =========================================================
-   RENDER PRODUCTS + STORES SEARCH
+   RENDER PRODUCTS + STORE SEARCH
    ========================================================= */
 
 function renderProducts(
@@ -643,12 +643,453 @@ function renderProducts(
   query = ""
 ) {
 
-  const container =
-    $("products");
+  const container = $("products");
 
   if (!container) return;
 
 
+  /* =======================================================
+     FILTER PRODUCTS
+     ======================================================= */
+
+  let list = products.filter(
+    p =>
+      category === "All" ||
+      p.category === category
+  );
+
+
+  const q = query
+    .trim()
+    .toLowerCase();
+
+
+  if (q) {
+
+    list = list.filter(
+      p =>
+        (
+          p.name +
+          " " +
+          p.store +
+          " " +
+          p.category
+        )
+          .toLowerCase()
+          .includes(q)
+    );
+
+  }
+
+
+  /* =======================================================
+     FIND STORES
+     ======================================================= */
+
+  let storeList = [];
+
+  if (q) {
+
+    const usernameQuery =
+      q.replace(/^@/, "");
+
+    storeList = stores.filter(
+      store => {
+
+        const storeName =
+          (store.name || "")
+            .toLowerCase();
+
+        const storeUsername =
+          (store.slug || "")
+            .toLowerCase();
+
+        return (
+          storeName.includes(q) ||
+          storeUsername.includes(usernameQuery)
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     COUNT
+     ======================================================= */
+
+  if ($("productCount")) {
+
+    $("productCount").textContent =
+      list.length +
+      " products" +
+      (
+        storeList.length
+          ? " · " +
+            storeList.length +
+            " stores"
+          : ""
+      );
+
+  }
+
+
+  /* =======================================================
+     STORE RESULTS
+     ======================================================= */
+
+  const storeHTML =
+    storeList.length
+      ? `
+
+        <div class="search-store-results">
+
+          <div class="search-section-title">
+            Stores
+          </div>
+
+          ${storeList.map(
+            store => `
+
+              <div
+                class="search-store-card"
+                data-store-id="${escapeHTML(
+                  String(store.id)
+                )}"
+              >
+
+                <div class="search-store-avatar">
+
+                  ${
+                    store.logo_url
+
+                      ? `
+                        <img
+                          src="${escapeHTML(
+                            store.logo_url
+                          )}"
+                          alt="${escapeHTML(
+                            store.name || "Store"
+                          )}"
+                        >
+                      `
+
+                      : escapeHTML(
+                          (
+                            store.name ||
+                            "S"
+                          )
+                            .charAt(0)
+                            .toUpperCase()
+                        )
+                  }
+
+                </div>
+
+
+                <div class="search-store-info">
+
+                  <h3>
+                    ${escapeHTML(
+                      store.name || "Store"
+                    )}
+                  </h3>
+
+                  <p>
+                    @${escapeHTML(
+                      store.slug || ""
+                    )}
+                  </p>
+
+                  ${
+                    store.description
+                      ? `
+                        <span>
+                          ${escapeHTML(
+                            store.description
+                          )}
+                        </span>
+                      `
+                      : ""
+                  }
+
+                </div>
+
+
+                <button
+                  type="button"
+                  class="secondary-btn search-store-btn"
+                >
+                  View
+                </button>
+
+              </div>
+
+            `
+          ).join("")}
+
+        </div>
+
+      `
+      : "";
+
+
+  /* =======================================================
+     PRODUCT RESULTS
+     ======================================================= */
+
+  const productHTML =
+    list.length
+      ? `
+
+        ${
+          storeList.length
+            ? `
+              <div class="search-section-title">
+                Products
+              </div>
+            `
+            : ""
+        }
+
+        ${list.map(
+          p => `
+
+            <article
+              class="product-card"
+              data-product="${escapeHTML(
+                String(p.id)
+              )}"
+            >
+
+              <div class="product-image">
+
+                ${
+                  p.image
+                    ? `
+                      <img
+                        src="${escapeHTML(
+                          p.image
+                        )}"
+                        alt="${escapeHTML(
+                          p.name
+                        )}"
+                      >
+                    `
+                    : "🛍️"
+                }
+
+              </div>
+
+
+              <div class="product-info">
+
+                <div class="product-name">
+                  ${escapeHTML(
+                    p.name
+                  )}
+                </div>
+
+                <div class="price">
+                  ${money(p.price)}
+                </div>
+
+                <div class="store-name">
+                  ${escapeHTML(
+                    p.store
+                  )}
+                </div>
+
+              </div>
+
+            </article>
+
+          `
+        ).join("")}
+
+      `
+      : "";
+
+
+  /* =======================================================
+     EMPTY RESULT
+     ======================================================= */
+
+  if (
+    !storeList.length &&
+    !list.length
+  ) {
+
+    container.innerHTML = `
+
+      <div class="empty-card">
+
+        <h3>
+          কোনো product বা store পাওয়া যায়নি
+        </h3>
+
+        <p>
+          অন্য keyword, product name বা store username চেষ্টা করুন।
+        </p>
+
+      </div>
+
+    `;
+
+  } else {
+
+    /*
+     * গুরুত্বপূর্ণ:
+     * এখানে নতুন .product-grid বানানো হয়নি।
+     * কারণ #products নিজেই .product-grid।
+     */
+
+    container.innerHTML =
+      storeHTML +
+      productHTML;
+
+  }
+
+
+  /* =======================================================
+     PRODUCT CLICK
+     ======================================================= */
+
+  container
+    .querySelectorAll("[data-product]")
+    .forEach(card => {
+
+      card.addEventListener(
+        "click",
+        () => {
+
+          openProduct(
+            card.dataset.product
+          );
+
+        }
+      );
+
+    });
+
+
+  /* =======================================================
+     STORE CLICK
+     ======================================================= */
+
+  container
+    .querySelectorAll(".search-store-card")
+    .forEach(card => {
+
+      card.addEventListener(
+        "click",
+        () => {
+
+          const storeId =
+            card.dataset.storeId;
+
+          const store =
+            stores.find(
+              s =>
+                String(s.id) ===
+                String(storeId)
+            );
+
+          if (!store) return;
+
+
+          const searchInput =
+            $("searchInput");
+
+          if (searchInput) {
+
+            searchInput.value =
+              store.name;
+
+          }
+
+
+          renderProducts(
+            "All",
+            store.name
+          );
+
+
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+
+        }
+      );
+
+    });
+
+
+  /* =======================================================
+     STORE VIEW BUTTON
+     ======================================================= */
+
+  container
+    .querySelectorAll(".search-store-btn")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        e => {
+
+          e.stopPropagation();
+
+
+          const card =
+            button.closest(
+              ".search-store-card"
+            );
+
+          if (!card) return;
+
+
+          const store =
+            stores.find(
+              s =>
+                String(s.id) ===
+                String(
+                  card.dataset.storeId
+                )
+            );
+
+          if (!store) return;
+
+
+          const searchInput =
+            $("searchInput");
+
+          if (searchInput) {
+
+            searchInput.value =
+              store.name;
+
+          }
+
+
+          renderProducts(
+            "All",
+            store.name
+          );
+
+
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+
+        }
+      );
+
+    });
+
+}
   /* =======================================================
      FILTER PRODUCTS
      ======================================================= */
