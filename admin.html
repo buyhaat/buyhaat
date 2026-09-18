@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta name="color-scheme" content="light">
+
+    <title>BuyHaat Admin Login</title>
+
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+
+    <main class="login-page">
+
+        <div class="login-card">
+
+            <div class="logo">
+                B
+            </div>
+
+            <h1>BuyHaat Admin</h1>
+
+            <p class="subtitle">
+                Admin Panel-এ প্রবেশ করুন
+            </p>
+
+
+            <form id="adminLoginForm">
+
+                <label for="adminEmail">
+                    Admin Email
+                </label>
+
+                <input
+                    type="email"
+                    id="adminEmail"
+                    placeholder="Admin email"
+                    autocomplete="email"
+                    required
+                >
+
+
+                <label for="adminPassword">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="adminPassword"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                    required
+                >
+
+
+                <button
+                    type="submit"
+                    id="adminLoginBtn"
+                >
+                    Login
+                </button>
+
+
+                <div
+                    id="loginMessage"
+                    class="login-message"
+                ></div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+
+    <!-- Supabase configuration -->
+    <script src="../supabase-config.js"></script>
+
+    <!-- Admin authentication -->
+    <script src="admin.js"></script>
+
+</body>
+
+</html>
