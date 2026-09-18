@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BuyHaat - A multi-vendor marketplace">
+  <meta name="theme-color" content="#0f172a">
+  <title>BuyHaat — Marketplace</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="BuyHaat Home">Buy<span>Haat</span></a>
+    <button class="icon-btn" id="menuBtn" aria-label="Open menu">☰</button>
+  </header>
+
+  <main id="app">
+    <section id="home" class="page active">
+      <div class="search-wrap">
+        <input id="searchInput" type="search" placeholder="পণ্য খুঁজুন..." autocomplete="off">
+        <button id="searchBtn" class="search-btn">Search</button>
+      </div>
+
+      <section class="welcome">
+        <div>
+          <p class="eyebrow">WELCOME TO BUYHAAT</p>
+          <h1>এক জায়গায় অনেক Store, অনেক পণ্য</h1>
+          <p>পছন্দের পণ্য খুঁজুন, Store follow করুন এবং সরাসরি order করুন।</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Categories</h2>
+        </div>
+        <div id="categories" class="categories"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>All</h2>
+          <span id="productCount" class="muted"></span>
+        </div>
+        <div id="products" class="product-grid"></div>
+      </section>
+    </section>
+
+    <section id="following" class="page">
+      <div class="page-title">
+        <p class="eyebrow">FOLLOWING</p>
+        <h1>আপনার Follow করা Store</h1>
+      </div>
+      <div id="followingList" class="store-list"></div>
+    </section>
+
+    <section id="add-product" class="page">
+      <div class="page-title">
+        <p class="eyebrow">SELLER</p>
+        <h1>Add Product</h1>
+        <p>পরবর্তী ধাপে Supabase login ও seller permission যুক্ত হবে।</p>
+      </div>
+      <div class="empty-card">
+        <h3>Product Add System</h3>
+        <p>এখানে product name, price, image, category, stock ও description যোগ করার form থাকবে।</p>
+      </div>
+    </section>
+
+    <section id="chat" class="page">
+      <div class="page-title">
+        <p class="eyebrow">MESSAGES</p>
+        <h1>Chat</h1>
+        <p>Buyer এবং Store-এর conversation এখানে থাকবে।</p>
+      </div>
+      <div id="chatList" class="chat-list">
+        <div class="empty-card">
+          <h3>কোনো conversation নেই</h3>
+          <p>Order করার পর সংশ্লিষ্ট Store-এর সঙ্গে chat করা যাবে।</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="my-store" class="page">
+      <div class="page-title">
+        <p class="eyebrow">ACCOUNT</p>
+        <h1>My Store</h1>
+        <p>Buyer account, seller account এবং Store management এখানে থাকবে।</p>
+      </div>
+      <div class="account-actions">
+        <button class="primary-btn" id="loginBtn">Login / Register</button>
+        <button class="secondary-btn" id="createStoreBtn">Create Store</button>
+      </div>
+      <div class="empty-card">
+        <h3>Store Manager</h3>
+        <p>Products, orders, stock, customers, chat এবং store settings পরবর্তী ধাপে যুক্ত হবে।</p>
+      </div>
+    </section>
+
+    <section id="product-detail" class="page"></section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <a href="#home" data-page="home">⌂<span>Home</span></a>
+    <a href="#following" data-page="following">♡<span>Following</span></a>
+    <a href="#add-product" data-page="add-product" class="add-tab">＋<span>Add Product</span></a>
+    <a href="#chat" data-page="chat">▢<span>Chat</span></a>
+    <a href="#my-store" data-page="my-store">◎<span>My Store</span></a>
+  </nav>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
