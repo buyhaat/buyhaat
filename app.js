@@ -1,16 +1,87 @@
-const sb = window.supabaseClient || window.supabase.createClient(
-  window.SUPABASE_URL,
-  window.SUPABASE_ANON_KEY
-);
+/* =========================================================
+   BUYHAAT APP
+   Supabase + Auth + Stores + Products
+   File Upload + Product Management + Orders
+   ========================================================= */
+
+
+/* =========================================================
+   SUPABASE
+   ========================================================= */
+
+const sb =
+  window.supabaseClient ||
+  window.supabase.createClient(
+    window.SUPABASE_URL,
+    window.SUPABASE_ANON_KEY
+  );
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+const $ = (id) => document.getElementById(id);
+
+const esc = (value) =>
+  String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+
+const money = (value) =>
+  "৳" +
+  Number(value || 0).toLocaleString("en-BD", {
+    maximumFractionDigits: 2
+  });
+
+
+function toast(message) {
+  const el = $("toast");
+
+  if (!el) return;
+
+  el.textContent = message;
+  el.classList.add("show");
+
+  clearTimeout(toast.timer);
+
+  toast.timer = setTimeout(() => {
+    el.classList.remove("show");
+  }, 2400);
+}
+
+
+/* =========================================================
+   IMAGE UPLOAD
+   Supabase Storage bucket: store-images
+   ========================================================= */
 
 async function uploadImage(file, folder) {
+
   if (!file) return null;
 
+  if (!file.type.startsWith("image/")) {
+    toast("শুধু Image file নির্বাচন করো।");
+    return null;
+  }
+
   const ext =
-    file.name.split(".").pop().toLowerCase();
+    file.name.includes(".")
+      ? file.name.split(".").pop().toLowerCase()
+      : "jpg";
+
+  const randomId =
+    crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
   const fileName =
-    `${folder}/${crypto.randomUUID()}.${ext}`;
+    `${folder}/${randomId}.${ext}`;
+
 
   const {
     error
@@ -18,14 +89,26 @@ async function uploadImage(file, folder) {
     .from("store-images")
     .upload(fileName, file, {
       cacheControl: "3600",
-      upsert: false
+      upsert: false,
+      contentType: file.type
     });
 
+
   if (error) {
-    console.error("Image upload error:", error);
-    toast(error.message || "Image upload failed");
+
+    console.error(
+      "Image upload error:",
+      error
+    );
+
+    toast(
+      error.message ||
+      "Image upload failed"
+    );
+
     return null;
   }
+
 
   const {
     data
@@ -33,61 +116,78 @@ async function uploadImage(file, folder) {
     .from("store-images")
     .getPublicUrl(fileName);
 
-  return data.publicUrl;
+
+  return data?.publicUrl || null;
 }
+
+
+/* =========================================================
+   APP STATE
+   ========================================================= */
 
 let products = [];
+
 let stores = [];
+
 let categories = ["All"];
+
 let followedStores = [];
+
 let currentUser = null;
+
 let currentMyStore = null;
+
 let currentCategory = "All";
+
 let authMode = "login";
+
 let editingProductId = null;
 
-const $ = (id) => document.getElementById(id);
+let editingProductImageUrl = null;
 
-const esc = (v) => String(v ?? "")
-  .replaceAll("&", "&amp;")
-  .replaceAll("<", "&lt;")
-  .replaceAll(">", "&gt;")
-  .replaceAll('"', "&quot;")
-  .replaceAll("'", "&#039;");
 
-const money = (v) => "৳" + Number(v || 0).toLocaleString("en-BD", {
-  maximumFractionDigits: 2
-});
-
-function toast(message) {
-  const el = $("toast");
-  if (!el) return;
-  el.textContent = message;
-  el.classList.add("show");
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => el.classList.remove("show"), 2400);
-}
-
-/* ---------------- ROUTING + MENU ---------------- */
+/* =========================================================
+   ROUTING + MENU
+   ========================================================= */
 
 function closeMenu() {
+
   $("sideMenu")?.classList.remove("open");
+
   document.body.classList.remove("menu-open");
 }
 
+
 function openMenu() {
-  if ((location.hash || "#home") !== "#home") return;
+
+  if (
+    (location.hash || "#home") !==
+    "#home"
+  ) {
+    return;
+  }
+
   $("sideMenu")?.classList.add("open");
+
   document.body.classList.add("menu-open");
 }
 
+
 function go(page) {
+
   closeMenu();
+
   location.hash = "#" + page;
 }
 
+
 function route() {
-  let page = (location.hash || "#home").slice(1).split("?")[0];
+
+  let page =
+    (location.hash || "#home")
+      .slice(1)
+      .split("?")[0];
+
 
   const valid = [
     "home",
@@ -98,196 +198,404 @@ function route() {
     "product-detail"
   ];
 
+
   if (!valid.includes(page)) {
+
     page = "home";
-    if (location.hash !== "#home") history.replaceState(null, "", "#home");
+
+    if (location.hash !== "#home") {
+      history.replaceState(
+        null,
+        "",
+        "#home"
+      );
+    }
   }
 
-  document.querySelectorAll(".page").forEach((el) => {
-    el.classList.toggle("active-page", el.id === page);
-  });
 
-  document.querySelectorAll(".bottom button").forEach((el) => {
-    el.classList.toggle("active", el.dataset.route === page);
-  });
+  document
+    .querySelectorAll(".page")
+    .forEach((el) => {
 
-  /* Menu button is visible ONLY on Home. */
-  $("menuBtn")?.classList.toggle("hidden", page !== "home");
+      el.classList.toggle(
+        "active-page",
+        el.id === page
+      );
 
-  /* Header search button is useful only on Home. */
-  $("headerSearchBtn")?.classList.toggle("hidden", page !== "home");
+    });
+
+
+  document
+    .querySelectorAll(".bottom button")
+    .forEach((el) => {
+
+      el.classList.toggle(
+        "active",
+        el.dataset.route === page
+      );
+
+    });
+
+
+  $("menuBtn")?.classList.toggle(
+    "hidden",
+    page !== "home"
+  );
+
+
+  $("headerSearchBtn")?.classList.toggle(
+    "hidden",
+    page !== "home"
+  );
+
 
   closeMenu();
 
+
   if (page === "home") {
+
     renderCategories();
-    renderProducts(currentCategory, $("searchInput")?.value || "");
+
+    renderProducts(
+      currentCategory,
+      $("searchInput")?.value || ""
+    );
   }
 
-  if (page === "following") renderFollowing();
-  if (page === "my-store") renderMyStore();
 
-  window.scrollTo({ top: 0, behavior: "instant" });
+  if (page === "following") {
+    renderFollowing();
+  }
+
+
+  if (page === "my-store") {
+    renderMyStore();
+  }
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "instant"
+  });
 }
 
-window.addEventListener("hashchange", route);
 
-/* ---------------- AUTH ---------------- */
+window.addEventListener(
+  "hashchange",
+  route
+);
+
+
+/* =========================================================
+   AUTH
+   ========================================================= */
 
 async function updateAuth() {
+
   if (!sb?.auth) return;
 
-  const { data, error } = await sb.auth.getSession();
+
+  const {
+    data,
+    error
+  } = await sb.auth.getSession();
+
 
   if (error) {
-    console.error("Auth session error:", error);
+
+    console.error(
+      "Auth session error:",
+      error
+    );
+
     return;
   }
 
-  currentUser = data?.session?.user || null;
+
+  currentUser =
+    data?.session?.user || null;
+
 
   await loadMyStore();
+
   await loadFollowing();
+
   updateAccount();
 }
 
+
 async function loadMyStore() {
+
   currentMyStore = null;
+
 
   if (!currentUser) return;
 
-  const { data, error } = await sb
+
+  const {
+    data,
+    error
+  } = await sb
     .from("stores")
     .select("*")
-    .eq("owner_id", currentUser.id)
-    .order("created_at", { ascending: false })
+    .eq(
+      "owner_id",
+      currentUser.id
+    )
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    )
     .limit(1)
     .maybeSingle();
 
+
   if (error) {
-    console.error("My store error:", error);
+
+    console.error(
+      "My store error:",
+      error
+    );
+
     return;
   }
 
-  currentMyStore = data || null;
+
+  currentMyStore =
+    data || null;
 }
 
+
 function updateAccount() {
-  const status = $("accountStatus");
-  const loginBtn = $("loginBtn");
-  const logoutBtn = $("logoutBtn");
-  const createBtn = $("createStoreBtn");
+
+  const status =
+    $("accountStatus");
+
+  const loginBtn =
+    $("loginBtn");
+
+  const logoutBtn =
+    $("logoutBtn");
+
+  const createBtn =
+    $("createStoreBtn");
+
 
   if (!status) return;
 
+
   if (!currentUser) {
+
     status.innerHTML = `
       <div class="card">
         <b>Guest user</b><br>
-        <span class="store-meta">Login করলে Store management ব্যবহার করতে পারবে।</span>
+        <span class="store-meta">
+          Login করলে Store management ব্যবহার করতে পারবে।
+        </span>
       </div>
     `;
 
-    loginBtn?.classList.remove("hidden");
-    logoutBtn?.classList.add("hidden");
-    createBtn?.classList.add("hidden");
+
+    loginBtn?.classList.remove(
+      "hidden"
+    );
+
+    logoutBtn?.classList.add(
+      "hidden"
+    );
+
+    createBtn?.classList.add(
+      "hidden"
+    );
+
     return;
   }
+
 
   status.innerHTML = `
     <div class="card">
       <b>${esc(currentUser.email)}</b><br>
-      <span class="store-meta">Logged in</span>
+      <span class="store-meta">
+        Logged in
+      </span>
     </div>
   `;
 
-  loginBtn?.classList.add("hidden");
-  logoutBtn?.classList.remove("hidden");
-  createBtn?.classList.toggle("hidden", !!currentMyStore);
+
+  loginBtn?.classList.add(
+    "hidden"
+  );
+
+  logoutBtn?.classList.remove(
+    "hidden"
+  );
+
+
+  createBtn?.classList.toggle(
+    "hidden",
+    !!currentMyStore
+  );
 }
 
+
 function openAuth(mode = "login") {
+
   authMode = mode;
 
+
   $("authTitle").textContent =
-    mode === "login" ? "Login" : "Create account";
+    mode === "login"
+      ? "Login"
+      : "Create account";
+
 
   $("authSubtitle").textContent =
     mode === "login"
       ? "তোমার BuyHaat account-এ login করো।"
       : "নতুন BuyHaat account তৈরি করো।";
 
+
   $("authSubmitBtn").textContent =
-    mode === "login" ? "Login" : "Register";
+    mode === "login"
+      ? "Login"
+      : "Register";
+
 
   $("authSwitchBtn").textContent =
     mode === "login"
       ? "নতুন অ্যাকাউন্ট তৈরি করুন"
       : "আগের অ্যাকাউন্টে Login করুন";
 
+
   $("authMessage").textContent = "";
-  $("authModal").classList.remove("hidden");
+
+  $("authModal").classList.remove(
+    "hidden"
+  );
 }
+
 
 function closeAuth() {
-  $("authModal")?.classList.add("hidden");
+
+  $("authModal")?.classList.add(
+    "hidden"
+  );
 }
 
+
 async function authSubmit(event) {
+
   event.preventDefault();
 
-  const email = $("authEmail").value.trim();
-  const password = $("authPassword").value;
+
+  const email =
+    $("authEmail").value.trim();
+
+
+  const password =
+    $("authPassword").value;
+
 
   let result;
 
+
   if (authMode === "login") {
-    result = await sb.auth.signInWithPassword({ email, password });
+
+    result =
+      await sb.auth.signInWithPassword({
+        email,
+        password
+      });
+
   } else {
-    result = await sb.auth.signUp({ email, password });
+
+    result =
+      await sb.auth.signUp({
+        email,
+        password
+      });
+
   }
+
 
   if (result.error) {
-    $("authMessage").textContent = result.error.message;
+
+    $("authMessage").textContent =
+      result.error.message;
+
     return;
   }
 
-  if (authMode === "register" && !result.data?.session) {
+
+  if (
+    authMode === "register" &&
+    !result.data?.session
+  ) {
+
     $("authMessage").textContent =
       "Account তৈরি হয়েছে। Email confirmation চালু থাকলে আগে email verify করে Login করো।";
+
     return;
   }
 
+
   closeAuth();
+
   await updateAuth();
+
   toast("Success");
+
   route();
 }
 
+
 async function logout() {
-  const { error } = await sb.auth.signOut();
+
+  const {
+    error
+  } = await sb.auth.signOut();
+
 
   if (error) {
+
     toast(error.message);
+
     return;
   }
 
+
   currentUser = null;
+
   currentMyStore = null;
+
   followedStores = [];
 
+
   updateAccount();
+
   closeMenu();
+
   go("home");
+
   toast("Logged out");
 }
 
-/* ---------------- STORES + PRODUCTS ---------------- */
+
+/* =========================================================
+   STORES
+   ========================================================= */
 
 async function loadStores() {
+
   if (!sb) return;
 
-  const { data, error } = await sb
+
+  const {
+    data,
+    error
+  } = await sb
     .from("stores")
     .select(`
       id,
@@ -303,23 +611,52 @@ async function loadStores() {
       owner_id,
       created_at
     `)
-    .eq("is_active", true)
-    .eq("is_approved", true)
-    .order("created_at", { ascending: false });
+    .eq(
+      "is_active",
+      true
+    )
+    .eq(
+      "is_approved",
+      true
+    )
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    );
+
 
   if (error) {
-    console.error("Store error:", error);
+
+    console.error(
+      "Store error:",
+      error
+    );
+
     stores = [];
+
     return;
   }
+
 
   stores = data || [];
 }
 
+
+/* =========================================================
+   PRODUCTS
+   ========================================================= */
+
 async function loadProducts() {
+
   if (!sb) return;
 
-  const { data, error } = await sb
+
+  const {
+    data,
+    error
+  } = await sb
     .from("products")
     .select(`
       id,
@@ -334,173 +671,431 @@ async function loadProducts() {
       is_approved,
       created_at,
       categories(name),
-      stores(id,name,slug,is_active,is_approved)
+      stores(
+        id,
+        name,
+        slug,
+        is_active,
+        is_approved
+      )
     `)
-    .eq("is_active", true)
-    .eq("is_approved", true)
-    .order("created_at", { ascending: false });
+    .eq(
+      "is_active",
+      true
+    )
+    .eq(
+      "is_approved",
+      true
+    )
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    );
+
 
   if (error) {
-    console.error("Product error:", error);
+
+    console.error(
+      "Product error:",
+      error
+    );
+
     products = [];
+
     renderProducts();
+
     return;
   }
 
-  products = (data || []).map((p) => ({
-    id: p.id,
-    name: p.name,
-    price: Number(p.price),
-    description: p.description || "",
-    stock: Number(p.stock || 0),
-    category: p.categories?.name || "Others",
-    store: p.stores?.name || "Unknown Store",
-    storeSlug: p.stores?.slug || "",
-    storeId: p.store_id,
-    image: p.image_url || null
-  }));
 
-  renderProducts(currentCategory, $("searchInput")?.value || "");
+  products =
+    (data || []).map((p) => ({
+
+      id: p.id,
+
+      name: p.name,
+
+      price: Number(p.price),
+
+      description:
+        p.description || "",
+
+      stock:
+        Number(p.stock || 0),
+
+      category:
+        p.categories?.name ||
+        "Others",
+
+      store:
+        p.stores?.name ||
+        "Unknown Store",
+
+      storeSlug:
+        p.stores?.slug ||
+        "",
+
+      storeId:
+        p.store_id,
+
+      image:
+        p.image_url ||
+        null
+
+    }));
+
+
+  renderProducts(
+    currentCategory,
+    $("searchInput")?.value || ""
+  );
 }
 
+
+/* =========================================================
+   STORE SEARCH RESULT
+   ========================================================= */
+
 function storeHTML(store) {
+
   return `
     <div class="store-result">
+
       <div class="avatar">
-        ${store.logo_url
-          ? `<img class="avatar" src="${esc(store.logo_url)}" alt="">`
-          : ""}
+
+        ${
+          store.logo_url
+            ? `
+              <img
+                class="avatar"
+                src="${esc(store.logo_url)}"
+                alt=""
+              >
+            `
+            : ""
+        }
+
       </div>
+
 
       <div class="store-result-info">
-        <strong>${esc(store.name)}</strong>
-        <span class="store-meta">@${esc(store.slug)}</span>
+
+        <strong>
+          ${esc(store.name)}
+        </strong>
+
+        <span class="store-meta">
+          @${esc(store.slug)}
+        </span>
+
       </div>
 
-      <button class="view-store secondary" data-id="${esc(store.id)}">
+
+      <button
+        class="view-store secondary"
+        data-id="${esc(store.id)}"
+      >
         View Store
       </button>
+
     </div>
   `;
 }
 
-function renderProducts(category = "All", query = "") {
-  currentCategory = category;
 
-  const q = String(query || "").trim().toLowerCase();
-  const clean = q.replace(/^@/, "");
+/* =========================================================
+   RENDER PRODUCTS
+   ========================================================= */
 
-  const productList = products.filter((p) => {
-    const categoryOK =
-      category === "All" || p.category === category;
+function renderProducts(
+  category = "All",
+  query = ""
+) {
 
-    const text = [
-      p.name,
-      p.store,
-      p.storeSlug,
-      p.category,
-      p.description
-    ].join(" ").toLowerCase();
+  currentCategory =
+    category;
 
-    return categoryOK && (!q || text.includes(q));
-  });
 
-  const storeList = q
-    ? stores
-        .filter(
-          (s) =>
-            String(s.name).toLowerCase().includes(q) ||
-            String(s.slug).toLowerCase().includes(clean)
-        )
-        .slice(0, 8)
-    : [];
+  const q =
+    String(query || "")
+      .trim()
+      .toLowerCase();
 
-  const box = $("products");
+
+  const clean =
+    q.replace(/^@/, "");
+
+
+  const productList =
+    products.filter((p) => {
+
+      const categoryOK =
+        category === "All" ||
+        p.category === category;
+
+
+      const text = [
+        p.name,
+        p.store,
+        p.storeSlug,
+        p.category,
+        p.description
+      ]
+        .join(" ")
+        .toLowerCase();
+
+
+      const searchOK =
+        !q ||
+        text.includes(q) ||
+        text.includes(clean);
+
+
+      return (
+        categoryOK &&
+        searchOK
+      );
+    });
+
+
+  const storeList =
+    q
+      ? stores
+          .filter(
+            (s) =>
+              String(s.name)
+                .toLowerCase()
+                .includes(q) ||
+
+              String(s.slug)
+                .toLowerCase()
+                .includes(clean)
+          )
+          .slice(0, 8)
+      : [];
+
+
+  const box =
+    $("products");
+
+
   if (!box) return;
 
-  $("productCount").textContent =
-    `${productList.length} products`;
 
-  if (!productList.length && !storeList.length) {
+  if ($("productCount")) {
+
+    $("productCount").textContent =
+      `${productList.length} products`;
+  }
+
+
+  if (
+    !productList.length &&
+    !storeList.length
+  ) {
+
     box.innerHTML =
-      '<div class="empty">কোনো Product বা Store পাওয়া যায়নি।</div>';
+      `
+        <div class="empty">
+          কোনো Product বা Store পাওয়া যায়নি।
+        </div>
+      `;
+
     return;
   }
 
+
   box.innerHTML =
-    (storeList.length
-      ? `
-        <div class="store-search-results">
-          <h2>Stores</h2>
-          ${storeList.map(storeHTML).join("")}
-        </div>
-      `
-      : "") +
+
+    (
+      storeList.length
+        ? `
+          <div class="store-search-results">
+
+            <h2>Stores</h2>
+
+            ${storeList
+              .map(storeHTML)
+              .join("")}
+
+          </div>
+        `
+        : ""
+    )
+
+    +
+
     productList
       .map(
         (p) => `
-          <article class="product-card" data-id="${esc(p.id)}">
+
+          <article
+            class="product-card"
+            data-id="${esc(p.id)}"
+          >
+
             ${
               p.image
-                ? `<img class="product-image" src="${esc(p.image)}" alt="">`
-                : `<div class="product-image"></div>`
+                ? `
+                  <img
+                    class="product-image"
+                    src="${esc(p.image)}"
+                    alt="${esc(p.name)}"
+                  >
+                `
+                : `
+                  <div class="product-image"></div>
+                `
             }
 
+
             <div class="product-info">
-              <div class="product-name">${esc(p.name)}</div>
-              <div class="price">${money(p.price)}</div>
-              <div class="store-name">${esc(p.store)}</div>
+
+              <div class="product-name">
+                ${esc(p.name)}
+              </div>
+
+              <div class="price">
+                ${money(p.price)}
+              </div>
+
+              <div class="store-name">
+                ${esc(p.store)}
+              </div>
+
             </div>
+
           </article>
+
         `
       )
       .join("");
 
-  box.querySelectorAll(".product-card").forEach((card) => {
-    card.onclick = () => openProduct(card.dataset.id);
-  });
 
-  box.querySelectorAll(".view-store").forEach((button) => {
-    button.onclick = (event) => {
-      event.stopPropagation();
+  box
+    .querySelectorAll(".product-card")
+    .forEach((card) => {
 
-      const store = stores.find(
-        (s) => String(s.id) === String(button.dataset.id)
-      );
+      card.onclick = () => {
+        openProduct(
+          card.dataset.id
+        );
+      };
 
-      if (!store) return;
+    });
 
-      $("searchInput").value = `@${store.slug}`;
-      renderProducts("All", `@${store.slug}`);
-    };
-  });
+
+  box
+    .querySelectorAll(".view-store")
+    .forEach((button) => {
+
+      button.onclick =
+        (event) => {
+
+          event.stopPropagation();
+
+
+          const store =
+            stores.find(
+              (s) =>
+                String(s.id) ===
+                String(
+                  button.dataset.id
+                )
+            );
+
+
+          if (!store) return;
+
+
+          if ($("searchInput")) {
+
+            $("searchInput").value =
+              `@${store.slug}`;
+          }
+
+
+          renderProducts(
+            "All",
+            `@${store.slug}`
+          );
+        };
+
+    });
 }
 
+
+/* =========================================================
+   PRODUCT DETAIL
+   ========================================================= */
+
 function openProduct(id) {
-  const product = products.find(
-    (p) => String(p.id) === String(id)
-  );
+
+  const product =
+    products.find(
+      (p) =>
+        String(p.id) ===
+        String(id)
+    );
+
 
   if (!product) return;
 
+
   $("productDetailContent").innerHTML = `
-    <button class="secondary" onclick="go('home')">
+
+    <button
+      class="secondary"
+      onclick="go('home')"
+    >
       ← Back
     </button>
 
+
     <div class="detail">
+
       ${
         product.image
-          ? `<img src="${esc(product.image)}" alt="">`
+          ? `
+            <img
+              src="${esc(product.image)}"
+              alt="${esc(product.name)}"
+            >
+          `
           : ""
       }
 
+
       <div class="detail-body">
-        <h1>${esc(product.name)}</h1>
-        <h2>${money(product.price)}</h2>
-        <p><b>Store:</b> ${esc(product.store)}</p>
-        <p><b>Stock:</b> ${product.stock}</p>
-        <p>${esc(product.description)}</p>
+
+        <h1>
+          ${esc(product.name)}
+        </h1>
+
+
+        <h2>
+          ${money(product.price)}
+        </h2>
+
+
+        <p>
+          <b>Store:</b>
+          ${esc(product.store)}
+        </p>
+
+
+        <p>
+          <b>Stock:</b>
+          ${product.stock}
+        </p>
+
+
+        <p>
+          ${esc(product.description)}
+        </p>
+
 
         <button
           class="primary"
@@ -508,156 +1103,412 @@ function openProduct(id) {
         >
           Buy / Order
         </button>
+
       </div>
+
     </div>
+
   `;
+
 
   go("product-detail");
 }
 
-/* ---------------- CATEGORIES ---------------- */
+
+/* =========================================================
+   CATEGORIES
+   ========================================================= */
 
 async function loadCategories() {
+
   if (!sb) return;
 
-  const { data, error } = await sb
+
+  const {
+    data,
+    error
+  } = await sb
     .from("categories")
     .select("id,name")
     .order("name");
 
-  categories = error
-    ? ["All"]
-    : ["All", ...(data || []).map((x) => x.name)];
+
+  categories =
+    error
+      ? ["All"]
+      : [
+          "All",
+          ...(data || [])
+            .map(
+              (x) => x.name
+            )
+        ];
+
 
   renderCategories();
+
   populateCategory();
 }
 
+
 function renderCategories() {
-  const box = $("categories");
+
+  const box =
+    $("categories");
+
+
   if (!box) return;
 
-  box.innerHTML = categories
-    .map(
-      (name) => `
-        <button
-          class="category ${name === currentCategory ? "active" : ""}"
-          data-cat="${esc(name)}"
-        >
-          ${esc(name)}
-        </button>
-      `
-    )
-    .join("");
 
-  box.querySelectorAll(".category").forEach((button) => {
-    button.onclick = () => {
-      currentCategory = button.dataset.cat;
-      renderCategories();
-      renderProducts(
-        currentCategory,
-        $("searchInput")?.value || ""
-      );
-    };
-  });
+  box.innerHTML =
+    categories
+      .map(
+        (name) => `
+
+          <button
+            class="category ${
+              name === currentCategory
+                ? "active"
+                : ""
+            }"
+            data-cat="${esc(name)}"
+          >
+            ${esc(name)}
+          </button>
+
+        `
+      )
+      .join("");
+
+
+  box
+    .querySelectorAll(".category")
+    .forEach((button) => {
+
+      button.onclick = () => {
+
+        currentCategory =
+          button.dataset.cat;
+
+
+        renderCategories();
+
+
+        renderProducts(
+          currentCategory,
+          $("searchInput")?.value || ""
+        );
+      };
+
+    });
 }
+
 
 function populateCategory() {
-  const select = $("productCategory");
+
+  const select =
+    $("productCategory");
+
+
   if (!select) return;
 
-  select.innerHTML = categories
-    .filter((x) => x !== "All")
-    .map((x) => `<option value="${esc(x)}">${esc(x)}</option>`)
-    .join("");
+
+  select.innerHTML =
+    categories
+      .filter(
+        (x) => x !== "All"
+      )
+      .map(
+        (x) =>
+          `
+            <option value="${esc(x)}">
+              ${esc(x)}
+            </option>
+          `
+      )
+      .join("");
 }
 
-/* ---------------- STORE CREATION / EDIT ---------------- */
+
+/* =========================================================
+   CREATE STORE
+   ========================================================= */
 
 function openStore() {
+
   if (!currentUser) {
+
     openAuth("login");
+
     return;
   }
+
 
   $("storeMessage").textContent = "";
-  $("storeModal").classList.remove("hidden");
+
+  $("storeModal").classList.remove(
+    "hidden"
+  );
 }
+
 
 function closeStore() {
-  $("storeModal")?.classList.add("hidden");
+
+  $("storeModal")?.classList.add(
+    "hidden"
+  );
 }
 
+
 async function createStore(event) {
+
   event.preventDefault();
 
+
   if (!currentUser) {
+
     openAuth("login");
+
     return;
   }
 
-  const name = $("storeName").value.trim();
+
+  const name =
+    $("storeName")
+      .value
+      .trim();
+
 
   if (!name) {
-    $("storeMessage").textContent = "Store name দাও।";
+
+    $("storeMessage").textContent =
+      "Store name দাও।";
+
     return;
   }
 
-  const base = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+
+  const base =
+    name
+      .toLowerCase()
+      .replace(
+        /[^a-z0-9]+/g,
+        "-"
+      )
+      .replace(
+        /^-+|-+$/g,
+        ""
+      );
+
 
   const slug =
-    `${base || "store"}-${Math.random().toString(36).slice(2, 8)}`;
+    `${
+      base || "store"
+    }-${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
 
-  const { data, error } = await sb
-    .from("stores")
-    .insert({
-      owner_id: currentUser.id,
+
+  /* -----------------------------
+     Logo
+     ----------------------------- */
+
+  const logoFile =
+    $("storeLogoFile")
+      ?.files?.[0] ||
+    null;
+
+
+  let logoUrl = null;
+
+
+  if (logoFile) {
+
+    $("storeMessage").textContent =
+      "Store logo upload হচ্ছে...";
+
+
+    logoUrl =
+      await uploadImage(
+        logoFile,
+        "store-logos"
+      );
+
+
+    if (!logoUrl) {
+
+      $("storeMessage").textContent =
+        "Store logo upload করা যায়নি।";
+
+      return;
+    }
+  }
+
+
+  /* -----------------------------
+     Cover
+     ----------------------------- */
+
+  const coverFile =
+    $("storeCoverFile")
+      ?.files?.[0] ||
+    null;
+
+
+  let coverUrl = null;
+
+
+  if (coverFile) {
+
+    $("storeMessage").textContent =
+      "Store cover upload হচ্ছে...";
+
+
+    coverUrl =
+      await uploadImage(
+        coverFile,
+        "store-covers"
+      );
+
+
+    if (!coverUrl) {
+
+      $("storeMessage").textContent =
+        "Store cover upload করা যায়নি।";
+
+      return;
+    }
+  }
+
+
+  /* -----------------------------
+     Store data
+     ----------------------------- */
+
+  const payload = {
+
+    owner_id:
+      currentUser.id,
+
+    name:
       name,
+
+    slug:
       slug,
-      description: $("storeDescription").value.trim() || null,
-      phone: $("storePhone").value.trim() || null,
-      address: $("storeAddress").value.trim() || null,
-      logo_url: $("storeLogoUrl").value.trim() || null,
-      cover_url: $("storeCoverUrl").value.trim() || null,
-      is_active: true,
-      is_approved: false
-    })
+
+    description:
+      $("storeDescription")
+        .value
+        .trim() ||
+      null,
+
+    phone:
+      $("storePhone")
+        .value
+        .trim() ||
+      null,
+
+    address:
+      $("storeAddress")
+        .value
+        .trim() ||
+      null,
+
+    logo_url:
+      logoUrl,
+
+    cover_url:
+      coverUrl,
+
+    is_active:
+      true,
+
+    is_approved:
+      false
+  };
+
+
+  $("storeMessage").textContent =
+    "Store save হচ্ছে...";
+
+
+  const {
+    data,
+    error
+  } = await sb
+    .from("stores")
+    .insert(payload)
     .select()
     .single();
 
+
   if (error) {
-    $("storeMessage").textContent = error.message;
+
+    console.error(
+      "Store insert error:",
+      error
+    );
+
+
+    $("storeMessage").textContent =
+      error.message;
+
+
     return;
   }
 
-  currentMyStore = data;
+
+  currentMyStore =
+    data;
+
+
+  $("storeForm")?.reset();
+
+
   closeStore();
+
   updateAccount();
+
   await loadStores();
+
   await renderMyStore();
-  toast("Store created — approval pending");
+
+
+  toast(
+    "Store created — approval pending"
+  );
 }
 
-/* ---------------- PRODUCT ADD / EDIT ---------------- */
+
+/* =========================================================
+   ADD PRODUCT
+   ========================================================= */
 
 async function addProduct(event) {
+
   event.preventDefault();
 
+
   if (!currentUser) {
+
     openAuth("login");
+
     return;
   }
+
 
   if (!currentMyStore) {
+
     openStore();
+
     return;
   }
 
+
   const categoryName =
-    $("productCategory").value;
+    $("productCategory")
+      .value;
+
 
   const {
     data: category,
@@ -665,28 +1516,44 @@ async function addProduct(event) {
   } = await sb
     .from("categories")
     .select("id")
-    .eq("name", categoryName)
+    .eq(
+      "name",
+      categoryName
+    )
     .maybeSingle();
 
-  if (categoryError || !category) {
+
+  if (
+    categoryError ||
+    !category
+  ) {
+
     $("productMsg").textContent =
       categoryError?.message ||
       "Category পাওয়া যায়নি।";
+
     return;
   }
 
+
   /* -----------------------------
-     Product image upload
+     Product image
      ----------------------------- */
 
   const imageFile =
-    $("productImageFile")?.files?.[0] || null;
+    $("productImageFile")
+      ?.files?.[0] ||
+    null;
+
 
   let imageUrl = null;
 
+
   if (imageFile) {
+
     $("productMsg").textContent =
       "Product image upload হচ্ছে...";
+
 
     imageUrl =
       await uploadImage(
@@ -694,30 +1561,45 @@ async function addProduct(event) {
         "products"
       );
 
+
     if (!imageUrl) {
+
       $("productMsg").textContent =
         "Product image upload করা যায়নি।";
+
       return;
     }
   }
+
 
   /* -----------------------------
      Product data
      ----------------------------- */
 
   const payload = {
+
     name:
-      $("productName").value.trim(),
+      $("productName")
+        .value
+        .trim(),
 
     price:
-      Number($("productPrice").value),
+      Number(
+        $("productPrice")
+          .value
+      ),
 
     description:
-      $("productDescription").value.trim() ||
+      $("productDescription")
+        .value
+        .trim() ||
       null,
 
     stock:
-      Number($("productStock").value),
+      Number(
+        $("productStock")
+          .value
+      ),
 
     category_id:
       category.id,
@@ -728,13 +1610,17 @@ async function addProduct(event) {
     image_url:
       imageUrl,
 
-    is_active: true,
+    is_active:
+      true,
 
-    is_approved: false
+    is_approved:
+      false
   };
+
 
   $("productMsg").textContent =
     "Product save হচ্ছে...";
+
 
   const {
     error
@@ -742,162 +1628,350 @@ async function addProduct(event) {
     .from("products")
     .insert(payload);
 
+
   if (error) {
+
     console.error(
       "Product insert error:",
       error
     );
 
+
     $("productMsg").textContent =
       error.message;
+
 
     return;
   }
 
-  $("productForm").reset();
 
-  $("productStock").value = 1;
+  $("productForm")?.reset();
+
+
+  if ($("productStock")) {
+
+    $("productStock").value = 1;
+  }
+
 
   $("productMsg").textContent =
     "Product added — approval pending.";
 
+
   await loadProducts();
+
   await sellerProducts();
 
-  toast("Product added successfully");
+
+  toast(
+    "Product added successfully"
+  );
 }
 
-/* ---------------- FOLLOWING ---------------- */
+
+/* =========================================================
+   FOLLOWING
+   ========================================================= */
 
 async function loadFollowing() {
+
   followedStores = [];
+
 
   if (!currentUser) return;
 
-  const { data, error } = await sb
+
+  const {
+    data,
+    error
+  } = await sb
     .from("followed_stores")
     .select(
-      "store_id,stores(id,name,slug,logo_url,description)"
-    )
-    .eq("user_id", currentUser.id);
-
-  if (!error) {
-    followedStores = (data || [])
-      .map((x) => x.stores)
-      .filter(Boolean);
-  } else {
-    console.error("Following error:", error);
-  }
-}
-
-function renderFollowing() {
-  const box = $("followingList");
-  if (!box) return;
-
-  if (!currentUser) {
-    box.innerHTML =
-      '<div class="empty">Following দেখতে Login করো।</div>';
-    return;
-  }
-
-  if (!followedStores.length) {
-    box.innerHTML =
-      '<div class="empty">এখনো কোনো Store follow করোনি।</div>';
-    return;
-  }
-
-  box.innerHTML = followedStores
-    .map(
-      (store) => `
-        <div class="store-card">
-          <div class="avatar">
-            ${
-              store.logo_url
-                ? `<img class="avatar" src="${esc(store.logo_url)}" alt="">`
-                : ""
-            }
-          </div>
-
-          <div>
-            <b>${esc(store.name)}</b><br>
-            <span class="store-meta">@${esc(store.slug)}</span>
-          </div>
-        </div>
+      `
+        store_id,
+        stores(
+          id,
+          name,
+          slug,
+          logo_url,
+          description
+        )
       `
     )
-    .join("");
+    .eq(
+      "user_id",
+      currentUser.id
+    );
+
+
+  if (!error) {
+
+    followedStores =
+      (data || [])
+        .map(
+          (x) => x.stores
+        )
+        .filter(Boolean);
+
+  } else {
+
+    console.error(
+      "Following error:",
+      error
+    );
+  }
 }
 
-/* ---------------- MY STORE ---------------- */
+
+function renderFollowing() {
+
+  const box =
+    $("followingList");
+
+
+  if (!box) return;
+
+
+  if (!currentUser) {
+
+    box.innerHTML =
+      `
+        <div class="empty">
+          Following দেখতে Login করো।
+        </div>
+      `;
+
+    return;
+  }
+
+
+  if (!followedStores.length) {
+
+    box.innerHTML =
+      `
+        <div class="empty">
+          এখনো কোনো Store follow করোনি।
+        </div>
+      `;
+
+    return;
+  }
+
+
+  box.innerHTML =
+    followedStores
+      .map(
+        (store) => `
+
+          <div class="store-card">
+
+            <div class="avatar">
+
+              ${
+                store.logo_url
+                  ? `
+                    <img
+                      class="avatar"
+                      src="${esc(store.logo_url)}"
+                      alt=""
+                    >
+                  `
+                  : ""
+              }
+
+            </div>
+
+
+            <div>
+
+              <b>
+                ${esc(store.name)}
+              </b>
+
+              <br>
+
+              <span class="store-meta">
+                @${esc(store.slug)}
+              </span>
+
+            </div>
+
+          </div>
+
+        `
+      )
+      .join("");
+}
+
+
+/* =========================================================
+   MY STORE
+   ========================================================= */
 
 async function renderMyStore() {
+
   updateAccount();
 
-  const box = $("myStoreContent");
-  const manager = $("storeManagerCard");
+
+  const box =
+    $("myStoreContent");
+
+
+  const manager =
+    $("storeManagerCard");
+
 
   if (!box || !manager) return;
 
+
   if (!currentUser) {
+
     box.innerHTML =
-      '<div class="empty">My Store ব্যবহার করতে Login করো।</div>';
-    manager.classList.add("hidden");
+      `
+        <div class="empty">
+          My Store ব্যবহার করতে Login করো।
+        </div>
+      `;
+
+
+    manager.classList.add(
+      "hidden"
+    );
+
     return;
   }
+
 
   if (!currentMyStore) {
+
     box.innerHTML =
-      '<div class="empty">তোমার Store নেই। Create Store চাপো।</div>';
-    manager.classList.add("hidden");
+      `
+        <div class="empty">
+          তোমার Store নেই। Create Store চাপো।
+        </div>
+      `;
+
+
+    manager.classList.add(
+      "hidden"
+    );
+
     return;
   }
 
-  const store = currentMyStore;
+
+  const store =
+    currentMyStore;
+
 
   box.innerHTML = `
+
     <div class="card store-profile-card">
+
       ${
         store.cover_url
-          ? `<img class="store-cover" src="${esc(store.cover_url)}" alt="">`
+          ? `
+            <img
+              class="store-cover"
+              src="${esc(store.cover_url)}"
+              alt=""
+            >
+          `
           : ""
       }
 
+
       <div class="store-profile-row">
+
         <div class="avatar large-avatar">
+
           ${
             store.logo_url
-              ? `<img class="avatar large-avatar" src="${esc(store.logo_url)}" alt="">`
+              ? `
+                <img
+                  class="avatar large-avatar"
+                  src="${esc(store.logo_url)}"
+                  alt=""
+                >
+              `
               : ""
           }
+
         </div>
+
 
         <div>
-          <h2>${esc(store.name)}</h2>
-          <p>@${esc(store.slug)}</p>
+
+          <h2>
+            ${esc(store.name)}
+          </h2>
+
+
+          <p>
+            @${esc(store.slug)}
+          </p>
+
+
           <small>
-            ${store.is_approved ? "Approved" : "Pending approval"}
+            ${
+              store.is_approved
+                ? "Approved"
+                : "Pending approval"
+            }
           </small>
+
         </div>
+
       </div>
 
-      <p>${esc(store.description || "No description")}</p>
+
+      <p>
+        ${esc(
+          store.description ||
+          "No description"
+        )}
+      </p>
+
     </div>
+
   `;
 
-  manager.classList.remove("hidden");
+
+  manager.classList.remove(
+    "hidden"
+  );
+
 
   await sellerProducts();
+
   await sellerOrders();
+
   sellerSettings();
 }
 
-/* ---------------- SELLER PRODUCT MANAGEMENT ---------------- */
+
+/* =========================================================
+   SELLER PRODUCTS
+   ========================================================= */
 
 async function sellerProducts() {
-  const box = $("sellerProductsTab");
-  if (!box || !currentMyStore) return;
 
-  const { data, error } = await sb
+  const box =
+    $("sellerProductsTab");
+
+
+  if (
+    !box ||
+    !currentMyStore
+  ) {
+    return;
+  }
+
+
+  const {
+    data,
+    error
+  } = await sb
     .from("products")
     .select(`
       id,
@@ -911,445 +1985,1379 @@ async function sellerProducts() {
       category_id,
       categories(name)
     `)
-    .eq("store_id", currentMyStore.id)
-    .order("created_at", { ascending: false });
+    .eq(
+      "store_id",
+      currentMyStore.id
+    )
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    );
+
 
   if (error) {
-    box.innerHTML = `
-      <div class="empty">${esc(error.message)}</div>
-    `;
+
+    box.innerHTML =
+      `
+        <div class="empty">
+          ${esc(error.message)}
+        </div>
+      `;
+
     return;
   }
+
 
   if (!data?.length) {
+
     box.innerHTML =
-      '<div class="empty">কোনো product নেই।</div>';
+      `
+        <div class="empty">
+          কোনো product নেই।
+        </div>
+      `;
+
     return;
   }
 
-  box.innerHTML = data
-    .map(
-      (product) => `
-        <div class="manage ${product.is_active ? "" : "inactive-product"}">
-          ${
-            product.image_url
-              ? `<img src="${esc(product.image_url)}" alt="">`
-              : `<div class="manage-placeholder"></div>`
-          }
 
-          <div class="manage-info">
-            <b>${esc(product.name)}</b><br>
-            <small>
-              ${money(product.price)}
-              · Stock ${Number(product.stock || 0)}
-              · ${product.is_approved ? "Approved" : "Pending"}
-              ${product.is_active ? "" : " · Hidden"}
-            </small>
+  box.innerHTML =
+    data
+      .map(
+        (product) => `
+
+          <div
+            class="manage ${
+              product.is_active
+                ? ""
+                : "inactive-product"
+            }"
+          >
+
+            ${
+              product.image_url
+                ? `
+                  <img
+                    src="${esc(
+                      product.image_url
+                    )}"
+                    alt="${esc(
+                      product.name
+                    )}"
+                  >
+                `
+                : `
+                  <div class="manage-placeholder"></div>
+                `
+            }
+
+
+            <div class="manage-info">
+
+              <b>
+                ${esc(product.name)}
+              </b>
+
+              <br>
+
+              <small>
+
+                ${money(product.price)}
+
+                · Stock
+                ${Number(
+                  product.stock || 0
+                )}
+
+                ·
+                ${
+                  product.is_approved
+                    ? "Approved"
+                    : "Pending"
+                }
+
+                ${
+                  product.is_active
+                    ? ""
+                    : " · Hidden"
+                }
+
+              </small>
+
+            </div>
+
+
+            <button
+              class="small edit"
+              data-id="${esc(
+                product.id
+              )}"
+            >
+              Edit
+            </button>
+
+
+            <button
+              class="small del"
+              data-id="${esc(
+                product.id
+              )}"
+            >
+              Delete
+            </button>
+
           </div>
 
-          <button
-            class="small edit"
-            data-id="${esc(product.id)}"
-          >
-            Edit
-          </button>
+        `
+      )
+      .join("");
 
-          <button
-            class="small del"
-            data-id="${esc(product.id)}"
-          >
-            Delete
-          </button>
-        </div>
-      `
-    )
-    .join("");
 
-  box.querySelectorAll(".edit").forEach((button) => {
-    button.onclick = () => editProduct(button.dataset.id);
-  });
+  box
+    .querySelectorAll(".edit")
+    .forEach((button) => {
 
-  box.querySelectorAll(".del").forEach((button) => {
-    button.onclick = () => deleteProduct(button.dataset.id);
-  });
+      button.onclick = () => {
+
+        editProduct(
+          button.dataset.id
+        );
+      };
+
+    });
+
+
+  box
+    .querySelectorAll(".del")
+    .forEach((button) => {
+
+      button.onclick = () => {
+
+        deleteProduct(
+          button.dataset.id
+        );
+      };
+
+    });
 }
+
+
+/* =========================================================
+   PRODUCT EDITOR
+   ========================================================= */
 
 function openProductEditor(product) {
-  editingProductId = product.id;
 
-  $("editProductId").value = product.id;
-  $("editProductName").value = product.name || "";
-  $("editProductPrice").value = product.price ?? "";
-  $("editProductStock").value = product.stock ?? 0;
-  $("editProductDescription").value = product.description || "";
-  $("editProductImageUrl").value = product.image_url || "";
+  editingProductId =
+    product.id;
 
-  const category = product.categories?.name || "";
-  $("editProductCategory").innerHTML = categories
-    .filter((x) => x !== "All")
-    .map(
-      (x) =>
-        `<option value="${esc(x)}" ${x === category ? "selected" : ""}>
-          ${esc(x)}
-        </option>`
-    )
-    .join("");
 
-  $("editProductMessage").textContent = "";
-  $("productEditModal").classList.remove("hidden");
+  editingProductImageUrl =
+    product.image_url ||
+    null;
+
+
+  $("editProductId").value =
+    product.id;
+
+
+  $("editProductName").value =
+    product.name || "";
+
+
+  $("editProductPrice").value =
+    product.price ?? "";
+
+
+  $("editProductStock").value =
+    product.stock ?? 0;
+
+
+  $("editProductDescription").value =
+    product.description || "";
+
+
+  /* -----------------------------
+     Category
+     ----------------------------- */
+
+  const category =
+    product.categories?.name ||
+    "";
+
+
+  $("editProductCategory").innerHTML =
+    categories
+      .filter(
+        (x) => x !== "All"
+      )
+      .map(
+        (x) =>
+          `
+            <option
+              value="${esc(x)}"
+              ${
+                x === category
+                  ? "selected"
+                  : ""
+              }
+            >
+              ${esc(x)}
+            </option>
+          `
+      )
+      .join("");
+
+
+  /* -----------------------------
+     File input reset
+     ----------------------------- */
+
+  if ($("editProductImageFile")) {
+
+    $("editProductImageFile").value =
+      "";
+  }
+
+
+  $("editProductMessage").textContent =
+    "";
+
+
+  $("productEditModal")
+    .classList
+    .remove("hidden");
 }
+
 
 function closeProductEditor() {
+
   editingProductId = null;
-  $("productEditModal")?.classList.add("hidden");
+
+  editingProductImageUrl = null;
+
+
+  $("productEditModal")
+    ?.classList
+    .add("hidden");
 }
 
+
+/* =========================================================
+   LOAD PRODUCT FOR EDIT
+   ========================================================= */
+
 async function editProduct(id) {
+
   if (!currentMyStore) return;
 
-  const { data, error } = await sb
+
+  const {
+    data,
+    error
+  } = await sb
     .from("products")
     .select(`
       *,
       categories(name)
     `)
-    .eq("id", id)
-    .eq("store_id", currentMyStore.id)
+    .eq(
+      "id",
+      id
+    )
+    .eq(
+      "store_id",
+      currentMyStore.id
+    )
     .single();
 
+
   if (error) {
+
     toast(error.message);
+
     return;
   }
+
 
   openProductEditor(data);
 }
 
+
+/* =========================================================
+   SAVE PRODUCT EDIT
+   ========================================================= */
+
 async function saveProductEdit(event) {
+
   event.preventDefault();
 
-  if (!editingProductId || !currentMyStore) return;
 
-  const categoryName = $("editProductCategory").value;
+  if (
+    !editingProductId ||
+    !currentMyStore
+  ) {
+    return;
+  }
 
-  const { data: category, error: categoryError } = await sb
+
+  const categoryName =
+    $("editProductCategory")
+      .value;
+
+
+  const {
+    data: category,
+    error: categoryError
+  } = await sb
     .from("categories")
     .select("id")
-    .eq("name", categoryName)
+    .eq(
+      "name",
+      categoryName
+    )
     .maybeSingle();
 
-  if (categoryError || !category) {
-    $("editProductMessage").textContent =
-      categoryError?.message || "Category পাওয়া যায়নি।";
+
+  if (
+    categoryError ||
+    !category
+  ) {
+
+    $("editProductMessage")
+      .textContent =
+        categoryError?.message ||
+        "Category পাওয়া যায়নি।";
+
     return;
   }
+
+
+  /* -----------------------------
+     New image
+     ----------------------------- */
+
+  const imageFile =
+    $("editProductImageFile")
+      ?.files?.[0] ||
+    null;
+
+
+  let imageUrl =
+    editingProductImageUrl;
+
+
+  if (imageFile) {
+
+    $("editProductMessage")
+      .textContent =
+        "নতুন Product image upload হচ্ছে...";
+
+
+    imageUrl =
+      await uploadImage(
+        imageFile,
+        "products"
+      );
+
+
+    if (!imageUrl) {
+
+      $("editProductMessage")
+        .textContent =
+          "নতুন Product image upload করা যায়নি।";
+
+      return;
+    }
+  }
+
+
+  /* -----------------------------
+     Product update
+     ----------------------------- */
 
   const updates = {
-    name: $("editProductName").value.trim(),
-    price: Number($("editProductPrice").value),
-    stock: Number($("editProductStock").value),
-    description: $("editProductDescription").value.trim() || null,
-    image_url: $("editProductImageUrl").value.trim() || null,
-    category_id: category.id
+
+    name:
+      $("editProductName")
+        .value
+        .trim(),
+
+    price:
+      Number(
+        $("editProductPrice")
+          .value
+      ),
+
+    stock:
+      Number(
+        $("editProductStock")
+          .value
+      ),
+
+    description:
+      $("editProductDescription")
+        .value
+        .trim() ||
+      null,
+
+    image_url:
+      imageUrl,
+
+    category_id:
+      category.id
   };
 
-  const { error } = await sb
+
+  $("editProductMessage")
+    .textContent =
+      "Product save হচ্ছে...";
+
+
+  const {
+    error
+  } = await sb
     .from("products")
     .update(updates)
-    .eq("id", editingProductId)
-    .eq("store_id", currentMyStore.id);
+    .eq(
+      "id",
+      editingProductId
+    )
+    .eq(
+      "store_id",
+      currentMyStore.id
+    );
+
 
   if (error) {
-    $("editProductMessage").textContent = error.message;
+
+    $("editProductMessage")
+      .textContent =
+        error.message;
+
     return;
   }
+
 
   closeProductEditor();
+
+
   await loadProducts();
+
   await sellerProducts();
-  toast("Product updated");
+
+
+  toast(
+    "Product updated"
+  );
 }
 
+
+/* =========================================================
+   DELETE PRODUCT
+   ========================================================= */
+
 async function deleteProduct(id) {
+
   if (!currentMyStore) return;
 
-  if (!confirm("এই product remove করতে চাও?")) return;
 
-  const { error } = await sb
-    .from("products")
-    .update({ is_active: false })
-    .eq("id", id)
-    .eq("store_id", currentMyStore.id);
-
-  if (error) {
-    toast(error.message);
+  if (
+    !confirm(
+      "এই product remove করতে চাও?"
+    )
+  ) {
     return;
   }
 
+
+  const {
+    error
+  } = await sb
+    .from("products")
+    .update({
+      is_active: false
+    })
+    .eq(
+      "id",
+      id
+    )
+    .eq(
+      "store_id",
+      currentMyStore.id
+    );
+
+
+  if (error) {
+
+    toast(error.message);
+
+    return;
+  }
+
+
   await loadProducts();
+
   await sellerProducts();
-  toast("Product removed");
+
+
+  toast(
+    "Product removed"
+  );
 }
 
-/* ---------------- SELLER ORDERS ---------------- */
+
+/* =========================================================
+   SELLER ORDERS
+   ========================================================= */
 
 async function sellerOrders() {
-  const box = $("sellerOrdersTab");
-  if (!box || !currentMyStore) return;
 
-  const { data, error } = await sb
+  const box =
+    $("sellerOrdersTab");
+
+
+  if (
+    !box ||
+    !currentMyStore
+  ) {
+    return;
+  }
+
+
+  const {
+    data,
+    error
+  } = await sb
     .from("order_items")
     .select(`
       id,
       order_id,
       quantity,
       price,
-      products!inner(id,name,store_id),
-      orders(id,status,created_at,total_amount)
+      products!inner(
+        id,
+        name,
+        store_id
+      ),
+      orders(
+        id,
+        status,
+        created_at,
+        total_amount
+      )
     `)
-    .eq("products.store_id", currentMyStore.id)
-    .order("created_at", { ascending: false });
+    .eq(
+      "products.store_id",
+      currentMyStore.id
+    )
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    );
+
 
   if (error) {
-    box.innerHTML = `
-      <div class="empty">${esc(error.message)}</div>
-    `;
+
+    box.innerHTML =
+      `
+        <div class="empty">
+          ${esc(error.message)}
+        </div>
+      `;
+
     return;
   }
+
 
   if (!data?.length) {
+
     box.innerHTML =
-      '<div class="empty">কোনো order নেই।</div>';
+      `
+        <div class="empty">
+          কোনো order নেই।
+        </div>
+      `;
+
     return;
   }
 
-  box.innerHTML = data
-    .map(
-      (item) => `
-        <div class="card">
-          <b>Order #${esc(item.order_id)}</b>
-          <p>
-            ${esc(item.products?.name || "Product")}
-            × ${Number(item.quantity || 0)}
-          </p>
-          <small>
-            Status: ${esc(item.orders?.status || "pending")}
-          </small>
-        </div>
-      `
-    )
-    .join("");
+
+  box.innerHTML =
+    data
+      .map(
+        (item) => `
+
+          <div class="card">
+
+            <b>
+              Order #${esc(
+                item.order_id
+              )}
+            </b>
+
+
+            <p>
+
+              ${esc(
+                item.products?.name ||
+                "Product"
+              )}
+
+              ×
+              ${Number(
+                item.quantity || 0
+              )}
+
+            </p>
+
+
+            <small>
+
+              Status:
+              ${esc(
+                item.orders?.status ||
+                "pending"
+              )}
+
+            </small>
+
+          </div>
+
+        `
+      )
+      .join("");
 }
 
-/* ---------------- STORE SETTINGS ---------------- */
+
+/* =========================================================
+   STORE SETTINGS
+   ========================================================= */
 
 function sellerSettings() {
-  const box = $("sellerSettingsTab");
-  if (!box || !currentMyStore) return;
 
-  const store = currentMyStore;
+  const box =
+    $("sellerSettingsTab");
+
+
+  if (
+    !box ||
+    !currentMyStore
+  ) {
+    return;
+  }
+
+
+  const store =
+    currentMyStore;
+
 
   box.innerHTML = `
+
     <div class="card">
+
       <label>
+
         Store name
-        <input id="setName" value="${esc(store.name)}">
+
+        <input
+          id="setName"
+          value="${esc(
+            store.name
+          )}"
+        >
+
       </label>
 
+
       <label>
+
         Description
-        <textarea id="setDesc">${esc(store.description || "")}</textarea>
+
+        <textarea
+          id="setDesc"
+        >${esc(
+          store.description || ""
+        )}</textarea>
+
       </label>
 
+
       <label>
+
         Phone
-        <input id="setPhone" value="${esc(store.phone || "")}">
+
+        <input
+          id="setPhone"
+          value="${esc(
+            store.phone || ""
+          )}"
+        >
+
       </label>
 
+
       <label>
+
         Address
-        <input id="setAddress" value="${esc(store.address || "")}">
+
+        <input
+          id="setAddress"
+          value="${esc(
+            store.address || ""
+          )}"
+        >
+
       </label>
+
 
       <label>
-        Logo URL
-        <input id="setLogo" type="url" value="${esc(store.logo_url || "")}">
+
+        Store Logo
+
+        <input
+          id="setLogoFile"
+          type="file"
+          accept="image/*"
+        >
+
       </label>
+
+
+      ${
+        store.logo_url
+          ? `
+            <small class="store-meta">
+              বর্তমান Logo আছে। নতুন File না দিলে আগের Logo থাকবে।
+            </small>
+          `
+          : ""
+      }
+
 
       <label>
-        Cover URL
-        <input id="setCover" type="url" value="${esc(store.cover_url || "")}">
+
+        Store Cover
+
+        <input
+          id="setCoverFile"
+          type="file"
+          accept="image/*"
+        >
+
       </label>
 
-      <button id="saveStore" class="primary">
+
+      ${
+        store.cover_url
+          ? `
+            <small class="store-meta">
+              বর্তমান Cover আছে। নতুন File না দিলে আগের Cover থাকবে।
+            </small>
+          `
+          : ""
+      }
+
+
+      <button
+        id="saveStore"
+        class="primary"
+      >
         Save Store
       </button>
 
+
       <p id="storeSettingsMessage"></p>
+
     </div>
+
   `;
 
-  $("saveStore").onclick = saveStoreSettings;
+
+  $("saveStore").onclick =
+    saveStoreSettings;
 }
 
+
+/* =========================================================
+   SAVE STORE SETTINGS
+   ========================================================= */
+
 async function saveStoreSettings() {
-  const updates = {
-    name: $("setName").value.trim(),
-    description: $("setDesc").value.trim() || null,
-    phone: $("setPhone").value.trim() || null,
-    address: $("setAddress").value.trim() || null,
-    logo_url: $("setLogo").value.trim() || null,
-    cover_url: $("setCover").value.trim() || null
-  };
 
-  const { data, error } = await sb
-    .from("stores")
-    .update(updates)
-    .eq("id", currentMyStore.id)
-    .eq("owner_id", currentUser.id)
-    .select()
-    .single();
-
-  if (error) {
-    $("storeSettingsMessage").textContent = error.message;
+  if (
+    !currentUser ||
+    !currentMyStore
+  ) {
     return;
   }
 
-  currentMyStore = data;
+
+  const message =
+    $("storeSettingsMessage");
+
+
+  const name =
+    $("setName")
+      .value
+      .trim();
+
+
+  if (!name) {
+
+    message.textContent =
+      "Store name দাও।";
+
+    return;
+  }
+
+
+  /* -----------------------------
+     Existing images
+     ----------------------------- */
+
+  let logoUrl =
+    currentMyStore.logo_url ||
+    null;
+
+
+  let coverUrl =
+    currentMyStore.cover_url ||
+    null;
+
+
+  /* -----------------------------
+     New logo
+     ----------------------------- */
+
+  const logoFile =
+    $("setLogoFile")
+      ?.files?.[0] ||
+    null;
+
+
+  if (logoFile) {
+
+    message.textContent =
+      "নতুন Logo upload হচ্ছে...";
+
+
+    logoUrl =
+      await uploadImage(
+        logoFile,
+        "store-logos"
+      );
+
+
+    if (!logoUrl) {
+
+      message.textContent =
+        "Logo upload করা যায়নি।";
+
+      return;
+    }
+  }
+
+
+  /* -----------------------------
+     New cover
+     ----------------------------- */
+
+  const coverFile =
+    $("setCoverFile")
+      ?.files?.[0] ||
+    null;
+
+
+  if (coverFile) {
+
+    message.textContent =
+      "নতুন Cover upload হচ্ছে...";
+
+
+    coverUrl =
+      await uploadImage(
+        coverFile,
+        "store-covers"
+      );
+
+
+    if (!coverUrl) {
+
+      message.textContent =
+        "Cover upload করা যায়নি।";
+
+      return;
+    }
+  }
+
+
+  /* -----------------------------
+     Store update
+     ----------------------------- */
+
+  const updates = {
+
+    name,
+
+    description:
+      $("setDesc")
+        .value
+        .trim() ||
+      null,
+
+    phone:
+      $("setPhone")
+        .value
+        .trim() ||
+      null,
+
+    address:
+      $("setAddress")
+        .value
+        .trim() ||
+      null,
+
+    logo_url:
+      logoUrl,
+
+    cover_url:
+      coverUrl
+  };
+
+
+  message.textContent =
+    "Store save হচ্ছে...";
+
+
+  const {
+    data,
+    error
+  } = await sb
+    .from("stores")
+    .update(updates)
+    .eq(
+      "id",
+      currentMyStore.id
+    )
+    .eq(
+      "owner_id",
+      currentUser.id
+    )
+    .select()
+    .single();
+
+
+  if (error) {
+
+    console.error(
+      "Store update error:",
+      error
+    );
+
+
+    message.textContent =
+      error.message;
+
+    return;
+  }
+
+
+  currentMyStore =
+    data;
+
+
   await loadStores();
+
   await renderMyStore();
-  toast("Store updated");
+
+
+  toast(
+    "Store updated"
+  );
 }
 
-/* ---------------- UI EVENTS ---------------- */
+
+/* =========================================================
+   UI EVENTS
+   ========================================================= */
 
 function init() {
-  /* IMPORTANT: define every handler before using it. */
 
-  document.querySelectorAll("[data-route]").forEach((el) => {
-    el.onclick = () => go(el.dataset.route);
-  });
+  /* -----------------------------
+     Navigation
+     ----------------------------- */
 
-  $("menuBtn")?.addEventListener("click", openMenu);
-  $("closeMenuBtn")?.addEventListener("click", closeMenu);
-  $("menuOverlay")?.addEventListener("click", closeMenu);
+  document
+    .querySelectorAll(
+      "[data-route]"
+    )
+    .forEach((el) => {
 
-  $("loginBtn")?.addEventListener("click", () => openAuth("login"));
-  $("logoutBtn")?.addEventListener("click", logout);
-  $("createStoreBtn")?.addEventListener("click", openStore);
+      el.onclick = () => {
 
-  $("closeAuthBtn")?.addEventListener("click", closeAuth);
-  $("authSwitchBtn")?.addEventListener(
-    "click",
-    () => openAuth(authMode === "login" ? "register" : "login")
-  );
-  $("authForm")?.addEventListener("submit", authSubmit);
+        go(
+          el.dataset.route
+        );
 
-  $("closeStoreBtn")?.addEventListener("click", closeStore);
-  $("storeForm")?.addEventListener("submit", createStore);
+      };
 
-  $("productForm")?.addEventListener("submit", addProduct);
+    });
 
-  $("closeProductEditBtn")?.addEventListener(
-    "click",
-    closeProductEditor
-  );
 
-  $("productEditForm")?.addEventListener(
-    "submit",
-    saveProductEdit
-  );
+  /* -----------------------------
+     Menu
+     ----------------------------- */
 
-  $("searchInput")?.addEventListener("input", () => {
-    renderProducts(
-      currentCategory,
-      $("searchInput").value || ""
+  $("menuBtn")
+    ?.addEventListener(
+      "click",
+      openMenu
     );
-  });
 
-  $("searchBtn")?.addEventListener("click", () => {
-    go("home");
-    renderProducts(
-      currentCategory,
-      $("searchInput")?.value || ""
+
+  $("closeMenuBtn")
+    ?.addEventListener(
+      "click",
+      closeMenu
     );
-  });
 
-  $("headerSearchBtn")?.addEventListener("click", () => {
-    go("home");
-    setTimeout(() => $("searchInput")?.focus(), 50);
-  });
 
-  document.querySelectorAll(".tab").forEach((tab) => {
-    tab.onclick = () => {
-      document.querySelectorAll(".tab").forEach((t) =>
-        t.classList.remove("active")
-      );
+  $("menuOverlay")
+    ?.addEventListener(
+      "click",
+      closeMenu
+    );
 
-      tab.classList.add("active");
 
-      const tabName = tab.dataset.tab;
+  /* -----------------------------
+     Account
+     ----------------------------- */
 
-      $("sellerProductsTab")?.classList.toggle(
-        "hidden",
-        tabName !== "products"
-      );
+  $("loginBtn")
+    ?.addEventListener(
+      "click",
+      () => openAuth("login")
+    );
 
-      $("sellerOrdersTab")?.classList.toggle(
-        "hidden",
-        tabName !== "orders"
-      );
 
-      $("sellerSettingsTab")?.classList.toggle(
-        "hidden",
-        tabName !== "settings"
-      );
-    };
-  });
+  $("logoutBtn")
+    ?.addEventListener(
+      "click",
+      logout
+    );
 
-  $("authModal")?.querySelector(".shade")?.addEventListener(
-    "click",
-    closeAuth
-  );
 
-  $("storeModal")?.querySelector(".shade")?.addEventListener(
-    "click",
-    closeStore
-  );
+  $("createStoreBtn")
+    ?.addEventListener(
+      "click",
+      openStore
+    );
 
-  $("productEditModal")?.querySelector(".shade")?.addEventListener(
-    "click",
-    closeProductEditor
-  );
+
+  /* -----------------------------
+     Auth
+     ----------------------------- */
+
+  $("closeAuthBtn")
+    ?.addEventListener(
+      "click",
+      closeAuth
+    );
+
+
+  $("authSwitchBtn")
+    ?.addEventListener(
+      "click",
+      () =>
+        openAuth(
+          authMode === "login"
+            ? "register"
+            : "login"
+        )
+    );
+
+
+  $("authForm")
+    ?.addEventListener(
+      "submit",
+      authSubmit
+    );
+
+
+  /* -----------------------------
+     Store
+     ----------------------------- */
+
+  $("closeStoreBtn")
+    ?.addEventListener(
+      "click",
+      closeStore
+    );
+
+
+  $("storeForm")
+    ?.addEventListener(
+      "submit",
+      createStore
+    );
+
+
+  /* -----------------------------
+     Product
+     ----------------------------- */
+
+  $("productForm")
+    ?.addEventListener(
+      "submit",
+      addProduct
+    );
+
+
+  $("closeProductEditBtn")
+    ?.addEventListener(
+      "click",
+      closeProductEditor
+    );
+
+
+  $("productEditForm")
+    ?.addEventListener(
+      "submit",
+      saveProductEdit
+    );
+
+
+  /* -----------------------------
+     Search
+     ----------------------------- */
+
+  $("searchInput")
+    ?.addEventListener(
+      "input",
+      () => {
+
+        renderProducts(
+          currentCategory,
+          $("searchInput").value ||
+          ""
+        );
+
+      }
+    );
+
+
+  $("searchBtn")
+    ?.addEventListener(
+      "click",
+      () => {
+
+        go("home");
+
+
+        renderProducts(
+          currentCategory,
+          $("searchInput")
+            .value ||
+          ""
+        );
+
+      }
+    );
+
+
+  $("headerSearchBtn")
+    ?.addEventListener(
+      "click",
+      () => {
+
+        go("home");
+
+
+        setTimeout(
+          () =>
+            $("searchInput")
+              ?.focus(),
+          50
+        );
+
+      }
+    );
+
+
+  /* -----------------------------
+     Seller Tabs
+     ----------------------------- */
+
+  document
+    .querySelectorAll(".tab")
+    .forEach((tab) => {
+
+      tab.onclick = () => {
+
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) =>
+            t.classList.remove(
+              "active"
+            )
+          );
+
+
+        tab.classList.add(
+          "active"
+        );
+
+
+        const tabName =
+          tab.dataset.tab;
+
+
+        $("sellerProductsTab")
+          ?.classList.toggle(
+            "hidden",
+            tabName !==
+              "products"
+          );
+
+
+        $("sellerOrdersTab")
+          ?.classList.toggle(
+            "hidden",
+            tabName !==
+              "orders"
+          );
+
+
+        $("sellerSettingsTab")
+          ?.classList.toggle(
+            "hidden",
+            tabName !==
+              "settings"
+          );
+
+      };
+
+    });
+
+
+  /* -----------------------------
+     Modal shades
+     ----------------------------- */
+
+  $("authModal")
+    ?.querySelector(".shade")
+    ?.addEventListener(
+      "click",
+      closeAuth
+    );
+
+
+  $("storeModal")
+    ?.querySelector(".shade")
+    ?.addEventListener(
+      "click",
+      closeStore
+    );
+
+
+  $("productEditModal")
+    ?.querySelector(".shade")
+    ?.addEventListener(
+      "click",
+      closeProductEditor
+    );
+
+
+  /* -----------------------------
+     Initial render
+     ----------------------------- */
 
   renderCategories();
+
   renderProducts();
+
   route();
 
+
+  /* -----------------------------
+     Load Supabase data
+     ----------------------------- */
+
   (async () => {
+
     await updateAuth();
+
     await loadCategories();
+
     await loadStores();
+
     await loadProducts();
+
     route();
+
   })();
 }
 
-if (sb?.auth) {
-  sb.auth.onAuthStateChange(async () => {
-    await updateAuth();
 
-    if (location.hash === "#my-store") {
-      await renderMyStore();
+/* =========================================================
+   AUTH STATE
+   ========================================================= */
+
+if (sb?.auth) {
+
+  sb.auth.onAuthStateChange(
+    async () => {
+
+      await updateAuth();
+
+
+      if (
+        location.hash ===
+        "#my-store"
+      ) {
+
+        await renderMyStore();
+
+      }
+
     }
-  });
+  );
 }
 
-document.addEventListener("DOMContentLoaded", init);
 
-window.go = go;
-window.toast = toast;
-window.closeMenu = closeMenu;
-window.closeAuth = closeAuth;
-window.closeStore = closeStore;
-window.closeProductEditor = closeProductEditor;
+/* =========================================================
+   START APP
+   ========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  init
+);
+
+
+/* =========================================================
+   GLOBAL FUNCTIONS
+   ========================================================= */
+
+window.go =
+  go;
+
+window.toast =
+  toast;
+
+window.closeMenu =
+  closeMenu;
+
+window.closeAuth =
+  closeAuth;
+
+window.closeStore =
+  closeStore;
+
+window.closeProductEditor =
+  closeProductEditor;
