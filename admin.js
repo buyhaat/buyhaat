@@ -131,13 +131,23 @@ function showLogin() {
 
 function showDashboard(user) {
 
+    const loginPage =
+        document.getElementById("loginPage");
+
+    const dashboardPage =
+        document.getElementById("dashboardPage");
+
+
     if (loginPage) {
-        loginPage.hidden = true;
+        loginPage.style.display = "none";
     }
+
 
     if (dashboardPage) {
         dashboardPage.hidden = false;
+        dashboardPage.style.display = "flex";
     }
+
 
     document.body.classList.add(
         "dashboard-active"
@@ -152,27 +162,17 @@ function showDashboard(user) {
         adminUserEmail.textContent = email;
     }
 
+
     if (settingsEmail) {
         settingsEmail.textContent = email;
     }
 
 
-    /* Make sure URL stays /admin */
-
-    if (
-        window.location.pathname !== "/admin"
-    ) {
-
-        window.history.replaceState(
-            {},
-            "",
-            "/admin"
-        );
-
-    }
-
+    console.log(
+        "DASHBOARD SHOWN:",
+        email
+    );
 }
-
 
 /* =========================================================
    CHECK ADMIN
