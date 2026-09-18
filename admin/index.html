@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="bn">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -10,76 +12,80 @@
 
     <meta name="color-scheme" content="light">
 
-    <title>BuyHaat — Admin Login</title>
+    <title>BuyHaat — Admin Panel</title>
 
     <link rel="stylesheet" href="admin.css">
+
 </head>
 
+
 <body class="admin-page">
+
 
     <!-- =====================================================
          LOGIN PAGE
     ====================================================== -->
 
-    <section id="adminLogin" class="login-page">
+    <section
+        id="adminLogin"
+        class="login-page"
+    >
 
         <div class="login-card">
 
-            <div class="login-logo">
-                <div class="login-logo-icon">B</div>
-
-                <div>
-                    <h1>BuyHaat</h1>
-                    <p>Admin Panel</p>
-                </div>
+            <div class="admin-logo">
+                B
             </div>
 
-            <div class="login-heading">
-                <h2>Welcome back</h2>
-                <p>Admin panel-এ প্রবেশ করতে Login করুন</p>
-            </div>
+            <h1>
+                BuyHaat Admin
+            </h1>
+
+            <p class="login-subtitle">
+                Admin Panel-এ প্রবেশ করতে Login করুন
+            </p>
+
 
             <form id="adminLoginForm">
 
-                <div class="form-group">
-                    <label for="adminEmail">
-                        Email
-                    </label>
+                <label for="adminEmail">
+                    Email
+                </label>
 
-                    <input
-                        type="email"
-                        id="adminEmail"
-                        placeholder="admin@example.com"
-                        autocomplete="email"
-                        required
-                    >
-                </div>
+                <input
+                    type="email"
+                    id="adminEmail"
+                    placeholder="admin@example.com"
+                    autocomplete="email"
+                    required
+                >
 
-                <div class="form-group">
-                    <label for="adminPassword">
-                        Password
-                    </label>
 
-                    <input
-                        type="password"
-                        id="adminPassword"
-                        placeholder="আপনার password দিন"
-                        autocomplete="current-password"
-                        required
-                    >
-                </div>
+                <label for="adminPassword">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="adminPassword"
+                    placeholder="আপনার password দিন"
+                    autocomplete="current-password"
+                    required
+                >
+
 
                 <button
                     type="submit"
                     id="adminLoginBtn"
-                    class="login-btn"
+                    class="primary-btn"
                 >
                     Login
                 </button>
 
+
                 <div
                     id="loginMessage"
-                    class="login-message"
+                    class="message"
                 ></div>
 
             </form>
@@ -89,18 +95,22 @@
     </section>
 
 
+
     <!-- =====================================================
          ADMIN APP
-         Login হওয়ার আগে পুরোপুরি hidden থাকবে
+         Login না করলে এটি সম্পূর্ণ hidden থাকবে
     ====================================================== -->
 
     <section
-    id="adminApp"
-    class="admin-app"
-    hidden
->
+        id="adminApp"
+        class="admin-app"
+        hidden
+    >
 
-        <!-- HEADER -->
+
+        <!-- =================================================
+             HEADER
+        ================================================== -->
 
         <header class="admin-header">
 
@@ -108,18 +118,28 @@
 
                 <button
                     id="sidebarToggle"
-                    class="sidebar-toggle"
+                    class="icon-btn"
                     type="button"
+                    aria-label="Open menu"
                 >
                     ☰
                 </button>
 
-                <div class="header-brand">
-                    <strong>BuyHaat</strong>
-                    <span>Admin</span>
+
+                <div>
+
+                    <h1>
+                        BuyHaat Admin
+                    </h1>
+
+                    <span>
+                        Administration Panel
+                    </span>
+
                 </div>
 
             </div>
+
 
             <button
                 id="logoutBtn"
@@ -132,326 +152,469 @@
         </header>
 
 
-        <!-- SIDEBAR -->
 
-        <aside
-            id="adminSidebar"
-            class="admin-sidebar"
-        >
+        <!-- =================================================
+             ADMIN LAYOUT
+        ================================================== -->
 
-            <nav class="admin-nav">
-
-                <button
-                    class="nav-item active"
-                    data-page="dashboard"
-                    type="button"
-                >
-                    <span>📊</span>
-                    <span>Dashboard</span>
-                </button>
-
-                <button
-                    class="nav-item"
-                    data-page="stores"
-                    type="button"
-                >
-                    <span>🏪</span>
-                    <span>Stores</span>
-                </button>
-
-                <button
-                    class="nav-item"
-                    data-page="products"
-                    type="button"
-                >
-                    <span>📦</span>
-                    <span>Products</span>
-                </button>
-
-                <button
-                    class="nav-item"
-                    data-page="orders"
-                    type="button"
-                >
-                    <span>🛒</span>
-                    <span>Orders</span>
-                </button>
-
-                <button
-                    class="nav-item"
-                    data-page="users"
-                    type="button"
-                >
-                    <span>👥</span>
-                    <span>Users</span>
-                </button>
-
-                <button
-                    class="nav-item"
-                    data-page="settings"
-                    type="button"
-                >
-                    <span>⚙️</span>
-                    <span>Settings</span>
-                </button>
-
-            </nav>
-
-        </aside>
-
-
-        <!-- MAIN -->
-
-        <main class="admin-main">
+        <div class="admin-layout">
 
 
             <!-- =================================================
-                 DASHBOARD
+                 SIDEBAR
             ================================================== -->
 
-            <section
-                id="page-dashboard"
-                class="admin-page-section active"
+            <aside
+                id="adminSidebar"
+                class="sidebar"
             >
 
-                <div class="page-title">
-                    <h1>Dashboard</h1>
-                    <p>BuyHaat-এর সার্বিক তথ্য</p>
-                </div>
+                <nav>
+
+                    <button
+                        class="nav-item active"
+                        data-page="dashboard"
+                        type="button"
+                    >
+                        <span>📊</span>
+                        <span>Dashboard</span>
+                    </button>
 
 
-                <div class="stats-grid">
+                    <button
+                        class="nav-item"
+                        data-page="stores"
+                        type="button"
+                    >
+                        <span>🏪</span>
+                        <span>Stores</span>
+                    </button>
 
-                    <div class="stat-card">
-                        <div class="stat-icon">🏪</div>
+
+                    <button
+                        class="nav-item"
+                        data-page="products"
+                        type="button"
+                    >
+                        <span>📦</span>
+                        <span>Products</span>
+                    </button>
+
+
+                    <button
+                        class="nav-item"
+                        data-page="orders"
+                        type="button"
+                    >
+                        <span>🛒</span>
+                        <span>Orders</span>
+                    </button>
+
+
+                    <button
+                        class="nav-item"
+                        data-page="users"
+                        type="button"
+                    >
+                        <span>👥</span>
+                        <span>Users</span>
+                    </button>
+
+
+                    <button
+                        class="nav-item"
+                        data-page="settings"
+                        type="button"
+                    >
+                        <span>⚙️</span>
+                        <span>Settings</span>
+                    </button>
+
+                </nav>
+
+            </aside>
+
+
+
+            <!-- =================================================
+                 CONTENT
+            ================================================== -->
+
+            <main class="admin-content">
+
+
+                <!-- =================================================
+                     DASHBOARD
+                ================================================== -->
+
+                <section
+                    id="page-dashboard"
+                    class="admin-page-section active"
+                >
+
+                    <div class="page-heading">
 
                         <div>
-                            <span>Total Stores</span>
-                            <strong id="totalStores">0</strong>
+
+                            <h2>
+                                Dashboard
+                            </h2>
+
+                            <p>
+                                BuyHaat-এর সার্বিক তথ্য
+                            </p>
+
                         </div>
+
                     </div>
 
 
-                    <div class="stat-card">
-                        <div class="stat-icon">📦</div>
+                    <!-- STATISTICS -->
 
-                        <div>
-                            <span>Total Products</span>
-                            <strong id="totalProducts">0</strong>
+                    <div class="stats-grid">
+
+
+                        <div class="stat-card">
+
+                            <div class="stat-icon">
+                                🏪
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Total Stores
+                                </span>
+
+                                <strong id="totalStores">
+                                    0
+                                </strong>
+
+                            </div>
+
                         </div>
+
+
+
+                        <div class="stat-card">
+
+                            <div class="stat-icon">
+                                📦
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Total Products
+                                </span>
+
+                                <strong id="totalProducts">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="stat-card">
+
+                            <div class="stat-icon">
+                                🛒
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Total Orders
+                                </span>
+
+                                <strong id="totalOrders">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="stat-card">
+
+                            <div class="stat-icon">
+                                👥
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Total Users
+                                </span>
+
+                                <strong id="totalUsers">
+                                    —
+                                </strong>
+
+                            </div>
+
+                        </div>
+
                     </div>
 
 
-                    <div class="stat-card">
-                        <div class="stat-icon">🛒</div>
 
-                        <div>
-                            <span>Total Orders</span>
-                            <strong id="totalOrders">0</strong>
+                    <!-- RECENT ORDERS -->
+
+                    <div class="dashboard-section">
+
+                        <div class="section-header">
+
+                            <h3>
+                                Recent Orders
+                            </h3>
+
                         </div>
-                    </div>
 
-
-                    <div class="stat-card">
-                        <div class="stat-icon">👥</div>
-
-                        <div>
-                            <span>Total Users</span>
-                            <strong id="totalUsers">—</strong>
-                        </div>
-                    </div>
-
-                </div>
-
-
-                <div class="dashboard-grid">
-
-                    <div class="dashboard-card">
-
-                        <div class="card-header">
-                            <h2>Recent Orders</h2>
-                        </div>
 
                         <div
                             id="recentOrders"
-                            class="table-container"
+                            class="table-wrapper"
                         ></div>
 
                     </div>
 
 
-                    <div class="dashboard-card">
 
-                        <div class="card-header">
-                            <h2>Recent Stores</h2>
+                    <!-- RECENT STORES -->
+
+                    <div class="dashboard-section">
+
+                        <div class="section-header">
+
+                            <h3>
+                                Recent Stores
+                            </h3>
+
                         </div>
+
 
                         <div
                             id="recentStores"
-                            class="table-container"
+                            class="table-wrapper"
                         ></div>
 
                     </div>
 
-                </div>
-
-            </section>
+                </section>
 
 
-            <!-- =================================================
-                 STORES
-            ================================================== -->
 
-            <section
-                id="page-stores"
-                class="admin-page-section"
-            >
+                <!-- =================================================
+                     STORES
+                ================================================== -->
 
-                <div class="page-title-row">
+                <section
+                    id="page-stores"
+                    class="admin-page-section"
+                >
 
-                    <div class="page-title">
-                        <h1>Stores</h1>
-                        <p>সকল Store পরিচালনা করুন</p>
+                    <div class="page-heading">
+
+                        <div>
+
+                            <h2>
+                                Stores
+                            </h2>
+
+                            <p>
+                                সকল Store পরিচালনা করুন
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            id="refreshStoresBtn"
+                            class="primary-btn"
+                            type="button"
+                        >
+                            ↻ Refresh
+                        </button>
+
                     </div>
 
-                    <button
-                        id="refreshStoresBtn"
-                        class="action-btn"
-                        type="button"
-                    >
-                        ↻ Refresh
-                    </button>
 
-                </div>
+                    <div
+                        id="storesTable"
+                        class="dashboard-section"
+                    ></div>
 
-                <div
-                    id="storesTable"
-                    class="table-card"
-                ></div>
-
-            </section>
+                </section>
 
 
-            <!-- =================================================
-                 PRODUCTS
-            ================================================== -->
 
-            <section
-                id="page-products"
-                class="admin-page-section"
-            >
+                <!-- =================================================
+                     PRODUCTS
+                ================================================== -->
 
-                <div class="page-title-row">
+                <section
+                    id="page-products"
+                    class="admin-page-section"
+                >
 
-                    <div class="page-title">
-                        <h1>Products</h1>
-                        <p>সকল Product পরিচালনা করুন</p>
+                    <div class="page-heading">
+
+                        <div>
+
+                            <h2>
+                                Products
+                            </h2>
+
+                            <p>
+                                সকল Product পরিচালনা করুন
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            id="refreshProductsBtn"
+                            class="primary-btn"
+                            type="button"
+                        >
+                            ↻ Refresh
+                        </button>
+
                     </div>
 
-                    <button
-                        id="refreshProductsBtn"
-                        class="action-btn"
-                        type="button"
-                    >
-                        ↻ Refresh
-                    </button>
 
-                </div>
+                    <div
+                        id="productsTable"
+                        class="dashboard-section"
+                    ></div>
 
-                <div
-                    id="productsTable"
-                    class="table-card"
-                ></div>
-
-            </section>
+                </section>
 
 
-            <!-- =================================================
-                 ORDERS
-            ================================================== -->
 
-            <section
-                id="page-orders"
-                class="admin-page-section"
-            >
+                <!-- =================================================
+                     ORDERS
+                ================================================== -->
 
-                <div class="page-title-row">
+                <section
+                    id="page-orders"
+                    class="admin-page-section"
+                >
 
-                    <div class="page-title">
-                        <h1>Orders</h1>
-                        <p>সকল Order পরিচালনা করুন</p>
+                    <div class="page-heading">
+
+                        <div>
+
+                            <h2>
+                                Orders
+                            </h2>
+
+                            <p>
+                                সকল Order পরিচালনা করুন
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            id="refreshOrdersBtn"
+                            class="primary-btn"
+                            type="button"
+                        >
+                            ↻ Refresh
+                        </button>
+
                     </div>
 
-                    <button
-                        id="refreshOrdersBtn"
-                        class="action-btn"
-                        type="button"
+
+                    <div
+                        id="ordersTable"
+                        class="dashboard-section"
+                    ></div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     USERS
+                ================================================== -->
+
+                <section
+                    id="page-users"
+                    class="admin-page-section"
+                >
+
+                    <div class="page-heading">
+
+                        <div>
+
+                            <h2>
+                                Users
+                            </h2>
+
+                            <p>
+                                Registered users information
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="usersTable"
+                        class="dashboard-section"
                     >
-                        ↻ Refresh
-                    </button>
 
-                </div>
+                        <div class="empty-state">
+                            User management-এর জন্য
+                            Supabase Auth data ব্যবহার করতে হবে।
+                        </div>
 
-                <div
-                    id="ordersTable"
-                    class="table-card"
-                ></div>
+                    </div>
 
-            </section>
+                </section>
 
 
-            <!-- =================================================
-                 USERS
-            ================================================== -->
 
-            <section
-                id="page-users"
-                class="admin-page-section"
-            >
+                <!-- =================================================
+                     SETTINGS
+                ================================================== -->
 
-                <div class="page-title">
+                <section
+                    id="page-settings"
+                    class="admin-page-section"
+                >
 
-                    <h1>Users</h1>
+                    <div class="page-heading">
 
-                    <p>
-                        Registered users information
-                    </p>
+                        <div>
 
-                </div>
+                            <h2>
+                                Settings
+                            </h2>
 
-                <div
-                    id="usersTable"
-                    class="table-card"
-                ></div>
+                            <p>
+                                Admin panel settings
+                            </p>
 
-            </section>
+                        </div>
 
+                    </div>
 
-            <!-- =================================================
-                 SETTINGS
-            ================================================== -->
-
-            <section
-                id="page-settings"
-                class="admin-page-section"
-            >
-
-                <div class="page-title">
-
-                    <h1>Settings</h1>
-
-                    <p>
-                        Admin panel settings
-                    </p>
-
-                </div>
-
-
-                <div class="settings-grid">
 
                     <div class="settings-card">
 
-                        <h2>Admin Account</h2>
+                        <h3>
+                            Admin Account
+                        </h3>
 
                         <p>
                             Logged in email
@@ -466,7 +629,9 @@
 
                     <div class="settings-card">
 
-                        <h2>Supabase</h2>
+                        <h3>
+                            Supabase
+                        </h3>
 
                         <p>
                             Database connection status
@@ -478,16 +643,20 @@
 
                     </div>
 
-                </div>
+                </section>
 
-            </section>
 
-        </main>
+            </main>
+
+        </div>
 
     </section>
 
 
-    <!-- TOAST -->
+
+    <!-- =====================================================
+         TOAST
+    ====================================================== -->
 
     <div
         id="toast"
@@ -495,13 +664,20 @@
     ></div>
 
 
-    <!-- SUPABASE CONFIG -->
+
+    <!-- =====================================================
+         SUPABASE
+    ====================================================== -->
 
     <script src="../supabase-config.js"></script>
 
-    <!-- ADMIN JS -->
+
+    <!-- =====================================================
+         ADMIN JS
+    ====================================================== -->
 
     <script src="admin.js"></script>
 
 </body>
+
 </html>
