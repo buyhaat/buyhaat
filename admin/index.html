@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="bn">
-
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -12,158 +10,136 @@
 
     <meta name="color-scheme" content="light">
 
-    <title>BuyHaat — Admin Panel</title>
+    <title>BuyHaat — Admin Login</title>
 
-    <link
-        rel="stylesheet"
-        href="admin.css"
-    >
-
+    <link rel="stylesheet" href="admin.css">
 </head>
 
+<body class="admin-page">
 
-<body>
+    <!-- =====================================================
+         LOGIN PAGE
+    ====================================================== -->
 
+    <section id="adminLogin" class="login-page">
 
-<!-- =====================================================
-     LOGIN
-===================================================== -->
+        <div class="login-card">
 
-<section
-    id="adminLogin"
-    class="login-page"
->
+            <div class="login-logo">
+                <div class="login-logo-icon">B</div>
 
-    <div class="login-card">
+                <div>
+                    <h1>BuyHaat</h1>
+                    <p>Admin Panel</p>
+                </div>
+            </div>
 
-        <div class="admin-logo">
-            🛍️
+            <div class="login-heading">
+                <h2>Welcome back</h2>
+                <p>Admin panel-এ প্রবেশ করতে Login করুন</p>
+            </div>
+
+            <form id="adminLoginForm">
+
+                <div class="form-group">
+                    <label for="adminEmail">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="adminEmail"
+                        placeholder="admin@example.com"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="adminPassword">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="adminPassword"
+                        placeholder="আপনার password দিন"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    id="adminLoginBtn"
+                    class="login-btn"
+                >
+                    Login
+                </button>
+
+                <div
+                    id="loginMessage"
+                    class="login-message"
+                ></div>
+
+            </form>
+
         </div>
 
-        <h1>
-            BuyHaat Admin
-        </h1>
-
-        <p class="login-subtitle">
-            Admin Panel-এ লগইন করুন
-        </p>
+    </section>
 
 
-        <form id="adminLoginForm">
+    <!-- =====================================================
+         ADMIN APP
+         Login হওয়ার আগে পুরোপুরি hidden থাকবে
+    ====================================================== -->
 
-            <label for="adminEmail">
-                Email
-            </label>
+    <section
+        id="adminApp"
+        class="admin-app"
+        style="display: none;"
+    >
 
-            <input
-                type="email"
-                id="adminEmail"
-                placeholder="Admin email"
-                autocomplete="email"
-                required
-            >
+        <!-- HEADER -->
 
+        <header class="admin-header">
 
-            <label for="adminPassword">
-                Password
-            </label>
+            <div class="header-left">
 
-            <input
-                type="password"
-                id="adminPassword"
-                placeholder="Password"
-                autocomplete="current-password"
-                required
-            >
+                <button
+                    id="sidebarToggle"
+                    class="sidebar-toggle"
+                    type="button"
+                >
+                    ☰
+                </button>
 
-
-            <button
-                type="submit"
-                id="adminLoginBtn"
-                class="primary-btn"
-            >
-                Login
-            </button>
-
-        </form>
-
-
-        <div
-            id="loginMessage"
-            class="message"
-        ></div>
-
-    </div>
-
-</section>
-
-
-
-<!-- =====================================================
-     ADMIN APP
-===================================================== -->
-
-<section
-    id="adminApp"
-    class="admin-app hidden"
->
-
-
-    <!-- HEADER -->
-
-    <header class="admin-header">
-
-        <div class="header-left">
-
-            <button
-                id="sidebarToggle"
-                class="icon-btn"
-                type="button"
-            >
-                ☰
-            </button>
-
-
-            <div>
-
-                <h1>
-                    BuyHaat
-                </h1>
-
-                <span>
-                    Admin Panel
-                </span>
+                <div class="header-brand">
+                    <strong>BuyHaat</strong>
+                    <span>Admin</span>
+                </div>
 
             </div>
 
-        </div>
+            <button
+                id="logoutBtn"
+                class="logout-btn"
+                type="button"
+            >
+                Logout
+            </button>
 
-
-        <button
-            id="logoutBtn"
-            class="logout-btn"
-            type="button"
-        >
-            Logout
-        </button>
-
-    </header>
-
-
-
-    <!-- LAYOUT -->
-
-    <div class="admin-layout">
+        </header>
 
 
         <!-- SIDEBAR -->
 
         <aside
             id="adminSidebar"
-            class="sidebar"
+            class="admin-sidebar"
         >
 
-            <nav>
+            <nav class="admin-nav">
 
                 <button
                     class="nav-item active"
@@ -171,9 +147,8 @@
                     type="button"
                 >
                     <span>📊</span>
-                    Dashboard
+                    <span>Dashboard</span>
                 </button>
-
 
                 <button
                     class="nav-item"
@@ -181,9 +156,8 @@
                     type="button"
                 >
                     <span>🏪</span>
-                    Stores
+                    <span>Stores</span>
                 </button>
-
 
                 <button
                     class="nav-item"
@@ -191,29 +165,26 @@
                     type="button"
                 >
                     <span>📦</span>
-                    Products
+                    <span>Products</span>
                 </button>
-
 
                 <button
                     class="nav-item"
                     data-page="orders"
                     type="button"
                 >
-                    <span>🧾</span>
-                    Orders
+                    <span>🛒</span>
+                    <span>Orders</span>
                 </button>
-
 
                 <button
                     class="nav-item"
                     data-page="users"
                     type="button"
                 >
-                    <span>👤</span>
-                    Users
+                    <span>👥</span>
+                    <span>Users</span>
                 </button>
-
 
                 <button
                     class="nav-item"
@@ -221,7 +192,7 @@
                     type="button"
                 >
                     <span>⚙️</span>
-                    Settings
+                    <span>Settings</span>
                 </button>
 
             </nav>
@@ -229,10 +200,9 @@
         </aside>
 
 
+        <!-- MAIN -->
 
-        <!-- CONTENT -->
-
-        <main class="admin-content">
+        <main class="admin-main">
 
 
             <!-- =================================================
@@ -241,191 +211,91 @@
 
             <section
                 id="page-dashboard"
-                class="admin-page"
+                class="admin-page-section active"
             >
 
-                <div class="page-heading">
-
-                    <div>
-
-                        <h2>
-                            Dashboard
-                        </h2>
-
-                        <p>
-                            BuyHaat-এর বর্তমান অবস্থা
-                        </p>
-
-                    </div>
-
+                <div class="page-title">
+                    <h1>Dashboard</h1>
+                    <p>BuyHaat-এর সার্বিক তথ্য</p>
                 </div>
 
 
                 <div class="stats-grid">
 
-
                     <div class="stat-card">
-
-                        <div class="stat-icon">
-                            🏪
-                        </div>
+                        <div class="stat-icon">🏪</div>
 
                         <div>
-
-                            <span>
-                                মোট Store
-                            </span>
-
-                            <strong id="totalStores">
-                                0
-                            </strong>
-
+                            <span>Total Stores</span>
+                            <strong id="totalStores">0</strong>
                         </div>
-
                     </div>
 
 
-
                     <div class="stat-card">
-
-                        <div class="stat-icon">
-                            📦
-                        </div>
+                        <div class="stat-icon">📦</div>
 
                         <div>
-
-                            <span>
-                                মোট Product
-                            </span>
-
-                            <strong id="totalProducts">
-                                0
-                            </strong>
-
+                            <span>Total Products</span>
+                            <strong id="totalProducts">0</strong>
                         </div>
-
                     </div>
 
 
-
                     <div class="stat-card">
-
-                        <div class="stat-icon">
-                            🧾
-                        </div>
+                        <div class="stat-icon">🛒</div>
 
                         <div>
-
-                            <span>
-                                মোট Order
-                            </span>
-
-                            <strong id="totalOrders">
-                                0
-                            </strong>
-
+                            <span>Total Orders</span>
+                            <strong id="totalOrders">0</strong>
                         </div>
-
                     </div>
 
 
-
                     <div class="stat-card">
-
-                        <div class="stat-icon">
-                            👤
-                        </div>
+                        <div class="stat-icon">👥</div>
 
                         <div>
-
-                            <span>
-                                মোট User
-                            </span>
-
-                            <strong id="totalUsers">
-                                —
-                            </strong>
-
+                            <span>Total Users</span>
+                            <strong id="totalUsers">—</strong>
                         </div>
-
                     </div>
 
                 </div>
 
 
+                <div class="dashboard-grid">
 
-                <!-- RECENT ORDERS -->
+                    <div class="dashboard-card">
 
-                <div class="dashboard-section">
-
-                    <div class="section-header">
-
-                        <h3>
-                            সাম্প্রতিক Order
-                        </h3>
-
-                        <button
-                            class="small-btn"
-                            data-page="orders"
-                            type="button"
-                        >
-                            সব দেখুন
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        id="recentOrders"
-                        class="table-wrapper"
-                    >
-
-                        <div class="empty-state">
-                            Loading...
+                        <div class="card-header">
+                            <h2>Recent Orders</h2>
                         </div>
 
-                    </div>
-
-                </div>
-
-
-
-                <!-- RECENT STORES -->
-
-                <div class="dashboard-section">
-
-                    <div class="section-header">
-
-                        <h3>
-                            সাম্প্রতিক Store
-                        </h3>
-
-                        <button
-                            class="small-btn"
-                            data-page="stores"
-                            type="button"
-                        >
-                            সব দেখুন
-                        </button>
+                        <div
+                            id="recentOrders"
+                            class="table-container"
+                        ></div>
 
                     </div>
 
 
-                    <div
-                        id="recentStores"
-                        class="table-wrapper"
-                    >
+                    <div class="dashboard-card">
 
-                        <div class="empty-state">
-                            Loading...
+                        <div class="card-header">
+                            <h2>Recent Stores</h2>
                         </div>
+
+                        <div
+                            id="recentStores"
+                            class="table-container"
+                        ></div>
 
                     </div>
 
                 </div>
 
             </section>
-
 
 
             <!-- =================================================
@@ -434,48 +304,32 @@
 
             <section
                 id="page-stores"
-                class="admin-page hidden"
+                class="admin-page-section"
             >
 
-                <div class="page-heading">
+                <div class="page-title-row">
 
-                    <div>
-
-                        <h2>
-                            Stores
-                        </h2>
-
-                        <p>
-                            সকল Store পরিচালনা করুন
-                        </p>
-
+                    <div class="page-title">
+                        <h1>Stores</h1>
+                        <p>সকল Store পরিচালনা করুন</p>
                     </div>
-
 
                     <button
                         id="refreshStoresBtn"
-                        class="primary-btn"
+                        class="action-btn"
                         type="button"
                     >
-                        Refresh
+                        ↻ Refresh
                     </button>
 
                 </div>
 
-
                 <div
                     id="storesTable"
-                    class="table-wrapper"
-                >
-
-                    <div class="loading">
-                        Loading...
-                    </div>
-
-                </div>
+                    class="table-card"
+                ></div>
 
             </section>
-
 
 
             <!-- =================================================
@@ -484,48 +338,32 @@
 
             <section
                 id="page-products"
-                class="admin-page hidden"
+                class="admin-page-section"
             >
 
-                <div class="page-heading">
+                <div class="page-title-row">
 
-                    <div>
-
-                        <h2>
-                            Products
-                        </h2>
-
-                        <p>
-                            সকল Product পরিচালনা করুন
-                        </p>
-
+                    <div class="page-title">
+                        <h1>Products</h1>
+                        <p>সকল Product পরিচালনা করুন</p>
                     </div>
-
 
                     <button
                         id="refreshProductsBtn"
-                        class="primary-btn"
+                        class="action-btn"
                         type="button"
                     >
-                        Refresh
+                        ↻ Refresh
                     </button>
 
                 </div>
 
-
                 <div
                     id="productsTable"
-                    class="table-wrapper"
-                >
-
-                    <div class="loading">
-                        Loading...
-                    </div>
-
-                </div>
+                    class="table-card"
+                ></div>
 
             </section>
-
 
 
             <!-- =================================================
@@ -534,48 +372,32 @@
 
             <section
                 id="page-orders"
-                class="admin-page hidden"
+                class="admin-page-section"
             >
 
-                <div class="page-heading">
+                <div class="page-title-row">
 
-                    <div>
-
-                        <h2>
-                            Orders
-                        </h2>
-
-                        <p>
-                            সকল Order পরিচালনা করুন
-                        </p>
-
+                    <div class="page-title">
+                        <h1>Orders</h1>
+                        <p>সকল Order পরিচালনা করুন</p>
                     </div>
-
 
                     <button
                         id="refreshOrdersBtn"
-                        class="primary-btn"
+                        class="action-btn"
                         type="button"
                     >
-                        Refresh
+                        ↻ Refresh
                     </button>
 
                 </div>
 
-
                 <div
                     id="ordersTable"
-                    class="table-wrapper"
-                >
-
-                    <div class="loading">
-                        Loading...
-                    </div>
-
-                </div>
+                    class="table-card"
+                ></div>
 
             </section>
-
 
 
             <!-- =================================================
@@ -584,42 +406,25 @@
 
             <section
                 id="page-users"
-                class="admin-page hidden"
+                class="admin-page-section"
             >
 
-                <div class="page-heading">
+                <div class="page-title">
 
-                    <div>
+                    <h1>Users</h1>
 
-                        <h2>
-                            Users
-                        </h2>
-
-                        <p>
-                            Registered users
-                        </p>
-
-                    </div>
+                    <p>
+                        Registered users information
+                    </p>
 
                 </div>
-
 
                 <div
                     id="usersTable"
-                    class="table-wrapper"
-                >
-
-                    <div class="empty-state">
-
-                        User management পরবর্তী ধাপে
-                        secureভাবে যুক্ত করা হবে।
-
-                    </div>
-
-                </div>
+                    class="table-card"
+                ></div>
 
             </section>
-
 
 
             <!-- =================================================
@@ -628,79 +433,75 @@
 
             <section
                 id="page-settings"
-                class="admin-page hidden"
+                class="admin-page-section"
             >
 
-                <div class="page-heading">
+                <div class="page-title">
 
-                    <div>
+                    <h1>Settings</h1>
 
-                        <h2>
-                            Settings
-                        </h2>
+                    <p>
+                        Admin panel settings
+                    </p>
+
+                </div>
+
+
+                <div class="settings-grid">
+
+                    <div class="settings-card">
+
+                        <h2>Admin Account</h2>
 
                         <p>
-                            Admin Panel settings
+                            Logged in email
                         </p>
+
+                        <strong id="adminEmailDisplay">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="settings-card">
+
+                        <h2>Supabase</h2>
+
+                        <p>
+                            Database connection status
+                        </p>
+
+                        <strong id="supabaseStatus">
+                            Checking...
+                        </strong>
 
                     </div>
 
                 </div>
 
-
-                <div class="settings-card">
-
-                    <h3>
-                        Admin Account
-                    </h3>
-
-                    <p id="adminEmailDisplay">
-                        —
-                    </p>
-
-                </div>
-
-
-                <div class="settings-card">
-
-                    <h3>
-                        Supabase Connection
-                    </h3>
-
-                    <p id="supabaseStatus">
-                        Checking...
-                    </p>
-
-                </div>
-
             </section>
-
 
         </main>
 
-    </div>
-
-</section>
+    </section>
 
 
+    <!-- TOAST -->
 
-<!-- TOAST -->
-
-<div
-    id="toast"
-    class="toast"
-></div>
-
+    <div
+        id="toast"
+        class="toast"
+    ></div>
 
 
-<!-- IMPORTANT:
-     ../ দিয়ে root-এর supabase-config.js load হবে
--->
+    <!-- SUPABASE CONFIG -->
 
-<script src="../supabase-config.js"></script>
+    <script src="../supabase-config.js"></script>
 
-<script src="admin.js"></script>
+    <!-- ADMIN JS -->
+
+    <script src="admin.js"></script>
 
 </body>
-
 </html>
