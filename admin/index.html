@@ -2,7 +2,6 @@
 <html lang="bn">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -12,50 +11,38 @@
 
     <meta name="color-scheme" content="light">
 
-    <title>BuyHaat — Admin Panel</title>
+    <title>BuyHaat Admin Login</title>
 
     <link rel="stylesheet" href="admin.css">
-
 </head>
 
+<body>
 
-<body class="admin-page">
-
-
-    <!-- =====================================================
-         LOGIN PAGE
-    ====================================================== -->
-
-    <section
-        id="adminLogin"
-        class="login-page"
-    >
+    <main class="login-page">
 
         <div class="login-card">
 
-            <div class="admin-logo">
+            <div class="logo">
                 B
             </div>
 
-            <h1>
-                BuyHaat Admin
-            </h1>
+            <h1>BuyHaat Admin</h1>
 
-            <p class="login-subtitle">
-                Admin Panel-এ প্রবেশ করতে Login করুন
+            <p class="subtitle">
+                Admin Panel-এ প্রবেশ করুন
             </p>
 
 
             <form id="adminLoginForm">
 
                 <label for="adminEmail">
-                    Email
+                    Admin Email
                 </label>
 
                 <input
                     type="email"
                     id="adminEmail"
-                    placeholder="admin@example.com"
+                    placeholder="Admin email"
                     autocomplete="email"
                     required
                 >
@@ -68,7 +55,7 @@
                 <input
                     type="password"
                     id="adminPassword"
-                    placeholder="আপনার password দিন"
+                    placeholder="Password"
                     autocomplete="current-password"
                     required
                 >
@@ -77,7 +64,6 @@
                 <button
                     type="submit"
                     id="adminLoginBtn"
-                    class="primary-btn"
                 >
                     Login
                 </button>
@@ -85,597 +71,20 @@
 
                 <div
                     id="loginMessage"
-                    class="message"
+                    class="login-message"
                 ></div>
 
             </form>
 
         </div>
 
-    </section>
+    </main>
 
 
-
-    <!-- =====================================================
-         ADMIN APP
-         Login না করলে এটি সম্পূর্ণ hidden থাকবে
-    ====================================================== -->
-
-    <section
-        id="adminApp"
-        class="admin-app"
-        hidden
-    >
-
-
-        <!-- =================================================
-             HEADER
-        ================================================== -->
-
-        <header class="admin-header">
-
-            <div class="header-left">
-
-                <button
-                    id="sidebarToggle"
-                    class="icon-btn"
-                    type="button"
-                    aria-label="Open menu"
-                >
-                    ☰
-                </button>
-
-
-                <div>
-
-                    <h1>
-                        BuyHaat Admin
-                    </h1>
-
-                    <span>
-                        Administration Panel
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <button
-                id="logoutBtn"
-                class="logout-btn"
-                type="button"
-            >
-                Logout
-            </button>
-
-        </header>
-
-
-
-        <!-- =================================================
-             ADMIN LAYOUT
-        ================================================== -->
-
-        <div class="admin-layout">
-
-
-            <!-- =================================================
-                 SIDEBAR
-            ================================================== -->
-
-            <aside
-                id="adminSidebar"
-                class="sidebar"
-            >
-
-                <nav>
-
-                    <button
-                        class="nav-item active"
-                        data-page="dashboard"
-                        type="button"
-                    >
-                        <span>📊</span>
-                        <span>Dashboard</span>
-                    </button>
-
-
-                    <button
-                        class="nav-item"
-                        data-page="stores"
-                        type="button"
-                    >
-                        <span>🏪</span>
-                        <span>Stores</span>
-                    </button>
-
-
-                    <button
-                        class="nav-item"
-                        data-page="products"
-                        type="button"
-                    >
-                        <span>📦</span>
-                        <span>Products</span>
-                    </button>
-
-
-                    <button
-                        class="nav-item"
-                        data-page="orders"
-                        type="button"
-                    >
-                        <span>🛒</span>
-                        <span>Orders</span>
-                    </button>
-
-
-                    <button
-                        class="nav-item"
-                        data-page="users"
-                        type="button"
-                    >
-                        <span>👥</span>
-                        <span>Users</span>
-                    </button>
-
-
-                    <button
-                        class="nav-item"
-                        data-page="settings"
-                        type="button"
-                    >
-                        <span>⚙️</span>
-                        <span>Settings</span>
-                    </button>
-
-                </nav>
-
-            </aside>
-
-
-
-            <!-- =================================================
-                 CONTENT
-            ================================================== -->
-
-            <main class="admin-content">
-
-
-                <!-- =================================================
-                     DASHBOARD
-                ================================================== -->
-
-                <section
-                    id="page-dashboard"
-                    class="admin-page-section active"
-                >
-
-                    <div class="page-heading">
-
-                        <div>
-
-                            <h2>
-                                Dashboard
-                            </h2>
-
-                            <p>
-                                BuyHaat-এর সার্বিক তথ্য
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- STATISTICS -->
-
-                    <div class="stats-grid">
-
-
-                        <div class="stat-card">
-
-                            <div class="stat-icon">
-                                🏪
-                            </div>
-
-                            <div>
-
-                                <span>
-                                    Total Stores
-                                </span>
-
-                                <strong id="totalStores">
-                                    0
-                                </strong>
-
-                            </div>
-
-                        </div>
-
-
-
-                        <div class="stat-card">
-
-                            <div class="stat-icon">
-                                📦
-                            </div>
-
-                            <div>
-
-                                <span>
-                                    Total Products
-                                </span>
-
-                                <strong id="totalProducts">
-                                    0
-                                </strong>
-
-                            </div>
-
-                        </div>
-
-
-
-                        <div class="stat-card">
-
-                            <div class="stat-icon">
-                                🛒
-                            </div>
-
-                            <div>
-
-                                <span>
-                                    Total Orders
-                                </span>
-
-                                <strong id="totalOrders">
-                                    0
-                                </strong>
-
-                            </div>
-
-                        </div>
-
-
-
-                        <div class="stat-card">
-
-                            <div class="stat-icon">
-                                👥
-                            </div>
-
-                            <div>
-
-                                <span>
-                                    Total Users
-                                </span>
-
-                                <strong id="totalUsers">
-                                    —
-                                </strong>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <!-- RECENT ORDERS -->
-
-                    <div class="dashboard-section">
-
-                        <div class="section-header">
-
-                            <h3>
-                                Recent Orders
-                            </h3>
-
-                        </div>
-
-
-                        <div
-                            id="recentOrders"
-                            class="table-wrapper"
-                        ></div>
-
-                    </div>
-
-
-
-                    <!-- RECENT STORES -->
-
-                    <div class="dashboard-section">
-
-                        <div class="section-header">
-
-                            <h3>
-                                Recent Stores
-                            </h3>
-
-                        </div>
-
-
-                        <div
-                            id="recentStores"
-                            class="table-wrapper"
-                        ></div>
-
-                    </div>
-
-                </section>
-
-
-
-                <!-- =================================================
-                     STORES
-                ================================================== -->
-
-                <section
-                    id="page-stores"
-                    class="admin-page-section"
-                >
-
-                    <div class="page-heading">
-
-                        <div>
-
-                            <h2>
-                                Stores
-                            </h2>
-
-                            <p>
-                                সকল Store পরিচালনা করুন
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            id="refreshStoresBtn"
-                            class="primary-btn"
-                            type="button"
-                        >
-                            ↻ Refresh
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        id="storesTable"
-                        class="dashboard-section"
-                    ></div>
-
-                </section>
-
-
-
-                <!-- =================================================
-                     PRODUCTS
-                ================================================== -->
-
-                <section
-                    id="page-products"
-                    class="admin-page-section"
-                >
-
-                    <div class="page-heading">
-
-                        <div>
-
-                            <h2>
-                                Products
-                            </h2>
-
-                            <p>
-                                সকল Product পরিচালনা করুন
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            id="refreshProductsBtn"
-                            class="primary-btn"
-                            type="button"
-                        >
-                            ↻ Refresh
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        id="productsTable"
-                        class="dashboard-section"
-                    ></div>
-
-                </section>
-
-
-
-                <!-- =================================================
-                     ORDERS
-                ================================================== -->
-
-                <section
-                    id="page-orders"
-                    class="admin-page-section"
-                >
-
-                    <div class="page-heading">
-
-                        <div>
-
-                            <h2>
-                                Orders
-                            </h2>
-
-                            <p>
-                                সকল Order পরিচালনা করুন
-                            </p>
-
-                        </div>
-
-
-                        <button
-                            id="refreshOrdersBtn"
-                            class="primary-btn"
-                            type="button"
-                        >
-                            ↻ Refresh
-                        </button>
-
-                    </div>
-
-
-                    <div
-                        id="ordersTable"
-                        class="dashboard-section"
-                    ></div>
-
-                </section>
-
-
-
-                <!-- =================================================
-                     USERS
-                ================================================== -->
-
-                <section
-                    id="page-users"
-                    class="admin-page-section"
-                >
-
-                    <div class="page-heading">
-
-                        <div>
-
-                            <h2>
-                                Users
-                            </h2>
-
-                            <p>
-                                Registered users information
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div
-                        id="usersTable"
-                        class="dashboard-section"
-                    >
-
-                        <div class="empty-state">
-                            User management-এর জন্য
-                            Supabase Auth data ব্যবহার করতে হবে।
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-
-                <!-- =================================================
-                     SETTINGS
-                ================================================== -->
-
-                <section
-                    id="page-settings"
-                    class="admin-page-section"
-                >
-
-                    <div class="page-heading">
-
-                        <div>
-
-                            <h2>
-                                Settings
-                            </h2>
-
-                            <p>
-                                Admin panel settings
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="settings-card">
-
-                        <h3>
-                            Admin Account
-                        </h3>
-
-                        <p>
-                            Logged in email
-                        </p>
-
-                        <strong id="adminEmailDisplay">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="settings-card">
-
-                        <h3>
-                            Supabase
-                        </h3>
-
-                        <p>
-                            Database connection status
-                        </p>
-
-                        <strong id="supabaseStatus">
-                            Checking...
-                        </strong>
-
-                    </div>
-
-                </section>
-
-
-            </main>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- =====================================================
-         TOAST
-    ====================================================== -->
-
-    <div
-        id="toast"
-        class="toast"
-    ></div>
-
-
-
-    <!-- =====================================================
-         SUPABASE
-    ====================================================== -->
-
+    <!-- Supabase configuration -->
     <script src="../supabase-config.js"></script>
 
-
-    <!-- =====================================================
-         ADMIN JS
-    ====================================================== -->
-
+    <!-- Admin authentication -->
     <script src="admin.js"></script>
 
 </body>
