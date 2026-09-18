@@ -1,4 +1,240 @@
 /* =========================================================
+   MY STORE
+   ========================================================= */
+
+async function loadMyStore() {
+
+  const container = $("myStoreContent");
+
+  if (!container) return;
+
+
+  container.innerHTML = `
+    <div class="empty-card">
+      <p>Store loading...</p>
+    </div>
+  `;
+
+
+  const {
+    data: { user },
+    error: userError
+  } = await sb.auth.getUser();
+
+
+  if (userError || !user) {
+
+    container.innerHTML = `
+      <div class="empty-card">
+        <h3>Login required</h3>
+        <p>নিজের Store দেখতে আগে Login করুন।</p>
+      </div>
+    `;
+
+    return;
+  }
+
+
+  const { data: store, error } = await sb
+    .from("stores")
+    .select(`
+      id,
+      owner_id,
+      name,
+      slug,
+      description,
+      logo_url,
+      cover_url,
+      phone,
+      address,
+      is_active,
+      is_approved,
+      created_at
+    `)
+    .eq("owner_id", user.id)
+    .maybeSingle();
+
+
+  if (error) {
+
+    console.error(
+      "My Store error:",
+      error
+    );
+
+    container.innerHTML = `
+      <div class="empty-card">
+        <h3>Store load করা যায়নি</h3>
+        <p>${escapeHTML(error.message)}</p>
+      </div>
+    `;
+
+    return;
+  }
+
+
+  if (!store) {
+
+    container.innerHTML = `
+      <div class="empty-card">
+
+        <h3>
+          আপনার কোনো Store নেই
+        </h3>
+
+        <p>
+          Create Store থেকে আপনার প্রথম Store তৈরি করুন।
+        </p>
+
+        <button
+          class="primary-store-btn"
+          onclick="document.getElementById('createStoreBtn')?.click()">
+          Create Store
+        </button>
+
+      </div>
+    `;
+
+    return;
+  }
+
+
+  container.innerHTML = `
+
+    <div class="my-store-card">
+
+      ${
+        store.cover_url
+          ? `
+            <div
+              class="my-store-cover"
+              style="
+                background-image:
+                url('${escapeHTML(store.cover_url)}');
+              ">
+            </div>
+          `
+          : `
+            <div class="my-store-cover"></div>
+          `
+      }
+
+
+      <div class="my-store-body">
+
+        <div class="my-store-header">
+
+          ${
+            store.logo_url
+              ? `
+                <img
+                  class="my-store-logo"
+                  src="${escapeHTML(store.logo_url)}"
+                  alt="Store Logo">
+              `
+              : `
+                <div class="my-store-logo placeholder">
+                  ${escapeHTML(
+                    store.name.charAt(0).toUpperCase()
+                  )}
+                </div>
+              `
+          }
+
+
+          <div>
+
+            <h2>
+              ${escapeHTML(store.name)}
+            </h2>
+
+            <p>
+              @${escapeHTML(store.slug)}
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="store-status">
+
+          <span>
+            ${
+              store.is_active
+                ? "Active"
+                : "Inactive"
+            }
+          </span>
+
+          <span>
+            ${
+              store.is_approved
+                ? "Approved"
+                : "Pending Approval"
+            }
+          </span>
+
+        </div>
+
+
+        ${
+          store.description
+            ? `
+              <p class="my-store-description">
+                ${escapeHTML(store.description)}
+              </p>
+            `
+            : ""
+        }
+
+
+        ${
+          store.phone
+            ? `
+              <p>
+                📞 ${escapeHTML(store.phone)}
+              </p>
+            `
+            : ""
+        }
+
+
+        ${
+          store.address
+            ? `
+              <p>
+                📍 ${escapeHTML(store.address)}
+              </p>
+            `
+            : ""
+        }
+
+
+        <div class="my-store-actions">
+
+          <button
+            class="secondary-btn"
+            onclick="showToast('Store edit পরের ধাপে যুক্ত হবে')">
+            Edit Store
+          </button>
+
+          <button
+            class="secondary-btn"
+            onclick="showToast('Product management পরের ধাপে যুক্ত হবে')">
+            Manage Products
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+}
+
+/* =========================================================
    BUYHAAT — SUPABASE CONNECTED APP
    Products + Categories + Stores
    ========================================================= */
@@ -510,7 +746,9 @@ function showPage(page) {
 
 
   target.classList.add("active");
-
+if (page === "my-store") {
+  loadMyStore();
+}
 
   document
     .querySelectorAll(".bottom-nav a")
