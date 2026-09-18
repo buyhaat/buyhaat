@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta name="color-scheme" content="light">
+
+    <title>BuyHaat Admin Dashboard</title>
+
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+<body class="dashboard-body">
+
+    <!-- =====================================================
+         ADMIN HEADER
+    ====================================================== -->
+
+    <header class="admin-header">
+
+        <div class="admin-brand">
+            <div class="admin-logo">B</div>
+
+            <div>
+                <h1>BuyHaat Admin</h1>
+                <p>Dashboard</p>
+            </div>
+        </div>
+
+
+        <button
+            type="button"
+            id="logoutBtn"
+            class="logout-btn"
+        >
+            Logout
+        </button>
+
+    </header>
+
+
+    <!-- =====================================================
+         DASHBOARD
+    ====================================================== -->
+
+    <main class="dashboard-container">
+
+        <section class="welcome-card">
+
+            <p class="welcome-label">
+                Welcome Admin
+            </p>
+
+            <h2>
+                BuyHaat Admin Dashboard
+            </h2>
+
+            <p id="adminEmailText">
+                Loading admin information...
+            </p>
+
+        </section>
+
+
+        <!-- =================================================
+             STAT CARDS
+        ================================================== -->
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <span class="stat-title">
+                    Stores
+                </span>
+
+                <strong id="storesCount">
+                    0
+                </strong>
+            </div>
+
+
+            <div class="stat-card">
+                <span class="stat-title">
+                    Products
+                </span>
+
+                <strong id="productsCount">
+                    0
+                </strong>
+            </div>
+
+
+            <div class="stat-card">
+                <span class="stat-title">
+                    Orders
+                </span>
+
+                <strong id="ordersCount">
+                    0
+                </strong>
+            </div>
+
+
+            <div class="stat-card">
+                <span class="stat-title">
+                    Users
+                </span>
+
+                <strong id="usersCount">
+                    0
+                </strong>
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ADMIN SECTIONS
+        ================================================== -->
+
+        <section class="admin-section-grid">
+
+            <button
+                type="button"
+                class="admin-section-card"
+            >
+                <span>🏪</span>
+                <strong>Stores</strong>
+                <small>Store management</small>
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-section-card"
+            >
+                <span>📦</span>
+                <strong>Products</strong>
+                <small>Product management</small>
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-section-card"
+            >
+                <span>🛒</span>
+                <strong>Orders</strong>
+                <small>Order management</small>
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-section-card"
+            >
+                <span>👥</span>
+                <strong>Users</strong>
+                <small>User management</small>
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-section-card"
+            >
+                <span>⚙️</span>
+                <strong>Settings</strong>
+                <small>Admin settings</small>
+            </button>
+
+        </section>
+
+    </main>
+
+
+    <!-- =====================================================
+         SUPABASE
+    ====================================================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="supabase-config.js"></script>
+
+
+    <!-- =====================================================
+         DASHBOARD SCRIPT
+    ====================================================== -->
+
+    <script>
+
+        const sb = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+        );
+
+
+        async function checkAdmin() {
+
+            try {
+
+                const {
+                    data: {
+                        session
+                    }
+                } = await sb.auth.getSession();
+
+
+                /*
+                 * Login করা নেই
+                 */
+
+                if (!session || !session.user) {
+
+                    window.location.href = "/admin";
+
+                    return;
+                }
+
+
+                /*
+                 * Profile থেকে role check
+                 */
+
+                const {
+                    data: profile,
+                    error
+                } = await sb
+                    .from("profiles")
+                    .select("role, full_name")
+                    .eq("id", session.user.id)
+                    .single();
+
+
+                if (
+                    error ||
+                    !profile ||
+                    profile.role !== "admin"
+                ) {
+
+                    await sb.auth.signOut();
+
+                    window.location.href = "/admin";
+
+                    return;
+                }
+
+
+                /*
+                 * Admin information
+                 */
+
+                const emailElement =
+                    document.getElementById(
+                        "adminEmailText"
+                    );
+
+
+                if (emailElement) {
+
+                    emailElement.textContent =
+                        session.user.email || "Admin";
+                }
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Admin verification error:",
+                    error
+                );
+
+                await sb.auth.signOut();
+
+                window.location.href = "/admin";
+            }
+
+        }
+
+
+        /*
+         * Logout
+         */
+
+        document
+            .getElementById("logoutBtn")
+            .addEventListener(
+                "click",
+                async () => {
+
+                    await sb.auth.signOut();
+
+                    window.location.href = "/admin";
+
+                }
+            );
+
+
+        /*
+         * Start
+         */
+
+        checkAdmin();
+
+    </script>
+
+</body>
+
+</html>
