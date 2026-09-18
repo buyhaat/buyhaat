@@ -81,25 +81,38 @@
 
     <section id="my-store" class="page">
 
+<section id="my-store" class="page">
+
   <div class="page-title">
     <p class="eyebrow">ACCOUNT</p>
     <h1>My Store</h1>
+
     <p id="accountStatus">
       Buyer account, seller account এবং Store management এখানে থাকবে।
     </p>
   </div>
 
-<div id="myStoreContent"></div>
-      
+
+  <!-- STORE CONTENT -->
+  <div id="myStoreContent"></div>
+
+
+  <!-- ACCOUNT ACTIONS -->
   <div class="account-actions">
 
-    <button class="primary-btn" id="loginBtn">
+    <button
+      class="primary-btn"
+      id="loginBtn">
       Login / Register
     </button>
 
-    <button class="secondary-btn" id="createStoreBtn">
+
+    <button
+      class="secondary-btn"
+      id="createStoreBtn">
       Create Store
     </button>
+
 
     <button
       class="secondary-btn"
@@ -110,7 +123,11 @@
 
   </div>
 
-  <div class="empty-card" id="storeManagerCard">
+
+  <!-- STORE MANAGER -->
+  <div
+    class="empty-card"
+    id="storeManagerCard">
 
     <h3>Store Manager</h3>
 
@@ -119,6 +136,138 @@
       products, orders, stock, customers এবং chat
       manage করতে পারবেন।
     </p>
+
+  </div>
+
+
+  <!-- EDIT STORE MODAL -->
+  <div
+    id="editStoreModal"
+    class="store-modal">
+
+    <div class="store-modal-card">
+
+      <button
+        type="button"
+        class="store-modal-close"
+        id="closeEditStore">
+        ×
+      </button>
+
+
+      <h2>Edit Store</h2>
+
+      <p class="store-modal-subtitle">
+        আপনার Store-এর তথ্য পরিবর্তন করুন
+      </p>
+
+
+      <form id="editStoreForm">
+
+
+        <!-- STORE LOGO -->
+
+        <label>
+          Store Logo
+
+          <input
+            type="file"
+            id="editStoreLogo"
+            accept="image/*">
+        </label>
+
+        <div
+          id="editLogoPreview"
+          class="store-image-preview">
+        </div>
+
+
+        <!-- STORE COVER -->
+
+        <label>
+          Store Cover
+
+          <input
+            type="file"
+            id="editStoreCover"
+            accept="image/*">
+        </label>
+
+        <div
+          id="editCoverPreview"
+          class="store-cover-preview">
+        </div>
+
+
+        <!-- NAME -->
+
+        <label>
+          Store Name
+
+          <input
+            type="text"
+            id="editStoreName"
+            maxlength="100"
+            required>
+        </label>
+
+
+        <!-- DESCRIPTION -->
+
+        <label>
+          Description
+
+          <textarea
+            id="editStoreDescription"
+            rows="4"
+            maxlength="500">
+          </textarea>
+        </label>
+
+
+        <!-- PHONE -->
+
+        <label>
+          Phone
+
+          <input
+            type="tel"
+            id="editStorePhone"
+            maxlength="20">
+        </label>
+
+
+        <!-- ADDRESS -->
+
+        <label>
+          Address
+
+          <textarea
+            id="editStoreAddress"
+            rows="3"
+            maxlength="300">
+          </textarea>
+        </label>
+
+
+        <button
+          type="submit"
+          id="saveStoreChanges"
+          class="primary-store-btn">
+
+          Save Changes
+
+        </button>
+
+
+        <p
+          id="editStoreMessage"
+          class="store-form-message">
+        </p>
+
+      </form>
+
+    </div>
 
   </div>
 
