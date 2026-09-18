@@ -1,121 +1,690 @@
-const products = [
-  {id:"p001",name:"Wireless Headphone",price:1250,category:"Electronics",store:"Tech Corner",icon:"🎧",description:"দৈনন্দিন ব্যবহার ও music-এর জন্য wireless headphone."},
-  {id:"p002",name:"Smart Watch",price:1850,category:"Electronics",store:"Digital House",icon:"⌚",description:"স্মার্ট ও lightweight watch, দৈনন্দিন ব্যবহারের জন্য।"},
-  {id:"p003",name:"Lipstick",price:650,category:"Makeup",store:"Beauty Zone",icon:"💄",description:"বিভিন্ন shade-এর lipstick."},
-  {id:"p004",name:"Casual T-Shirt",price:550,category:"Clothing",store:"Fashion Point",icon:"👕",description:"আরামদায়ক casual T-shirt."},
-  {id:"p005",name:"Backpack",price:900,category:"Accessories",store:"Daily Needs",icon:"🎒",description:"স্কুল, কলেজ ও দৈনন্দিন ব্যবহারের backpack."},
-  {id:"p006",name:"Running Shoes",price:1450,category:"Shoes",store:"Fashion Point",icon:"👟",description:"হালকা ও আরামদায়ক running shoes."}
-];
+/* =========================================================
+   BUYHAAT — SUPABASE CONNECTED APP
+   Products + Categories + Stores
+   ========================================================= */
 
-const categories = ["All","Electronics","Makeup","Clothing","Shoes","Accessories"];
-const followedStores = ["Tech Corner","Fashion Point"];
+const sb = supabaseClient;
+
+
+/* =========================================================
+   DOM
+   ========================================================= */
 
 const $ = id => document.getElementById(id);
 
-function money(n){return "৳" + n.toLocaleString("en-BD")}
-function showToast(msg){
-  const t=$("toast"); t.textContent=msg; t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),2200);
+
+/* =========================================================
+   DATA
+   ========================================================= */
+
+let products = [];
+let categories = ["All"];
+let followedStores = [];
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function money(n) {
+  return "৳" + Number(n || 0).toLocaleString("en-BD");
 }
 
-function renderCategories(){
-  $("categories").innerHTML=categories.map((c,i)=>
-    `<button class="category ${i===0?"active":""}" data-category="${c}">${c}</button>`
-  ).join("");
-  document.querySelectorAll(".category").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      document.querySelectorAll(".category").forEach(x=>x.classList.remove("active"));
-      btn.classList.add("active");
-      renderProducts(btn.dataset.category, $("searchInput").value);
+
+function showToast(msg) {
+  const t = $("toast");
+
+  if (!t) return;
+
+  t.textContent = msg;
+  t.classList.add("show");
+
+  setTimeout(() => {
+    t.classList.remove("show");
+  }, 2200);
+}
+
+
+/* =========================================================
+   LOAD CATEGORIES
+   ========================================================= */
+
+async function loadCategories() {
+
+  const { data, error } = await sb
+    .from("categories")
+    .select("*")
+    .order("name");
+
+  if (error) {
+    console.error("Category error:", error);
+    showToast("Categories load করা যায়নি");
+    return;
+  }
+
+  categories = [
+    "All",
+    ...(data || []).map(c => c.name)
+  ];
+
+  renderCategories();
+}
+
+
+/* =========================================================
+   LOAD PRODUCTS
+   ========================================================= */
+
+async function loadProducts() {
+
+  const { data, error } = await sb
+    .from("products")
+    .select(`
+      id,
+      name,
+      price,
+      description,
+      stock,
+      category_id,
+      store_id,
+      is_active,
+      is_approved,
+      categories (
+        name
+      ),
+      stores (
+        id,
+        name,
+        is_active,
+        is_approved
+      )
+    `)
+    .eq("is_active", true)
+    .eq("is_approved", true)
+    .order("created_at", {
+      ascending: false
     });
+
+  if (error) {
+
+    console.error("Product error:", error);
+
+    showToast("Products load করা যায়নি");
+
+    return;
+  }
+
+
+  products = (data || [])
+    .filter(p =>
+      p.stores &&
+      p.stores.is_active &&
+      p.stores.is_approved
+    )
+    .map(p => ({
+      id: p.id,
+      name: p.name,
+      price: Number(p.price),
+      category: p.categories?.name || "Others",
+      store: p.stores?.name || "Unknown Store",
+      storeId: p.store_id,
+      description: p.description || "",
+      stock: p.stock || 0,
+      icon: "🛍️"
+    }));
+
+
+  renderProducts(
+    document.querySelector(".category.active")?.dataset.category || "All",
+    $("searchInput")?.value || ""
+  );
+}
+
+
+/* =========================================================
+   RENDER CATEGORIES
+   ========================================================= */
+
+function renderCategories() {
+
+  const container = $("categories");
+
+  if (!container) return;
+
+  container.innerHTML = categories.map((c, i) =>
+
+    `<button
+      class="category ${i === 0 ? "active" : ""}"
+      data-category="${c}">
+      ${c}
+    </button>`
+
+  ).join("");
+
+
+  document.querySelectorAll(".category").forEach(btn => {
+
+    btn.addEventListener("click", () => {
+
+      document
+        .querySelectorAll(".category")
+        .forEach(x =>
+          x.classList.remove("active")
+        );
+
+      btn.classList.add("active");
+
+      renderProducts(
+        btn.dataset.category,
+        $("searchInput")?.value || ""
+      );
+
+    });
+
   });
 }
 
-function renderProducts(category="All", query=""){
-  let list=products.filter(p=>category==="All"||p.category===category);
-  const q=query.trim().toLowerCase();
-  if(q) list=list.filter(p=>(p.name+" "+p.store+" "+p.category).toLowerCase().includes(q));
-  $("productCount").textContent=list.length+" products";
-  $("products").innerHTML=list.length ? list.map(p=>`
-    <article class="product-card" data-product="${p.id}">
-      <div class="product-image">${p.icon}</div>
-      <div class="product-info">
-        <div class="product-name">${p.name}</div>
-        <div class="price">${money(p.price)}</div>
-        <div class="store-name">${p.store}</div>
-      </div>
-    </article>`).join("") :
-    `<div class="empty-card"><h3>কোনো product পাওয়া যায়নি</h3><p>অন্য keyword বা category চেষ্টা করুন।</p></div>`;
 
-  document.querySelectorAll("[data-product]").forEach(card=>{
-    card.addEventListener("click",()=>openProduct(card.dataset.product));
-  });
-}
+/* =========================================================
+   RENDER PRODUCTS
+   ========================================================= */
 
-function openProduct(id){
-  const p=products.find(x=>x.id===id); if(!p)return;
-  location.hash="product/"+p.id;
-  $("product-detail").innerHTML=`
-    <div class="detail">
-      <button class="back-btn" onclick="location.hash='home'">← Back to Home</button>
-      <div class="detail-card">
-        <div class="detail-image">${p.icon}</div>
-        <div class="detail-body">
-          <div class="eyebrow">${p.category.toUpperCase()}</div>
-          <h1>${p.name}</h1>
-          <div class="store-name">Store: ${p.store}</div>
-          <div class="detail-price">${money(p.price)}</div>
-          <p class="detail-desc">${p.description}</p>
-          <button class="order-btn" onclick="startOrder('${p.id}')">ORDER NOW</button>
+function renderProducts(category = "All", query = "") {
+
+  const container = $("products");
+
+  if (!container) return;
+
+
+  let list = products.filter(p =>
+
+    category === "All" ||
+    p.category === category
+
+  );
+
+
+  const q = query.trim().toLowerCase();
+
+
+  if (q) {
+
+    list = list.filter(p =>
+
+      (
+        p.name +
+        " " +
+        p.store +
+        " " +
+        p.category
+      )
+      .toLowerCase()
+      .includes(q)
+
+    );
+
+  }
+
+
+  if ($("productCount")) {
+
+    $("productCount").textContent =
+      list.length + " products";
+
+  }
+
+
+  container.innerHTML = list.length
+
+    ? list.map(p => `
+
+      <article
+        class="product-card"
+        data-product="${p.id}">
+
+        <div class="product-image">
+          ${p.icon}
         </div>
+
+        <div class="product-info">
+
+          <div class="product-name">
+            ${escapeHTML(p.name)}
+          </div>
+
+          <div class="price">
+            ${money(p.price)}
+          </div>
+
+          <div class="store-name">
+            ${escapeHTML(p.store)}
+          </div>
+
+        </div>
+
+      </article>
+
+    `).join("")
+
+    :
+
+    `
+      <div class="empty-card">
+
+        <h3>
+          কোনো product পাওয়া যায়নি
+        </h3>
+
+        <p>
+          অন্য keyword বা category চেষ্টা করুন।
+        </p>
+
       </div>
-    </div>`;
+    `;
+
+
+  document
+    .querySelectorAll("[data-product]")
+    .forEach(card => {
+
+      card.addEventListener("click", () => {
+
+        openProduct(
+          card.dataset.product
+        );
+
+      });
+
+    });
+
+}
+
+
+/* =========================================================
+   PRODUCT DETAIL
+   ========================================================= */
+
+function openProduct(id) {
+
+  const p = products.find(
+    x => String(x.id) === String(id)
+  );
+
+  if (!p) {
+
+    showToast("Product পাওয়া যায়নি");
+
+    return;
+  }
+
+
+  location.hash = "product/" + p.id;
+
+
+  $("product-detail").innerHTML = `
+
+    <div class="detail">
+
+      <button
+        class="back-btn"
+        onclick="location.hash='home'">
+
+        ← Back to Home
+
+      </button>
+
+
+      <div class="detail-card">
+
+        <div class="detail-image">
+          ${p.icon}
+        </div>
+
+
+        <div class="detail-body">
+
+          <div class="eyebrow">
+            ${escapeHTML(p.category).toUpperCase()}
+          </div>
+
+
+          <h1>
+            ${escapeHTML(p.name)}
+          </h1>
+
+
+          <div class="store-name">
+            Store: ${escapeHTML(p.store)}
+          </div>
+
+
+          <div class="detail-price">
+            ${money(p.price)}
+          </div>
+
+
+          <p class="detail-desc">
+            ${escapeHTML(p.description)}
+          </p>
+
+
+          <p>
+            Stock:
+            <strong>${p.stock}</strong>
+          </p>
+
+
+          <button
+            class="order-btn"
+            onclick="startOrder('${p.id}')">
+
+            ORDER NOW
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+
   showPage("product-detail");
 }
 
-function startOrder(id){
-  const p=products.find(x=>x.id===id);
-  showToast(`${p.name} — Order system পরের ধাপে Supabase-এর সাথে যুক্ত হবে`);
+
+/* =========================================================
+   ORDER
+   ========================================================= */
+
+function startOrder(id) {
+
+  const p = products.find(
+    x => String(x.id) === String(id)
+  );
+
+  if (!p) return;
+
+
+  if (p.stock <= 0) {
+
+    showToast("এই product বর্তমানে stock out");
+
+    return;
+  }
+
+
+  showToast(
+    `${p.name} — Order system পরের ধাপে যুক্ত হবে`
+  );
 }
 
-function renderFollowing(){
-  $("followingList").innerHTML=followedStores.map(store=>`
-    <div class="store-card">
-      <div class="store-avatar">${store.charAt(0)}</div>
-      <div class="store-meta"><h3>${store}</h3><p>Followed Store</p></div>
-      <button class="secondary-btn" onclick="showToast('Store page পরের ধাপে যুক্ত হবে')">View</button>
-    </div>`).join("");
+
+/* =========================================================
+   FOLLOWING
+   ========================================================= */
+
+function renderFollowing() {
+
+  const container = $("followingList");
+
+  if (!container) return;
+
+
+  if (!followedStores.length) {
+
+    container.innerHTML = `
+
+      <div class="empty-card">
+
+        <h3>
+          এখনো কোনো store follow করেননি
+        </h3>
+
+        <p>
+          পছন্দের store follow করলে এখানে দেখা যাবে।
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+  }
+
+
+  container.innerHTML =
+    followedStores.map(store => `
+
+      <div class="store-card">
+
+        <div class="store-avatar">
+          ${escapeHTML(store.charAt(0))}
+        </div>
+
+        <div class="store-meta">
+
+          <h3>
+            ${escapeHTML(store)}
+          </h3>
+
+          <p>
+            Followed Store
+          </p>
+
+        </div>
+
+        <button
+          class="secondary-btn"
+          onclick="showToast('Store page পরের ধাপে যুক্ত হবে')">
+
+          View
+
+        </button>
+
+      </div>
+
+    `).join("");
+
 }
 
-function showPage(page){
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  $(page).classList.add("active");
-  document.querySelectorAll(".bottom-nav a").forEach(a=>a.classList.toggle("active",a.dataset.page===page));
-  window.scrollTo({top:0,behavior:"smooth"});
+
+/* =========================================================
+   PAGE ROUTING
+   ========================================================= */
+
+function showPage(page) {
+
+  document
+    .querySelectorAll(".page")
+    .forEach(p =>
+      p.classList.remove("active")
+    );
+
+
+  const target = $(page);
+
+  if (!target) return;
+
+
+  target.classList.add("active");
+
+
+  document
+    .querySelectorAll(".bottom-nav a")
+    .forEach(a =>
+
+      a.classList.toggle(
+        "active",
+        a.dataset.page === page
+      )
+
+    );
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
 }
 
-function route(){
-  const hash=location.hash.replace("#","");
-  if(hash.startsWith("product/")){ openProduct(hash.split("/")[1]); return; }
-  const page=hash||"home";
-  const valid=["home","following","add-product","chat","my-store"];
-  showPage(valid.includes(page)?page:"home");
+
+/* =========================================================
+   ROUTER
+   ========================================================= */
+
+function route() {
+
+  const hash =
+    location.hash.replace("#", "");
+
+
+  if (hash.startsWith("product/")) {
+
+    openProduct(
+      hash.split("/")[1]
+    );
+
+    return;
+  }
+
+
+  const page = hash || "home";
+
+
+  const valid = [
+    "home",
+    "following",
+    "add-product",
+    "chat",
+    "my-store"
+  ];
+
+
+  showPage(
+    valid.includes(page)
+      ? page
+      : "home"
+  );
+
 }
 
-$("searchInput").addEventListener("input",()=> {
-  const active=document.querySelector(".category.active");
-  renderProducts(active?.dataset.category||"All",$("searchInput").value);
-});
-$("searchBtn").addEventListener("click",()=> {
-  $("searchInput").focus();
-  renderProducts("All",$("searchInput").value);
-});
-$("loginBtn").addEventListener("click",()=>showToast("Supabase authentication পরের ধাপে যুক্ত হবে"));
-$("createStoreBtn").addEventListener("click",()=>showToast("Store creation পরের ধাপে যুক্ত হবে"));
-$("menuBtn").addEventListener("click",()=>showToast("Menu options পরের ধাপে যুক্ত হবে"));
 
-renderCategories();
-renderProducts();
-renderFollowing();
-route();
-window.addEventListener("hashchange",route);
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+if ($("searchInput")) {
+
+  $("searchInput")
+    .addEventListener("input", () => {
+
+      const active =
+        document.querySelector(
+          ".category.active"
+        );
+
+
+      renderProducts(
+        active?.dataset.category || "All",
+        $("searchInput").value
+      );
+
+    });
+
+}
+
+
+if ($("searchBtn")) {
+
+  $("searchBtn")
+    .addEventListener("click", () => {
+
+      $("searchInput")?.focus();
+
+      renderProducts(
+        "All",
+        $("searchInput")?.value || ""
+      );
+
+    });
+
+}
+
+
+/* =========================================================
+   TEMP BUTTONS
+   ========================================================= */
+
+$("loginBtn")?.addEventListener(
+  "click",
+  () => showToast(
+    "Login system পরের ধাপে যুক্ত হবে"
+  )
+);
+
+
+$("createStoreBtn")?.addEventListener(
+  "click",
+  () => showToast(
+    "Store creation পরের ধাপে যুক্ত হবে"
+  )
+);
+
+
+$("menuBtn")?.addEventListener(
+  "click",
+  () => showToast(
+    "Menu options পরের ধাপে যুক্ত হবে"
+  )
+);
+
+
+/* =========================================================
+   HTML ESCAPE
+   ========================================================= */
+
+function escapeHTML(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
+
+async function init() {
+
+  renderCategories();
+
+  renderProducts();
+
+  renderFollowing();
+
+  route();
+
+
+  await loadCategories();
+
+  await loadProducts();
+
+}
+
+
+init();
+
+
+window.addEventListener(
+  "hashchange",
+  route
+);
