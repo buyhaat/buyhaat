@@ -1,594 +1,144 @@
 <!DOCTYPE html>
 <html lang="bn">
-
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <meta
-    name="description"
-    content="BuyHaat - A multi-vendor marketplace"
-  >
-
-  <meta
-    name="theme-color"
-    content="#0f172a"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BuyHaat - A multi-vendor marketplace">
+  <meta name="theme-color" content="#0f172a">
   <title>BuyHaat — Marketplace</title>
-
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
+  <link rel="stylesheet" href="style.css">
 </head>
-
-
 <body>
 
-
-  <!-- =====================================================
-       TOP BAR
-       ===================================================== -->
-
-  <header class="topbar">
-
-    <a
-      class="brand"
-      href="#home"
-      aria-label="BuyHaat Home"
-    >
-      Buy<span>Haat</span>
-    </a>
-
-    <button
-      class="icon-btn"
-      id="menuBtn"
-      aria-label="Open menu"
-      type="button"
-    >
-      ☰
-    </button>
-
-  </header>
-
-
-
-  <!-- =====================================================
-       MAIN APP
-       ===================================================== -->
-
-  <main id="app">
-
-
-    <!-- ===================================================
-         HOME
-         =================================================== -->
-
-    <section
-      id="home"
-      class="page active"
-    >
-
-      <div class="search-wrap">
-
-        <input
-          id="searchInput"
-          type="search"
-          placeholder="পণ্য খুঁজুন..."
-          autocomplete="off"
-        >
-
-        <button
-          id="searchBtn"
-          class="search-btn"
-          type="button"
-        >
-          Search
-        </button>
-
-      </div>
-
-
-      <section class="welcome">
-
-        <div>
-
-          <p class="eyebrow">
-            WELCOME TO BUYHAAT
-          </p>
-
-          <h1>
-            এক জায়গায় অনেক Store, অনেক পণ্য
-          </h1>
-
-          <p>
-            পছন্দের পণ্য খুঁজুন, Store follow করুন
-            এবং সরাসরি order করুন।
-          </p>
-
-        </div>
-
-      </section>
-
-
-      <!-- CATEGORIES -->
-
-      <section class="section">
-
-        <div class="section-head">
-
-          <h2>
-            Categories
-          </h2>
-
-        </div>
-
-        <div
-          id="categories"
-          class="categories"
-        ></div>
-
-      </section>
-
-
-      <!-- PRODUCTS -->
-
-      <section class="section">
-
-        <div class="section-head">
-
-          <h2>
-            All
-          </h2>
-
-          <span
-            id="productCount"
-            class="muted"
-          ></span>
-
-        </div>
-
-        <div
-          id="products"
-          class="product-grid"
-        ></div>
-
-      </section>
-
-    </section>
-
-
-
-    <!-- ===================================================
-         FOLLOWING
-         =================================================== -->
-
-    <section
-      id="following"
-      class="page"
-    >
-
-      <div class="page-title">
-
-        <p class="eyebrow">
-          FOLLOWING
-        </p>
-
-        <h1>
-          আপনার Follow করা Store
-        </h1>
-
-      </div>
-
-      <div
-        id="followingList"
-        class="store-list"
-      ></div>
-
-    </section>
-
-
-
-    <!-- ===================================================
-         ADD PRODUCT
-         =================================================== -->
-
-    <section
-      id="add-product"
-      class="page"
-    >
-
-      <div class="page-title">
-
-        <p class="eyebrow">
-          SELLER
-        </p>
-
-        <h1>
-          Add Product
-        </h1>
-
-        <p>
-          Store তৈরি করার পর এখান থেকে product
-          manage করা যাবে।
-        </p>
-
-      </div>
-
-
-      <div class="empty-card">
-
-        <h3>
-          Product Add System
-        </h3>
-
-        <p>
-          Store তৈরি ও Login করার পর
-          product name, price, image, category,
-          stock এবং description যোগ করতে পারবেন।
-        </p>
-
-      </div>
-
-    </section>
-
-
-
-    <!-- ===================================================
-         CHAT
-         =================================================== -->
-
-    <section
-      id="chat"
-      class="page"
-    >
-
-      <div class="page-title">
-
-        <p class="eyebrow">
-          MESSAGES
-        </p>
-
-        <h1>
-          Chat
-        </h1>
-
-        <p>
-          Buyer এবং Store-এর conversation এখানে থাকবে।
-        </p>
-
-      </div>
-
-
-      <div
-        id="chatList"
-        class="chat-list"
-      >
-
-        <div class="empty-card">
-
-          <h3>
-            কোনো conversation নেই
-          </h3>
-
-          <p>
-            Order করার পর সংশ্লিষ্ট Store-এর সঙ্গে
-            chat করা যাবে।
-          </p>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-
-    <!-- ===================================================
-         MY STORE
-         =================================================== -->
-
-    <section
-      id="my-store"
-      class="page"
-    >
-
-      <div class="page-title">
-
-        <p class="eyebrow">
-          ACCOUNT
-        </p>
-
-        <h1>
-          My Store
-        </h1>
-
-        <p id="accountStatus">
-          আপনার account এবং Store management এখানে থাকবে।
-        </p>
-
-      </div>
-
-
-      <!--
-        app.js এখানে Login / Store information
-        dynamically দেখাবে
-      -->
-
-      <div
-        id="myStoreContent"
-      ></div>
-
-
-      <!-- ACCOUNT ACTIONS -->
-
-      <div class="account-actions">
-
-        <button
-          class="primary-btn"
-          id="loginBtn"
-          type="button"
-        >
-          Login / Register
-        </button>
-
-
-        <button
-          class="secondary-btn"
-          id="createStoreBtn"
-          type="button"
-        >
-          Create Store
-        </button>
-
-
-        <button
-          class="secondary-btn"
-          id="logoutBtn"
-          type="button"
-          style="display:none;"
-        >
-          Logout
-        </button>
-
-      </div>
-
-
-      <!-- STORE MANAGER -->
-
-      <div
-        class="empty-card"
-        id="storeManagerCard"
-      >
-
-        <h3>
-          Store Manager
-        </h3>
-
-        <p>
-          Login করার পর নিজের Store তৈরি করে
-          products, orders, stock, customers
-          এবং chat manage করতে পারবেন।
-        </p>
-
-      </div>
-
-    </section>
-
-
-
-    <!-- ===================================================
-         PRODUCT DETAIL
-         =================================================== -->
-
-    <section
-      id="product-detail"
-      class="page"
-    ></section>
-
-
-  </main>
-
-
-
-  <!-- =====================================================
-       LOGIN / REGISTER MODAL
-       ===================================================== -->
-
-  <div
-    id="authModal"
-    class="auth-modal"
-  >
-
-    <div class="auth-box">
-
-
-      <button
-        id="closeAuthBtn"
-        class="auth-close"
-        aria-label="Close"
-        type="button"
-      >
-        ×
-      </button>
-
-
-      <div class="auth-header">
-
-        <p class="eyebrow">
-          BUYHAAT ACCOUNT
-        </p>
-
-        <h2 id="authTitle">
-          Login
-        </h2>
-
-        <p id="authSubtitle">
-          আপনার BuyHaat account-এ Login করুন।
-        </p>
-
-      </div>
-
-
-
-      <!-- AUTH FORM -->
-
-      <form id="authForm">
-
-
-        <label for="authEmail">
-          Email
-        </label>
-
-        <input
-          id="authEmail"
-          type="email"
-          placeholder="আপনার email"
-          autocomplete="email"
-          required
-        >
-
-
-        <label for="authPassword">
-          Password
-        </label>
-
-        <input
-          id="authPassword"
-          type="password"
-          placeholder="Password"
-          autocomplete="current-password"
-          required
-        >
-
-
-        <button
-          id="authSubmitBtn"
-          class="primary-btn"
-          type="submit"
-        >
-          Login
-        </button>
-
-      </form>
-
-
-      <p
-        id="authMessage"
-        class="auth-message"
-      ></p>
-
-
-      <button
-        id="authSwitchBtn"
-        class="auth-switch"
-        type="button"
-      >
-        নতুন account তৈরি করুন
-      </button>
-
+<header class="topbar">
+  <a class="brand" href="#home" aria-label="BuyHaat Home">Buy<span>Haat</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open menu" type="button">☰</button>
+</header>
+
+<main id="app">
+
+  <section id="home" class="page active">
+    <div class="search-wrap">
+      <input id="searchInput" type="search"
+        placeholder="পণ্য বা Store username খুঁজুন..."
+        autocomplete="off">
+      <button id="searchBtn" class="search-btn" type="button">Search</button>
     </div>
 
+    <section class="welcome">
+      <div>
+        <p class="eyebrow">WELCOME TO BUYHAAT</p>
+        <h1>এক জায়গায় অনেক Store, অনেক পণ্য</h1>
+        <p>পছন্দের পণ্য খুঁজুন, Store follow করুন এবং সরাসরি order করুন।</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Categories</h2></div>
+      <div id="categories" class="categories"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>All</h2>
+        <span id="productCount" class="muted"></span>
+      </div>
+      <div id="products" class="product-grid"></div>
+    </section>
+  </section>
+
+  <section id="following" class="page">
+    <div class="page-title">
+      <p class="eyebrow">FOLLOWING</p>
+      <h1>আপনার Follow করা Store</h1>
+    </div>
+    <div id="followingList" class="store-list"></div>
+  </section>
+
+  <section id="add-product" class="page">
+    <div class="page-title">
+      <p class="eyebrow">SELLER</p>
+      <h1>Add Product</h1>
+      <p>Store তৈরি করার পর এখান থেকে product manage করা যাবে।</p>
+    </div>
+    <div class="empty-card">
+      <h3>Product Add System</h3>
+      <p>Store তৈরি ও Login করার পর product name, price, image, category, stock এবং description যোগ করতে পারবেন।</p>
+    </div>
+  </section>
+
+  <section id="chat" class="page">
+    <div class="page-title">
+      <p class="eyebrow">MESSAGES</p>
+      <h1>Chat</h1>
+      <p>Buyer এবং Store-এর conversation এখানে থাকবে।</p>
+    </div>
+    <div id="chatList" class="chat-list">
+      <div class="empty-card">
+        <h3>কোনো conversation নেই</h3>
+        <p>Order করার পর সংশ্লিষ্ট Store-এর সঙ্গে chat করা যাবে।</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="my-store" class="page">
+    <div class="page-title">
+      <p class="eyebrow">ACCOUNT</p>
+      <h1>My Store</h1>
+      <p id="accountStatus">আপনার account এবং Store management এখানে থাকবে।</p>
+    </div>
+
+    <div id="myStoreContent"></div>
+
+    <div class="account-actions">
+      <button class="primary-btn" id="loginBtn" type="button">Login / Register</button>
+      <button class="secondary-btn" id="createStoreBtn" type="button">Create Store</button>
+      <button class="secondary-btn" id="logoutBtn" type="button" style="display:none;">Logout</button>
+    </div>
+
+    <div class="empty-card" id="storeManagerCard">
+      <h3>Store Manager</h3>
+      <p>Login করার পর নিজের Store তৈরি করে products, orders, stock, customers এবং chat manage করতে পারবেন।</p>
+    </div>
+  </section>
+
+  <section id="product-detail" class="page"></section>
+</main>
+
+<div id="authModal" class="auth-modal">
+  <div class="auth-modal-card">
+    <button id="closeAuthBtn" class="auth-modal-close" aria-label="Close" type="button">×</button>
+    <div class="auth-header">
+      <p class="eyebrow">BUYHAAT ACCOUNT</p>
+      <h2 id="authTitle">Login</h2>
+      <p id="authSubtitle" class="auth-modal-subtitle">আপনার BuyHaat account-এ Login করুন।</p>
+    </div>
+    <form id="authForm">
+      <label for="authEmail">Email
+        <input id="authEmail" type="email" placeholder="আপনার email" autocomplete="email" required>
+      </label>
+      <label for="authPassword">Password
+        <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password" required>
+      </label>
+      <button id="authSubmitBtn" class="primary-btn" type="submit">Login</button>
+    </form>
+    <p id="authMessage" class="auth-message"></p>
+    <button id="authSwitchBtn" class="auth-switch" type="button">নতুন account তৈরি করুন</button>
   </div>
+</div>
 
+<nav class="bottom-nav" aria-label="Main navigation">
+  <a href="#home" data-page="home">⌂<span>Home</span></a>
+  <a href="#following" data-page="following">♡<span>Following</span></a>
+  <a href="#add-product" data-page="add-product" class="add-tab">＋<span>Add Product</span></a>
+  <a href="#chat" data-page="chat">▢<span>Chat</span></a>
+  <a href="#my-store" data-page="my-store">◎<span>My Store</span></a>
+</nav>
 
+<div id="toast" class="toast" role="status"></div>
 
-  <!-- =====================================================
-       BOTTOM NAVIGATION
-       ===================================================== -->
-
-  <nav
-    class="bottom-nav"
-    aria-label="Main navigation"
-  >
-
-    <a
-      href="#home"
-      data-page="home"
-    >
-      ⌂
-      <span>
-        Home
-      </span>
-    </a>
-
-
-    <a
-      href="#following"
-      data-page="following"
-    >
-      ♡
-      <span>
-        Following
-      </span>
-    </a>
-
-
-    <a
-      href="#add-product"
-      data-page="add-product"
-      class="add-tab"
-    >
-      ＋
-      <span>
-        Add Product
-      </span>
-    </a>
-
-
-    <a
-      href="#chat"
-      data-page="chat"
-    >
-      ▢
-      <span>
-        Chat
-      </span>
-    </a>
-
-
-    <a
-      href="#my-store"
-      data-page="my-store"
-    >
-      ◎
-      <span>
-        My Store
-      </span>
-    </a>
-
-  </nav>
-
-
-
-  <!-- =====================================================
-       TOAST
-       ===================================================== -->
-
-  <div
-    id="toast"
-    class="toast"
-    role="status"
-  ></div>
-
-
-
-  <!-- =====================================================
-       SCRIPTS
-       ===================================================== -->
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <script src="supabase-config.js"></script>
-
-  <script src="app.js"></script>
-
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
 </body>
-
 </html>
