@@ -1,7 +1,8 @@
 /* =========================================================
    BUYHAAT — SUPABASE CONNECTED APP
    Products + Categories + Stores
-   Seller Store Management + Products + Orders
+   Seller Store Management
+   Products + Orders
    ========================================================= */
 
 
@@ -13,7 +14,7 @@ const sb = supabaseClient;
 
 
 /* =========================================================
-   DOM
+   DOM HELPER
    ========================================================= */
 
 const $ = id => document.getElementById(id);
@@ -54,7 +55,9 @@ function showToast(msg) {
   t.classList.add("show");
 
   setTimeout(() => {
+
     t.classList.remove("show");
+
   }, 2200);
 
 }
@@ -91,11 +94,14 @@ async function getCurrentUser() {
     );
 
     return null;
+
   }
 
-  currentUser = user || null;
+  currentUser =
+    user || null;
 
   return currentUser;
+
 }
 
 
@@ -134,7 +140,8 @@ async function uploadImage(
 
 
   const user =
-    currentUser || await getCurrentUser();
+    currentUser ||
+    await getCurrentUser();
 
 
   if (!user) {
@@ -189,7 +196,9 @@ async function uploadImage(
     data
   } = sb.storage
     .from("store-images")
-    .getPublicUrl(fileName);
+    .getPublicUrl(
+      fileName
+    );
 
 
   return data.publicUrl;
@@ -224,6 +233,7 @@ async function loadCategories() {
     );
 
     return;
+
   }
 
 
@@ -273,11 +283,20 @@ async function loadProducts() {
         is_approved
       )
     `)
-    .eq("is_active", true)
-    .eq("is_approved", true)
-    .order("created_at", {
-      ascending: false
-    });
+    .eq(
+      "is_active",
+      true
+    )
+    .eq(
+      "is_approved",
+      true
+    )
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    );
 
 
   if (error) {
@@ -292,46 +311,55 @@ async function loadProducts() {
     );
 
     return;
+
   }
 
 
-  products = (data || [])
-    .filter(p =>
-      p.stores &&
-      p.stores.is_active &&
-      p.stores.is_approved
-    )
-    .map(p => ({
+  products =
+    (data || [])
+      .filter(
+        p =>
+          p.stores &&
+          p.stores.is_active &&
+          p.stores.is_approved
+      )
+      .map(
+        p => ({
 
-      id: p.id,
+          id:
+            p.id,
 
-      name: p.name,
+          name:
+            p.name,
 
-      price: Number(
-        p.price
-      ),
+          price:
+            Number(p.price),
 
-      category:
-        p.categories?.name ||
-        "Others",
+          category:
+            p.categories?.name ||
+            "Others",
 
-      store:
-        p.stores?.name ||
-        "Unknown Store",
+          store:
+            p.stores?.name ||
+            "Unknown Store",
 
-      storeId:
-        p.store_id,
+          storeId:
+            p.store_id,
 
-      description:
-        p.description || "",
+          description:
+            p.description ||
+            "",
 
-      stock:
-        p.stock || 0,
+          stock:
+            p.stock ||
+            0,
 
-      image:
-        p.image_url || null
+          image:
+            p.image_url ||
+            null
 
-    }));
+        })
+      );
 
 
   renderProducts(
@@ -343,7 +371,8 @@ async function loadProducts() {
       "All",
 
     $("searchInput")
-      ?.value || ""
+      ?.value ||
+      ""
   );
 
 }
@@ -362,52 +391,65 @@ function renderCategories() {
 
 
   container.innerHTML =
-    categories.map(
-      (c, i) =>
+    categories
+      .map(
+        (c, i) =>
 
-        `<button
-          class="category ${i === 0 ? "active" : ""}"
-          data-category="${escapeHTML(c)}">
-          ${escapeHTML(c)}
-        </button>`
+          `<button
+            class="category ${
+              i === 0
+                ? "active"
+                : ""
+            }"
+            data-category="${escapeHTML(c)}">
 
-    ).join("");
+            ${escapeHTML(c)}
+
+          </button>`
+      )
+      .join("");
 
 
   document
-    .querySelectorAll(".category")
-    .forEach(btn => {
+    .querySelectorAll(
+      ".category"
+    )
+    .forEach(
+      btn => {
 
-      btn.addEventListener(
-        "click",
-        () => {
+        btn.addEventListener(
+          "click",
+          () => {
 
-          document
-            .querySelectorAll(
-              ".category"
-            )
-            .forEach(x =>
-              x.classList.remove(
-                "active"
+            document
+              .querySelectorAll(
+                ".category"
               )
+              .forEach(
+                x =>
+                  x.classList.remove(
+                    "active"
+                  )
+              );
+
+
+            btn.classList.add(
+              "active"
             );
 
 
-          btn.classList.add(
-            "active"
-          );
+            renderProducts(
+              btn.dataset.category,
+              $("searchInput")
+                ?.value ||
+                ""
+            );
 
+          }
+        );
 
-          renderProducts(
-            btn.dataset.category,
-            $("searchInput")
-              ?.value || ""
-          );
-
-        }
-      );
-
-    });
+      }
+    );
 
 }
 
@@ -428,33 +470,33 @@ function renderProducts(
 
 
   let list =
-    products.filter(p =>
-
-      category === "All" ||
-      p.category === category
-
+    products.filter(
+      p =>
+        category === "All" ||
+        p.category === category
     );
 
 
   const q =
-    query.trim().toLowerCase();
+    query
+      .trim()
+      .toLowerCase();
 
 
   if (q) {
 
     list =
-      list.filter(p =>
-
-        (
-          p.name +
-          " " +
-          p.store +
-          " " +
-          p.category
-        )
-        .toLowerCase()
-        .includes(q)
-
+      list.filter(
+        p =>
+          (
+            p.name +
+            " " +
+            p.store +
+            " " +
+            p.category
+          )
+            .toLowerCase()
+            .includes(q)
       );
 
   }
@@ -473,49 +515,75 @@ function renderProducts(
   container.innerHTML =
     list.length
 
-      ? list.map(p => `
+      ? list
+          .map(
+            p => `
 
-          <article
-            class="product-card"
-            data-product="${p.id}">
+              <article
+                class="product-card"
+                data-product="${p.id}">
 
-            <div class="product-image">
+                <div class="product-image">
 
-              ${
-                p.image
-                  ? `
-                    <img
-                      src="${escapeHTML(p.image)}"
-                      alt="${escapeHTML(p.name)}">
-                  `
-                  : "🛍️"
-              }
+                  ${
+                    p.image
 
-            </div>
+                      ? `
+                        <img
+                          src="${escapeHTML(
+                            p.image
+                          )}"
+                          alt="${escapeHTML(
+                            p.name
+                          )}">
+                      `
 
-            <div class="product-info">
+                      : "🛍️"
+                  }
 
-              <div class="product-name">
-                ${escapeHTML(p.name)}
-              </div>
+                </div>
 
-              <div class="price">
-                ${money(p.price)}
-              </div>
 
-              <div class="store-name">
-                ${escapeHTML(p.store)}
-              </div>
+                <div class="product-info">
 
-            </div>
+                  <div class="product-name">
 
-          </article>
+                    ${escapeHTML(
+                      p.name
+                    )}
 
-        `).join("")
+                  </div>
+
+
+                  <div class="price">
+
+                    ${money(
+                      p.price
+                    )}
+
+                  </div>
+
+
+                  <div class="store-name">
+
+                    ${escapeHTML(
+                      p.store
+                    )}
+
+                  </div>
+
+                </div>
+
+              </article>
+
+            `
+          )
+          .join("")
 
       :
 
         `
+
           <div class="empty-card">
 
             <h3>
@@ -527,6 +595,7 @@ function renderProducts(
             </p>
 
           </div>
+
         `;
 
 
@@ -534,20 +603,22 @@ function renderProducts(
     .querySelectorAll(
       "[data-product]"
     )
-    .forEach(card => {
+    .forEach(
+      card => {
 
-      card.addEventListener(
-        "click",
-        () => {
+        card.addEventListener(
+          "click",
+          () => {
 
-          openProduct(
-            card.dataset.product
-          );
+            openProduct(
+              card.dataset.product
+            );
 
-        }
-      );
+          }
+        );
 
-    });
+      }
+    );
 
 }
 
@@ -573,14 +644,23 @@ function openProduct(id) {
     );
 
     return;
+
   }
 
 
   location.hash =
-    "product/" + p.id;
+    "product/" +
+    p.id;
 
 
-  $("product-detail").innerHTML = `
+  const detail =
+    $("product-detail");
+
+
+  if (!detail) return;
+
+
+  detail.innerHTML = `
 
     <div class="detail">
 
@@ -599,11 +679,17 @@ function openProduct(id) {
 
           ${
             p.image
+
               ? `
                 <img
-                  src="${escapeHTML(p.image)}"
-                  alt="${escapeHTML(p.name)}">
+                  src="${escapeHTML(
+                    p.image
+                  )}"
+                  alt="${escapeHTML(
+                    p.name
+                  )}">
               `
+
               : "🛍️"
           }
 
@@ -613,40 +699,58 @@ function openProduct(id) {
         <div class="detail-body">
 
           <div class="eyebrow">
+
             ${escapeHTML(
               p.category
             ).toUpperCase()}
+
           </div>
 
 
           <h1>
-            ${escapeHTML(p.name)}
+
+            ${escapeHTML(
+              p.name
+            )}
+
           </h1>
 
 
           <div class="store-name">
+
             Store:
-            ${escapeHTML(p.store)}
+            ${escapeHTML(
+              p.store
+            )}
+
           </div>
 
 
           <div class="detail-price">
-            ${money(p.price)}
+
+            ${money(
+              p.price
+            )}
+
           </div>
 
 
           <p class="detail-desc">
+
             ${escapeHTML(
               p.description
             )}
+
           </p>
 
 
           <p>
+
             Stock:
             <strong>
               ${p.stock}
             </strong>
+
           </p>
 
 
@@ -698,6 +802,7 @@ function startOrder(id) {
     );
 
     return;
+
   }
 
 
@@ -739,45 +844,54 @@ function renderFollowing() {
     `;
 
     return;
+
   }
 
 
   container.innerHTML =
-    followedStores.map(
-      store => `
+    followedStores
+      .map(
+        store => `
 
-        <div class="store-card">
+          <div class="store-card">
 
-          <div class="store-avatar">
-            ${escapeHTML(
-              store.charAt(0)
-            )}
+            <div class="store-avatar">
+
+              ${escapeHTML(
+                store.charAt(0)
+              )}
+
+            </div>
+
+
+            <div class="store-meta">
+
+              <h3>
+                ${escapeHTML(
+                  store
+                )}
+              </h3>
+
+              <p>
+                Followed Store
+              </p>
+
+            </div>
+
+
+            <button
+              class="secondary-btn"
+              onclick="showToast('Store page পরের ধাপে যুক্ত হবে')">
+
+              View
+
+            </button>
+
           </div>
 
-          <div class="store-meta">
-
-            <h3>
-              ${escapeHTML(store)}
-            </h3>
-
-            <p>
-              Followed Store
-            </p>
-
-          </div>
-
-          <button
-            class="secondary-btn"
-            onclick="showToast('Store page পরের ধাপে যুক্ত হবে')">
-
-            View
-
-          </button>
-
-        </div>
-
-      `
-    ).join("");
+        `
+      )
+      .join("");
 
 }
 
@@ -790,10 +904,11 @@ function showPage(page) {
 
   document
     .querySelectorAll(".page")
-    .forEach(p =>
-      p.classList.remove(
-        "active"
-      )
+    .forEach(
+      p =>
+        p.classList.remove(
+          "active"
+        )
     );
 
 
@@ -810,10 +925,27 @@ function showPage(page) {
 
       createManageProductsPage();
 
+      const newTarget =
+        $("manage-products");
+
+
+      if (newTarget) {
+
+        newTarget.classList.add(
+          "active"
+        );
+
+        loadManageProducts();
+
+      }
+
       return;
+
     }
 
+
     return;
+
   }
 
 
@@ -846,13 +978,12 @@ function showPage(page) {
     .querySelectorAll(
       ".bottom-nav a"
     )
-    .forEach(a =>
-
-      a.classList.toggle(
-        "active",
-        a.dataset.page === page
-      )
-
+    .forEach(
+      a =>
+        a.classList.toggle(
+          "active",
+          a.dataset.page === page
+        )
     );
 
 
@@ -888,11 +1019,13 @@ function route() {
     );
 
     return;
+
   }
 
 
   const page =
-    hash || "home";
+    hash ||
+    "home";
 
 
   const valid = [
@@ -907,17 +1040,17 @@ function route() {
 
     "my-store",
 
-    "manage-products"
+    "manage-products",
+
+    "product-detail"
 
   ];
 
 
   showPage(
-
     valid.includes(page)
       ? page
       : "home"
-
   );
 
 }
@@ -927,55 +1060,50 @@ function route() {
    SEARCH
    ========================================================= */
 
-if ($("searchInput")) {
+$("searchInput")
+  ?.addEventListener(
+    "input",
+    () => {
 
-  $("searchInput")
-    .addEventListener(
-      "input",
-      () => {
-
-        const active =
-          document.querySelector(
-            ".category.active"
-          );
-
-
-        renderProducts(
-
-          active?.dataset.category ||
-          "All",
-
-          $("searchInput").value
-
+      const active =
+        document.querySelector(
+          ".category.active"
         );
 
-      }
-    );
 
-}
+      renderProducts(
 
-
-if ($("searchBtn")) {
-
-  $("searchBtn")
-    .addEventListener(
-      "click",
-      () => {
+        active?.dataset.category ||
+        "All",
 
         $("searchInput")
-          ?.focus();
+          .value ||
+        ""
+
+      );
+
+    }
+  );
 
 
-        renderProducts(
-          "All",
-          $("searchInput")
-            ?.value || ""
-        );
+$("searchBtn")
+  ?.addEventListener(
+    "click",
+    () => {
 
-      }
-    );
+      $("searchInput")
+        ?.focus();
 
-}
+
+      renderProducts(
+        "All",
+        $("searchInput")
+          ?.value ||
+        ""
+      );
+
+    }
+  );
 
 
 /* =========================================================
@@ -998,12 +1126,9 @@ $("createStoreBtn")
         );
 
         return;
+
       }
 
-
-      /*
-       * Check existing store
-       */
 
       const {
         data: existingStore,
@@ -1029,6 +1154,7 @@ $("createStoreBtn")
         );
 
         return;
+
       }
 
 
@@ -1042,6 +1168,7 @@ $("createStoreBtn")
           "my-store";
 
         return;
+
       }
 
 
@@ -1056,6 +1183,7 @@ $("createStoreBtn")
         );
 
         return;
+
       }
 
 
@@ -1211,7 +1339,7 @@ $("createStoreBtn")
 
 
       $("closeCreateStore")
-        .addEventListener(
+        ?.addEventListener(
           "click",
           () => modal.remove()
         );
@@ -1234,7 +1362,7 @@ $("createStoreBtn")
 
 
       $("createStoreForm")
-        .addEventListener(
+        ?.addEventListener(
           "submit",
           async e => {
 
@@ -1288,6 +1416,7 @@ $("createStoreBtn")
                 "Store name দিন।";
 
               return;
+
             }
 
 
@@ -1329,7 +1458,7 @@ $("createStoreBtn")
               }
 
 
-              const slug =
+              const baseSlug =
                 name
                   .toLowerCase()
                   .trim()
@@ -1340,11 +1469,13 @@ $("createStoreBtn")
                   .replace(
                     /^-+|-+$/g,
                     ""
-                  ) +
-                "-" +
-                Math.random()
+                  );
+
+
+              const slug =
+                `${baseSlug || "store"}-${Math.random()
                   .toString(36)
-                  .substring(2, 7);
+                  .substring(2, 8)}`;
 
 
               const {
@@ -1416,6 +1547,9 @@ $("createStoreBtn")
               await updateAuthState();
 
 
+              await loadMyStore();
+
+
             } catch (error) {
 
               console.error(
@@ -1460,7 +1594,11 @@ async function loadMyStore() {
   container.innerHTML = `
 
     <div class="empty-card">
-      <p>Store loading...</p>
+
+      <p>
+        Store loading...
+      </p>
+
     </div>
 
   `;
@@ -1489,6 +1627,7 @@ async function loadMyStore() {
     `;
 
     return;
+
   }
 
 
@@ -1545,6 +1684,7 @@ async function loadMyStore() {
     `;
 
     return;
+
   }
 
 
@@ -1580,6 +1720,7 @@ async function loadMyStore() {
     `;
 
     return;
+
   }
 
 
@@ -1691,20 +1832,24 @@ async function loadMyStore() {
         <div class="store-status">
 
           <span>
+
             ${
               store.is_active
                 ? "Active"
                 : "Inactive"
             }
+
           </span>
 
 
           <span>
+
             ${
               store.is_approved
                 ? "Approved"
                 : "Pending Approval"
             }
+
           </span>
 
         </div>
@@ -1780,8 +1925,8 @@ async function loadMyStore() {
 
 
           <button
-            class="secondary-btn"
-            onclick="location.hash='manage-products'">
+            class="primary-store-btn"
+            onclick="openManageProducts()">
 
             Manage Products
 
@@ -1801,10 +1946,240 @@ async function loadMyStore() {
 
 
 /* =========================================================
-   EDIT STORE
+   EDIT STORE MODAL
+   ========================================================= */
+
+function createEditStoreModal() {
+
+  const old =
+    $("editStoreModal");
+
+
+  if (old) {
+
+    old.remove();
+
+  }
+
+
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+
+  modal.id =
+    "editStoreModal";
+
+  modal.className =
+    "store-modal";
+
+
+  modal.innerHTML = `
+
+    <div class="store-modal-card">
+
+      <button
+        type="button"
+        class="store-modal-close"
+        id="closeEditStore">
+
+        ×
+
+      </button>
+
+
+      <h2>
+        Edit Store
+      </h2>
+
+
+      <p class="store-modal-subtitle">
+        আপনার Store-এর তথ্য পরিবর্তন করুন
+      </p>
+
+
+      <form
+        id="editStoreForm">
+
+
+        <label>
+
+          Store Name
+
+          <input
+            type="text"
+            id="editStoreName"
+            maxlength="100"
+            required>
+
+        </label>
+
+
+        <label>
+
+          Store Logo
+
+          <input
+            type="file"
+            id="editStoreLogo"
+            accept="image/*">
+
+        </label>
+
+
+        <div
+          id="editLogoPreview"
+          class="store-image-preview">
+        </div>
+
+
+        <label>
+
+          Cover Image
+
+          <input
+            type="file"
+            id="editStoreCover"
+            accept="image/*">
+
+        </label>
+
+
+        <div
+          id="editCoverPreview"
+          class="store-image-preview">
+        </div>
+
+
+        <label>
+
+          Description
+
+          <textarea
+            id="editStoreDescription"
+            rows="4"
+            maxlength="500"></textarea>
+
+        </label>
+
+
+        <label>
+
+          Phone
+
+          <input
+            type="tel"
+            id="editStorePhone"
+            maxlength="20">
+
+        </label>
+
+
+        <label>
+
+          Address
+
+          <textarea
+            id="editStoreAddress"
+            rows="3"
+            maxlength="300"></textarea>
+
+        </label>
+
+
+        <button
+          type="submit"
+          id="saveStoreChanges"
+          class="primary-store-btn">
+
+          Save Changes
+
+        </button>
+
+
+        <p
+          id="editStoreMessage"
+          class="store-form-message">
+        </p>
+
+
+      </form>
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(
+    modal
+  );
+
+
+  modal.classList.add(
+    "show"
+  );
+
+
+  $("closeEditStore")
+    ?.addEventListener(
+      "click",
+      () => {
+
+        modal.remove();
+
+      }
+    );
+
+
+  modal.addEventListener(
+    "click",
+    e => {
+
+      if (
+        e.target === modal
+      ) {
+
+        modal.remove();
+
+      }
+
+    }
+  );
+
+
+  $("editStoreForm")
+    ?.addEventListener(
+      "submit",
+      submitEditStore
+    );
+
+
+  return modal;
+
+}
+
+
+/* =========================================================
+   OPEN EDIT STORE
    ========================================================= */
 
 async function openEditStore() {
+
+  const user =
+    await getCurrentUser();
+
+
+  if (!user) {
+
+    showToast(
+      "আগে Login করুন"
+    );
+
+    return;
+
+  }
+
 
   if (!currentMyStore) {
 
@@ -1820,25 +2195,17 @@ async function openEditStore() {
     );
 
     return;
+
   }
 
 
   const modal =
-    $("editStoreModal");
-
-
-  if (!modal) {
-
-    showToast(
-      "Edit Store interface পাওয়া যায়নি"
-    );
-
-    return;
-  }
+    createEditStoreModal();
 
 
   $("editStoreName").value =
-    currentMyStore.name || "";
+    currentMyStore.name ||
+    "";
 
 
   $("editStoreDescription").value =
@@ -1857,43 +2224,37 @@ async function openEditStore() {
 
 
   if (
-    $("editLogoPreview")
+    currentMyStore.logo_url
   ) {
 
     $("editLogoPreview")
-      .innerHTML =
-      currentMyStore.logo_url
+      .innerHTML = `
 
-        ? `
-          <img
-            src="${escapeHTML(
-              currentMyStore.logo_url
-            )}"
-            alt="Store Logo">
-        `
+        <img
+          src="${escapeHTML(
+            currentMyStore.logo_url
+          )}"
+          alt="Store Logo">
 
-        : "";
+      `;
 
   }
 
 
   if (
-    $("editCoverPreview")
+    currentMyStore.cover_url
   ) {
 
     $("editCoverPreview")
-      .innerHTML =
-      currentMyStore.cover_url
+      .innerHTML = `
 
-        ? `
-          <img
-            src="${escapeHTML(
-              currentMyStore.cover_url
-            )}"
-            alt="Store Cover">
-        `
+        <img
+          src="${escapeHTML(
+            currentMyStore.cover_url
+          )}"
+          alt="Store Cover">
 
-        : "";
+      `;
 
   }
 
@@ -1906,226 +2267,203 @@ async function openEditStore() {
 
 
 /* =========================================================
-   CLOSE EDIT STORE
-   ========================================================= */
-
-$("closeEditStore")
-  ?.addEventListener(
-    "click",
-    () => {
-
-      $("editStoreModal")
-        ?.classList.remove(
-          "show"
-        );
-
-    }
-  );
-
-
-/* =========================================================
    EDIT STORE SUBMIT
    ========================================================= */
 
-$("editStoreForm")
-  ?.addEventListener(
-    "submit",
-    async e => {
+async function submitEditStore(e) {
 
-      e.preventDefault();
+  e.preventDefault();
 
 
-      if (!currentMyStore) {
+  if (!currentMyStore) {
 
-        showToast(
-          "Store পাওয়া যায়নি"
+    showToast(
+      "Store পাওয়া যায়নি"
+    );
+
+    return;
+
+  }
+
+
+  const saveBtn =
+    $("saveStoreChanges");
+
+  const message =
+    $("editStoreMessage");
+
+
+  saveBtn.disabled =
+    true;
+
+  saveBtn.textContent =
+    "Saving...";
+
+  message.textContent =
+    "";
+
+
+  try {
+
+    let logoUrl =
+      currentMyStore.logo_url ||
+      null;
+
+
+    let coverUrl =
+      currentMyStore.cover_url ||
+      null;
+
+
+    const logoFile =
+      $("editStoreLogo")
+        ?.files[0];
+
+
+    const coverFile =
+      $("editStoreCover")
+        ?.files[0];
+
+
+    if (logoFile) {
+
+      logoUrl =
+        await uploadImage(
+          logoFile,
+          "store-logo"
         );
-
-        return;
-      }
-
-
-      const saveBtn =
-        $("saveStoreChanges");
-
-      const message =
-        $("editStoreMessage");
-
-
-      saveBtn.disabled =
-        true;
-
-      saveBtn.textContent =
-        "Saving...";
-
-      message.textContent =
-        "";
-
-
-      try {
-
-        let logoUrl =
-          currentMyStore.logo_url ||
-          null;
-
-
-        let coverUrl =
-          currentMyStore.cover_url ||
-          null;
-
-
-        const logoFile =
-          $("editStoreLogo")
-            ?.files[0];
-
-
-        const coverFile =
-          $("editStoreCover")
-            ?.files[0];
-
-
-        if (logoFile) {
-
-          logoUrl =
-            await uploadImage(
-              logoFile,
-              "store-logo"
-            );
-
-        }
-
-
-        if (coverFile) {
-
-          coverUrl =
-            await uploadImage(
-              coverFile,
-              "store-cover"
-            );
-
-        }
-
-
-        const name =
-          $("editStoreName")
-            .value
-            .trim();
-
-
-        if (!name) {
-
-          throw new Error(
-            "Store name প্রয়োজন।"
-          );
-
-        }
-
-
-        const updates = {
-
-          name,
-
-          description:
-            $("editStoreDescription")
-              .value
-              .trim() ||
-            null,
-
-          phone:
-            $("editStorePhone")
-              .value
-              .trim() ||
-            null,
-
-          address:
-            $("editStoreAddress")
-              .value
-              .trim() ||
-            null,
-
-          logo_url:
-            logoUrl,
-
-          cover_url:
-            coverUrl,
-
-          updated_at:
-            new Date()
-              .toISOString()
-
-        };
-
-
-        const {
-          data,
-          error
-        } = await sb
-          .from("stores")
-          .update(updates)
-          .eq(
-            "id",
-            currentMyStore.id
-          )
-          .eq(
-            "owner_id",
-            currentUser.id
-          )
-          .select()
-          .single();
-
-
-        if (error) {
-
-          throw error;
-
-        }
-
-
-        currentMyStore =
-          data;
-
-
-        message.textContent =
-          "Store successfully updated।";
-
-
-        showToast(
-          "Store update হয়েছে"
-        );
-
-
-        $("editStoreModal")
-          .classList.remove(
-            "show"
-          );
-
-
-        await loadMyStore();
-
-
-      } catch (error) {
-
-        console.error(
-          "Edit store error:",
-          error
-        );
-
-
-        message.textContent =
-          error.message ||
-          "Store update করা যায়নি।";
-
-      }
-
-
-      saveBtn.disabled =
-        false;
-
-      saveBtn.textContent =
-        "Save Changes";
 
     }
-  );
+
+
+    if (coverFile) {
+
+      coverUrl =
+        await uploadImage(
+          coverFile,
+          "store-cover"
+        );
+
+    }
+
+
+    const name =
+      $("editStoreName")
+        .value
+        .trim();
+
+
+    if (!name) {
+
+      throw new Error(
+        "Store name প্রয়োজন।"
+      );
+
+    }
+
+
+    const updates = {
+
+      name,
+
+      description:
+        $("editStoreDescription")
+          .value
+          .trim() ||
+        null,
+
+      phone:
+        $("editStorePhone")
+          .value
+          .trim() ||
+        null,
+
+      address:
+        $("editStoreAddress")
+          .value
+          .trim() ||
+        null,
+
+      logo_url:
+        logoUrl,
+
+      cover_url:
+        coverUrl,
+
+      updated_at:
+        new Date()
+          .toISOString()
+
+    };
+
+
+    const {
+      data,
+      error
+    } = await sb
+      .from("stores")
+      .update(updates)
+      .eq(
+        "id",
+        currentMyStore.id
+      )
+      .eq(
+        "owner_id",
+        currentUser.id
+      )
+      .select()
+      .single();
+
+
+    if (error) {
+
+      throw error;
+
+    }
+
+
+    currentMyStore =
+      data;
+
+
+    message.textContent =
+      "Store successfully updated।";
+
+
+    showToast(
+      "Store update হয়েছে"
+    );
+
+
+    $("editStoreModal")
+      ?.remove();
+
+
+    await loadMyStore();
+
+
+  } catch (error) {
+
+    console.error(
+      "Edit store error:",
+      error
+    );
+
+
+    message.textContent =
+      error.message ||
+      "Store update করা যায়নি।";
+
+  }
+
+
+  saveBtn.disabled =
+    false;
+
+  saveBtn.textContent =
+    "Save Changes";
+
+}
 
 
 /* =========================================================
@@ -2133,6 +2471,17 @@ $("editStoreForm")
    ========================================================= */
 
 function createManageProductsPage() {
+
+  const old =
+    $("manage-products");
+
+
+  if (old) {
+
+    return old;
+
+  }
+
 
   const page =
     document.createElement(
@@ -2155,9 +2504,11 @@ function createManageProductsPage() {
         SELLER
       </p>
 
+
       <h1>
         Manage Products
       </h1>
+
 
       <p>
         আপনার Store-এর products এবং orders পরিচালনা করুন।
@@ -2168,6 +2519,7 @@ function createManageProductsPage() {
 
     <div
       class="seller-tabs">
+
 
       <button
         class="secondary-btn seller-tab active"
@@ -2186,89 +2538,109 @@ function createManageProductsPage() {
 
       </button>
 
+
     </div>
 
 
     <div
       id="sellerProductsPanel">
-
     </div>
 
 
     <div
       id="sellerOrdersPanel"
       style="display:none;">
-
     </div>
 
   `;
 
 
   document
-    .querySelector(
-      "main"
-    )
-    ?.appendChild(
-      page
-    );
+    .querySelector("main")
+    ?.appendChild(page);
 
 
-  document
+  page
     .querySelectorAll(
       ".seller-tab"
     )
-    .forEach(btn => {
+    .forEach(
+      btn => {
 
-      btn.addEventListener(
-        "click",
-        () => {
+        btn.addEventListener(
+          "click",
+          () => {
 
-          document
-            .querySelectorAll(
-              ".seller-tab"
-            )
-            .forEach(x =>
-              x.classList.remove(
-                "active"
+            page
+              .querySelectorAll(
+                ".seller-tab"
               )
+              .forEach(
+                x =>
+                  x.classList.remove(
+                    "active"
+                  )
+              );
+
+
+            btn.classList.add(
+              "active"
             );
 
 
-          btn.classList.add(
-            "active"
-          );
+            const tab =
+              btn.dataset.tab;
 
 
-          const tab =
-            btn.dataset.tab;
+            $("sellerProductsPanel")
+              .style.display =
+              tab === "products"
+                ? "block"
+                : "none";
 
 
-          $("sellerProductsPanel")
-            .style.display =
-            tab === "products"
-              ? "block"
-              : "none";
+            $("sellerOrdersPanel")
+              .style.display =
+              tab === "orders"
+                ? "block"
+                : "none";
 
 
-          $("sellerOrdersPanel")
-            .style.display =
-            tab === "orders"
-              ? "block"
-              : "none";
+            if (
+              tab ===
+              "orders"
+            ) {
 
+              loadStoreOrders();
 
-          if (
-            tab === "orders"
-          ) {
-
-            loadStoreOrders();
+            }
 
           }
+        );
 
-        }
-      );
+      }
+    );
 
-    });
+
+  return page;
+
+}
+
+
+/* =========================================================
+   OPEN MANAGE PRODUCTS
+   ========================================================= */
+
+async function openManageProducts() {
+
+  createManageProductsPage();
+
+
+  location.hash =
+    "manage-products";
+
+
+  await loadManageProducts();
 
 }
 
@@ -2280,9 +2652,7 @@ function createManageProductsPage() {
 async function loadManageProducts() {
 
   if (
-    !document.getElementById(
-      "manage-products"
-    )
+    !$("manage-products")
   ) {
 
     createManageProductsPage();
@@ -2314,6 +2684,7 @@ async function loadManageProducts() {
       `;
 
     return;
+
   }
 
 
@@ -2348,6 +2719,7 @@ async function loadManageProducts() {
       `;
 
     return;
+
   }
 
 
@@ -2362,6 +2734,7 @@ async function loadManageProducts() {
             আগে Store তৈরি করুন
           </h3>
 
+
           <button
             class="primary-btn"
             onclick="location.hash='my-store'">
@@ -2375,6 +2748,7 @@ async function loadManageProducts() {
       `;
 
     return;
+
   }
 
 
@@ -2437,6 +2811,7 @@ async function loadManageProducts() {
       `;
 
     return;
+
   }
 
 
@@ -2450,7 +2825,9 @@ async function loadManageProducts() {
           align-items:center;
           gap:10px;
           margin-bottom:20px;
+          flex-wrap:wrap;
         ">
+
 
         <h2>
           Your Products
@@ -2471,84 +2848,112 @@ async function loadManageProducts() {
       ${
         storeProducts?.length
 
-          ? storeProducts.map(
-              product => `
-
-                <div
-                  class="store-card"
-                  style="margin-bottom:12px;">
+          ? storeProducts
+              .map(
+                product => `
 
                   <div
-                    class="store-avatar">
+                    class="store-card"
+                    style="
+                      margin-bottom:12px;
+                    ">
 
-                    ${
-                      product.image_url
-                        ? `
-                          <img
-                            src="${escapeHTML(
-                              product.image_url
-                            )}"
-                            style="
-                              width:100%;
-                              height:100%;
-                              object-fit:cover;
-                              border-radius:inherit;
-                            "
-                            alt="">
-                        `
-                        : "📦"
-                    }
+
+                    <div
+                      class="store-avatar">
+
+
+                      ${
+                        product.image_url
+
+                          ? `
+
+                            <img
+                              src="${escapeHTML(
+                                product.image_url
+                              )}"
+                              style="
+                                width:100%;
+                                height:100%;
+                                object-fit:cover;
+                                border-radius:inherit;
+                              "
+                              alt="">
+
+                          `
+
+                          : "📦"
+
+                      }
+
+
+                    </div>
+
+
+                    <div
+                      class="store-meta"
+                      style="
+                        flex:1;
+                      ">
+
+
+                      <h3>
+
+                        ${escapeHTML(
+                          product.name
+                        )}
+
+                      </h3>
+
+
+                      <p>
+
+                        ${money(
+                          product.price
+                        )}
+
+                        · Stock:
+                        ${product.stock}
+
+                      </p>
+
+
+                      <p>
+
+                        ${
+                          product.is_approved
+                            ? "Approved"
+                            : "Pending Approval"
+                        }
+
+                        ·
+
+                        ${
+                          product.is_active
+                            ? "Active"
+                            : "Inactive"
+                        }
+
+                      </p>
+
+
+                    </div>
+
+
+                    <button
+                      class="secondary-btn"
+                      onclick="openProductEditor('${product.id}')">
+
+                      Edit
+
+                    </button>
+
 
                   </div>
 
-
-                  <div
-                    class="store-meta"
-                    style="flex:1;">
-
-                    <h3>
-                      ${escapeHTML(
-                        product.name
-                      )}
-                    </h3>
-
-                    <p>
-                      ${money(
-                        product.price
-                      )}
-                      · Stock:
-                      ${product.stock}
-                    </p>
-
-                    <p>
-                      ${
-                        product.is_approved
-                          ? "Approved"
-                          : "Pending Approval"
-                      }
-                      ·
-                      ${
-                        product.is_active
-                          ? "Active"
-                          : "Inactive"
-                      }
-                    </p>
-
-                  </div>
-
-
-                  <button
-                    class="secondary-btn"
-                    onclick="openProductEditor('${product.id}')">
-
-                    Edit
-
-                  </button>
-
-                </div>
-
-              `
-            ).join("")
+                `
+              )
+              .join("")
 
           : `
 
@@ -2574,7 +2979,8 @@ async function loadManageProducts() {
   $("addProductBtn")
     ?.addEventListener(
       "click",
-      () => openProductEditor()
+      () =>
+        openProductEditor()
     );
 
 }
@@ -2588,7 +2994,26 @@ async function openProductEditor(
   productId = null
 ) {
 
-  let product = null;
+  if (!currentMyStore) {
+
+    await loadManageProducts();
+
+  }
+
+
+  if (!currentMyStore) {
+
+    showToast(
+      "Store পাওয়া যায়নি"
+    );
+
+    return;
+
+  }
+
+
+  let product =
+    null;
 
 
   if (productId) {
@@ -2612,28 +3037,27 @@ async function openProductEditor(
 
     if (error) {
 
+      console.error(
+        error
+      );
+
       showToast(
         "Product load করা যায়নি"
       );
 
       return;
+
     }
 
 
-    product = data;
+    product =
+      data;
 
   }
 
 
-  const existing =
-    $("productEditorModal");
-
-
-  if (existing) {
-
-    existing.remove();
-
-  }
+  $("productEditorModal")
+    ?.remove();
 
 
   const modal =
@@ -2666,11 +3090,13 @@ async function openProductEditor(
 
 
       <h2>
+
         ${
           product
             ? "Edit Product"
             : "Add Product"
         }
+
       </h2>
 
 
@@ -2722,7 +3148,8 @@ async function openProductEditor(
             id="productName"
             maxlength="150"
             value="${escapeHTML(
-              product?.name || ""
+              product?.name ||
+              ""
             )}"
             required>
 
@@ -2799,7 +3226,8 @@ async function openProductEditor(
             id="productSku"
             maxlength="100"
             value="${escapeHTML(
-              product?.sku || ""
+              product?.sku ||
+              ""
             )}">
 
         </label>
@@ -2813,7 +3241,8 @@ async function openProductEditor(
             id="productDescription"
             rows="4"
             maxlength="1000">${escapeHTML(
-              product?.description || ""
+              product?.description ||
+              ""
             )}</textarea>
 
         </label>
@@ -2853,20 +3282,44 @@ async function openProductEditor(
 
         ${
           product
+
             ? `
+
+              <button
+                type="button"
+                id="toggleProductBtn"
+                class="secondary-btn"
+                style="
+                  width:100%;
+                  margin-top:10px;
+                ">
+
+                ${
+                  product.is_active
+                    ? "Deactivate Product"
+                    : "Activate Product"
+                }
+
+              </button>
+
 
               <button
                 type="button"
                 id="deleteProductBtn"
                 class="secondary-btn"
-                style="width:100%;margin-top:10px;">
+                style="
+                  width:100%;
+                  margin-top:10px;
+                ">
 
                 Delete Product
 
               </button>
 
             `
+
             : ""
+
         }
 
 
@@ -2898,59 +3351,93 @@ async function openProductEditor(
 
 
   const {
-    data: categoryData
+    data: categoryData,
+    error: categoryError
   } = await sb
     .from("categories")
-    .select("id,name")
+    .select(
+      "id,name"
+    )
     .order("name");
 
 
+  if (categoryError) {
+
+    console.error(
+      categoryError
+    );
+
+  }
+
+
   (categoryData || [])
-    .forEach(category => {
+    .forEach(
+      category => {
 
-      const option =
-        document.createElement(
-          "option"
-        );
-
-      option.value =
-        category.id;
-
-      option.textContent =
-        category.name;
+        const option =
+          document.createElement(
+            "option"
+          );
 
 
-      if (
-        product &&
-        String(
-          product.category_id
-        ) ===
-        String(
-          category.id
-        )
-      ) {
+        option.value =
+          category.id;
 
-        option.selected =
-          true;
+
+        option.textContent =
+          category.name;
+
+
+        if (
+          product &&
+          String(
+            product.category_id
+          ) ===
+          String(
+            category.id
+          )
+        ) {
+
+          option.selected =
+            true;
+
+        }
+
+
+        categorySelect
+          .appendChild(
+            option
+          );
 
       }
-
-
-      categorySelect
-        .appendChild(option);
-
-    });
+    );
 
 
   $("closeProductEditor")
-    .addEventListener(
+    ?.addEventListener(
       "click",
       () => modal.remove()
     );
 
 
+  modal.addEventListener(
+    "click",
+    e => {
+
+      if (
+        e.target === modal
+      ) {
+
+        modal.remove();
+
+      }
+
+    }
+  );
+
+
   $("productEditorForm")
-    .addEventListener(
+    ?.addEventListener(
       "submit",
       async e => {
 
@@ -3095,24 +3582,6 @@ async function openProductEditor(
           }
 
 
-          const slug =
-            name
-              .toLowerCase()
-              .trim()
-              .replace(
-                /[^a-z0-9]+/g,
-                "-"
-              )
-              .replace(
-                /^-+|-+$/g,
-                ""
-              ) +
-            "-" +
-            Math.random()
-              .toString(36)
-              .substring(2, 7);
-
-
           const payload = {
 
             store_id:
@@ -3142,15 +3611,36 @@ async function openProductEditor(
               isActive,
 
             image_url:
-              imageUrl
+              imageUrl,
+
+            updated_at:
+              new Date()
+                .toISOString()
 
           };
 
 
           if (!product) {
 
+            const baseSlug =
+              name
+                .toLowerCase()
+                .trim()
+                .replace(
+                  /[^a-z0-9]+/g,
+                  "-"
+                )
+                .replace(
+                  /^-+|-+$/g,
+                  ""
+                );
+
+
             payload.slug =
-              slug;
+              `${baseSlug || "product"}-${Math.random()
+                .toString(36)
+                .substring(2, 8)}`;
+
 
             payload.is_approved =
               false;
@@ -3211,6 +3701,7 @@ async function openProductEditor(
 
           modal.remove();
 
+
           await loadManageProducts();
 
           await loadProducts();
@@ -3243,6 +3734,75 @@ async function openProductEditor(
     );
 
 
+  $("toggleProductBtn")
+    ?.addEventListener(
+      "click",
+      async () => {
+
+        if (!product) return;
+
+
+        const newStatus =
+          !product.is_active;
+
+
+        const {
+          error
+        } = await sb
+          .from("products")
+          .update({
+
+            is_active:
+              newStatus,
+
+            updated_at:
+              new Date()
+                .toISOString()
+
+          })
+          .eq(
+            "id",
+            product.id
+          )
+          .eq(
+            "store_id",
+            currentMyStore.id
+          );
+
+
+        if (error) {
+
+          console.error(
+            error
+          );
+
+          showToast(
+            "Product status update করা যায়নি"
+          );
+
+          return;
+
+        }
+
+
+        showToast(
+          newStatus
+            ? "Product activate হয়েছে"
+            : "Product deactivate হয়েছে"
+        );
+
+
+        modal.remove();
+
+
+        await loadManageProducts();
+
+        await loadProducts();
+
+      }
+    );
+
+
   $("deleteProductBtn")
     ?.addEventListener(
       "click",
@@ -3253,7 +3813,7 @@ async function openProductEditor(
 
         const confirmed =
           confirm(
-            "এই Product delete করতে চান?"
+            "এই Product permanently delete করতে চান?"
           );
 
 
@@ -3286,10 +3846,12 @@ async function openProductEditor(
           );
 
           return;
+
         }
 
 
         modal.remove();
+
 
         showToast(
           "Product delete হয়েছে"
@@ -3322,9 +3884,11 @@ async function loadStoreOrders() {
   panel.innerHTML = `
 
     <div class="empty-card">
+
       <p>
         Orders loading...
       </p>
+
     </div>
 
   `;
@@ -3335,20 +3899,19 @@ async function loadStoreOrders() {
     panel.innerHTML = `
 
       <div class="empty-card">
+
         <p>
           Store পাওয়া যায়নি।
         </p>
+
       </div>
 
     `;
 
     return;
+
   }
 
-
-  /*
-   * প্রথমে এই Store-এর products
-   */
 
   const {
     data: storeProducts,
@@ -3369,16 +3932,19 @@ async function loadStoreOrders() {
     panel.innerHTML = `
 
       <div class="empty-card">
+
         <p>
           ${escapeHTML(
             productError.message
           )}
         </p>
+
       </div>
 
     `;
 
     return;
+
   }
 
 
@@ -3408,12 +3974,9 @@ async function loadStoreOrders() {
     `;
 
     return;
+
   }
 
-
-  /*
-   * Order items
-   */
 
   const {
     data: items,
@@ -3463,6 +4026,7 @@ async function loadStoreOrders() {
     `;
 
     return;
+
   }
 
 
@@ -3494,12 +4058,9 @@ async function loadStoreOrders() {
     `;
 
     return;
+
   }
 
-
-  /*
-   * Orders
-   */
 
   const {
     data: orders,
@@ -3553,280 +4114,314 @@ async function loadStoreOrders() {
     `;
 
     return;
+
   }
 
 
-  const orderMap =
-    new Map(
-      (orders || []).map(
-        order => [
-          String(order.id),
-          order
-        ]
-      )
-    );
+  if (!orders?.length) {
+
+    panel.innerHTML = `
+
+      <div class="empty-card">
+
+        <h3>
+          এখনো কোনো Order নেই
+        </h3>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
 
 
   panel.innerHTML =
-    (orders || []).map(
-      order => {
+    orders
+      .map(
+        order => {
 
-        const orderItems =
-          (items || [])
-            .filter(
-              item =>
-                String(
-                  item.store_order_id
-                ) ===
-                String(
-                  order.id
-                )
-            );
+          const orderItems =
+            (items || [])
+              .filter(
+                item =>
+                  String(
+                    item.store_order_id
+                  ) ===
+                  String(
+                    order.id
+                  )
+              );
 
 
-        return `
-
-          <div
-            class="store-card"
-            style="
-              display:block;
-              margin-bottom:15px;
-            ">
-
+          return `
 
             <div
+              class="store-card"
               style="
-                display:flex;
-                justify-content:space-between;
-                gap:10px;
-                align-items:flex-start;
+                display:block;
+                margin-bottom:15px;
               ">
 
-              <div>
 
-                <h3>
-                  Order #${escapeHTML(
-                    String(
-                      order.id
-                    ).slice(0, 8)
-                  )}
-                </h3>
+              <div
+                style="
+                  display:flex;
+                  justify-content:space-between;
+                  gap:10px;
+                  align-items:flex-start;
+                ">
 
-                <p>
-                  ${escapeHTML(
-                    order.customer_name ||
-                    "Customer"
+
+                <div>
+
+                  <h3>
+
+                    Order #${escapeHTML(
+                      String(
+                        order.id
+                      ).slice(
+                        0,
+                        8
+                      )
+                    )}
+
+                  </h3>
+
+
+                  <p>
+
+                    ${escapeHTML(
+                      order.customer_name ||
+                      "Customer"
+                    )}
+
+                  </p>
+
+                </div>
+
+
+                <strong>
+
+                  ${money(
+                    order.total
                   )}
-                </p>
+
+                </strong>
 
               </div>
 
 
-              <strong>
-                ${money(
-                  order.total
+              <p>
+
+                📞
+                ${escapeHTML(
+                  order.customer_phone ||
+                  ""
                 )}
-              </strong>
 
-            </div>
-
-
-            <p>
-              📞
-              ${escapeHTML(
-                order.customer_phone ||
-                ""
-              )}
-            </p>
+              </p>
 
 
-            <p>
-              📍
-              ${escapeHTML(
-                order.delivery_address ||
-                ""
-              )}
-            </p>
+              <p>
+
+                📍
+                ${escapeHTML(
+                  order.delivery_address ||
+                  ""
+                )}
+
+              </p>
 
 
-            <div>
-
-              ${
-                orderItems
-                  .map(
-                    item => `
-
-                      <p>
-
-                        ${escapeHTML(
-                          item.product_name
-                        )}
-
-                        ×
-                        ${item.quantity}
-
-                        =
-                        ${money(
-                          item.subtotal
-                        )}
-
-                      </p>
-
-                    `
-                  )
-                  .join("")
-              }
-
-            </div>
-
-
-            <p>
-              Payment:
-              ${escapeHTML(
-                order.payment_method ||
-                ""
-              )}
-
-              ·
-
-              ${escapeHTML(
-                order.payment_status ||
-                ""
-              )}
-            </p>
-
-
-            <label>
-
-              Order Status
-
-              <select
-                class="order-status-select"
-                data-order-id="${order.id}">
+              <div>
 
                 ${
-                  [
-                    "pending",
-                    "confirmed",
-                    "processing",
-                    "shipped",
-                    "delivered",
-                    "cancelled"
-                  ]
-                  .map(
-                    status => `
+                  orderItems
+                    .map(
+                      item => `
 
-                      <option
-                        value="${status}"
-                        ${
-                          order.status ===
-                          status
-                            ? "selected"
-                            : ""
-                        }>
+                        <p>
 
-                        ${status}
+                          ${escapeHTML(
+                            item.product_name
+                          )}
 
-                      </option>
+                          ×
+                          ${item.quantity}
 
-                    `
-                  )
-                  .join("")
+                          =
+                          ${money(
+                            item.subtotal
+                          )}
+
+                        </p>
+
+                      `
+                    )
+                    .join("")
                 }
 
-              </select>
-
-            </label>
+              </div>
 
 
-            ${
-              order.notes
+              <p>
 
-                ? `
+                Payment:
+                ${escapeHTML(
+                  order.payment_method ||
+                  ""
+                )}
 
-                  <p>
-                    Note:
-                    ${escapeHTML(
-                      order.notes
-                    )}
-                  </p>
+                ·
 
-                `
+                ${escapeHTML(
+                  order.payment_status ||
+                  ""
+                )}
 
-                : ""
-            }
-
-
-          </div>
-
-        `;
-
-      }
-    ).join("");
+              </p>
 
 
-  document
+              <label>
+
+                Order Status
+
+
+                <select
+                  class="order-status-select"
+                  data-order-id="${order.id}">
+
+                  ${
+                    [
+                      "pending",
+                      "confirmed",
+                      "processing",
+                      "shipped",
+                      "delivered",
+                      "cancelled"
+                    ]
+                      .map(
+                        status => `
+
+                          <option
+                            value="${status}"
+                            ${
+                              order.status ===
+                              status
+                                ? "selected"
+                                : ""
+                            }>
+
+                            ${status}
+
+                          </option>
+
+                        `
+                      )
+                      .join("")
+                  }
+
+                </select>
+
+              </label>
+
+
+              ${
+                order.notes
+
+                  ? `
+
+                    <p>
+
+                      Note:
+                      ${escapeHTML(
+                        order.notes
+                      )}
+
+                    </p>
+
+                  `
+
+                  : ""
+              }
+
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+
+  panel
     .querySelectorAll(
       ".order-status-select"
     )
-    .forEach(select => {
+    .forEach(
+      select => {
 
-      select.addEventListener(
-        "change",
-        async () => {
+        select.addEventListener(
+          "change",
+          async () => {
 
-          const orderId =
-            select.dataset.orderId;
-
-
-          const newStatus =
-            select.value;
+            const orderId =
+              select.dataset.orderId;
 
 
-          const {
-            error
-          } = await sb
-            .from("orders")
-            .update({
-
-              status:
-                newStatus,
-
-              updated_at:
-                new Date()
-                  .toISOString()
-
-            })
-            .eq(
-              "id",
-              orderId
-            );
+            const newStatus =
+              select.value;
 
 
-          if (error) {
-
-            console.error(
-              "Order update error:",
+            const {
               error
-            );
+            } = await sb
+              .from("orders")
+              .update({
+
+                status:
+                  newStatus,
+
+                updated_at:
+                  new Date()
+                    .toISOString()
+
+              })
+              .eq(
+                "id",
+                orderId
+              );
+
+
+            if (error) {
+
+              console.error(
+                "Order update error:",
+                error
+              );
+
+
+              showToast(
+                "Order status update করা যায়নি"
+              );
+
+              return;
+
+            }
 
 
             showToast(
-              "Order status update করা যায়নি"
+              "Order status update হয়েছে"
             );
 
-            return;
           }
+        );
 
-
-          showToast(
-            "Order status update হয়েছে"
-          );
-
-        }
-      );
-
-    });
+      }
+    );
 
 }
 
@@ -3846,48 +4441,12 @@ $("menuBtn")
 
 
 /* =========================================================
-   INITIALIZE
-   ========================================================= */
-
-async function init() {
-
-  renderCategories();
-
-  renderProducts();
-
-  renderFollowing();
-
-  route();
-
-  await loadCategories();
-
-  await loadProducts();
-
-}
-
-
-/* =========================================================
-   START
-   ========================================================= */
-
-init();
-
-
-window.addEventListener(
-  "hashchange",
-  route
-);
-
-
-/* =========================================================
    AUTHENTICATION
    ========================================================= */
 
 let isRegisterMode =
   false;
 
-
-/* ---------- AUTH ELEMENTS ---------- */
 
 const authModal =
   $("authModal");
@@ -3926,7 +4485,9 @@ const accountStatus =
   $("accountStatus");
 
 
-/* ---------- OPEN LOGIN ---------- */
+/* =========================================================
+   OPEN LOGIN
+   ========================================================= */
 
 $("loginBtn")
   ?.addEventListener(
@@ -3946,7 +4507,9 @@ $("loginBtn")
   );
 
 
-/* ---------- CLOSE ---------- */
+/* =========================================================
+   CLOSE LOGIN
+   ========================================================= */
 
 closeAuthBtn
   ?.addEventListener(
@@ -3961,7 +4524,9 @@ closeAuthBtn
   );
 
 
-/* ---------- SWITCH ---------- */
+/* =========================================================
+   SWITCH LOGIN / REGISTER
+   ========================================================= */
 
 authSwitchBtn
   ?.addEventListener(
@@ -3977,7 +4542,9 @@ authSwitchBtn
   );
 
 
-/* ---------- AUTH UI ---------- */
+/* =========================================================
+   AUTH UI
+   ========================================================= */
 
 function updateAuthUI() {
 
@@ -3990,37 +4557,53 @@ function updateAuthUI() {
       : "Login";
 
 
-  authSubtitle.textContent =
-    isRegisterMode
+  if (authSubtitle) {
 
-      ? "নতুন BuyHaat account তৈরি করুন।"
+    authSubtitle.textContent =
+      isRegisterMode
 
-      : "আপনার BuyHaat account-এ Login করুন।";
+        ? "নতুন BuyHaat account তৈরি করুন।"
 
+        : "আপনার BuyHaat account-এ Login করুন।";
 
-  authSubmitBtn.textContent =
-    isRegisterMode
-
-      ? "Create Account"
-
-      : "Login";
+  }
 
 
-  authSwitchBtn.textContent =
-    isRegisterMode
+  if (authSubmitBtn) {
 
-      ? "আগে থেকেই account আছে? Login করুন"
+    authSubmitBtn.textContent =
+      isRegisterMode
+        ? "Create Account"
+        : "Login";
 
-      : "নতুন account তৈরি করুন";
+  }
 
 
-  authMessage.textContent =
-    "";
+  if (authSwitchBtn) {
+
+    authSwitchBtn.textContent =
+      isRegisterMode
+
+        ? "আগে থেকেই account আছে? Login করুন"
+
+        : "নতুন account তৈরি করুন";
+
+  }
+
+
+  if (authMessage) {
+
+    authMessage.textContent =
+      "";
+
+  }
 
 }
 
 
-/* ---------- LOGIN / REGISTER ---------- */
+/* =========================================================
+   LOGIN / REGISTER
+   ========================================================= */
 
 authForm
   ?.addEventListener(
@@ -4032,13 +4615,13 @@ authForm
 
       const email =
         authEmail
-          .value
+          ?.value
           .trim();
 
 
       const password =
         authPassword
-          .value;
+          ?.value;
 
 
       if (
@@ -4046,22 +4629,29 @@ authForm
         !password
       ) {
 
-        authMessage.textContent =
-          "Email এবং password দিন।";
+        if (authMessage) {
+
+          authMessage.textContent =
+            "Email এবং password দিন।";
+
+        }
 
         return;
 
       }
 
 
-      authSubmitBtn.disabled =
-        true;
+      if (authSubmitBtn) {
 
+        authSubmitBtn.disabled =
+          true;
 
-      authSubmitBtn.textContent =
-        isRegisterMode
-          ? "Creating..."
-          : "Logging in...";
+        authSubmitBtn.textContent =
+          isRegisterMode
+            ? "Creating..."
+            : "Logging in...";
+
+      }
 
 
       try {
@@ -4075,8 +4665,11 @@ authForm
             error
           } =
             await sb.auth.signUp({
+
               email,
+
               password
+
             });
 
 
@@ -4089,11 +4682,14 @@ authForm
 
           if (data.user) {
 
-            authMessage.textContent =
-              "Account তৈরি হয়েছে। Email verification প্রয়োজন হতে পারে।";
+            if (authMessage) {
+
+              authMessage.textContent =
+                "Account তৈরি হয়েছে। Email verification প্রয়োজন হতে পারে।";
+
+            }
 
           }
-
 
         } else {
 
@@ -4102,8 +4698,11 @@ authForm
           } =
             await sb.auth
               .signInWithPassword({
+
                 email,
+
                 password
+
               });
 
 
@@ -4115,7 +4714,7 @@ authForm
 
 
           authModal
-            .classList
+            ?.classList
             .remove("show");
 
 
@@ -4126,10 +4725,6 @@ authForm
 
           await updateAuthState();
 
-
-          /*
-           * My Store page refresh
-           */
 
           if (
             location.hash ===
@@ -4151,15 +4746,23 @@ authForm
         );
 
 
-        authMessage.textContent =
-          error.message ||
-          "Authentication failed.";
+        if (authMessage) {
+
+          authMessage.textContent =
+            error.message ||
+            "Authentication failed.";
+
+        }
 
       }
 
 
-      authSubmitBtn.disabled =
-        false;
+      if (authSubmitBtn) {
+
+        authSubmitBtn.disabled =
+          false;
+
+      }
 
 
       updateAuthUI();
@@ -4168,7 +4771,9 @@ authForm
   );
 
 
-/* ---------- LOGOUT ---------- */
+/* =========================================================
+   LOGOUT
+   ========================================================= */
 
 logoutBtn
   ?.addEventListener(
@@ -4192,6 +4797,7 @@ logoutBtn
         );
 
         return;
+
       }
 
 
@@ -4217,7 +4823,9 @@ logoutBtn
   );
 
 
-/* ---------- AUTH STATE ---------- */
+/* =========================================================
+   AUTH STATE
+   ========================================================= */
 
 async function updateAuthState() {
 
@@ -4252,10 +4860,6 @@ async function updateAuthState() {
 
     }
 
-
-    /*
-     * Check whether store exists
-     */
 
     const {
       data: store
@@ -4344,7 +4948,36 @@ sb.auth.onAuthStateChange(
 
 
 /* =========================================================
-   INITIAL AUTH CHECK
+   INITIALIZE
    ========================================================= */
 
-updateAuthState();
+async function init() {
+
+  renderCategories();
+
+  renderProducts();
+
+  renderFollowing();
+
+  await updateAuthState();
+
+  route();
+
+  await loadCategories();
+
+  await loadProducts();
+
+}
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
+init();
+
+
+window.addEventListener(
+  "hashchange",
+  route
+);
