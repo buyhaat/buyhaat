@@ -1,5 +1,6 @@
 /* =========================================================
    BUYHAAT ADMIN AUTHENTICATION
+   Supabase Auth + is_admin() RPC
    ========================================================= */
 
 
@@ -165,31 +166,40 @@ if (loginForm) {
                 data.user.id;
 
 
+            console.log(
+                "Logged-in user:",
+                data.user.email
+            );
+
+            console.log(
+                "Logged-in user ID:",
+                userId
+            );
+
+
             /* -------------------------------------------------
-               ADMIN ROLE CHECK
+               ADMIN CHECK
+               Uses public.is_admin()
             ------------------------------------------------- */
 
             const {
-                data: profile,
-                error: profileError
-            } = await sb
-                .from("profiles")
-                .select("role")
-                .eq("id", userId)
-                .single();
+                data: isAdmin,
+                error: adminError
+            } = await sb.rpc("is_admin");
 
 
-            if (profileError) {
+            if (adminError) {
 
                 console.error(
-                    "Profile error:",
-                    profileError
+                    "is_admin RPC error:",
+                    adminError
                 );
 
                 await sb.auth.signOut();
 
                 showMessage(
-                    "Admin profile যাচাই করা যায়নি।",
+                    "Admin verification করা যায়নি: " +
+                    adminError.message,
                     "error"
                 );
 
@@ -197,7 +207,17 @@ if (loginForm) {
             }
 
 
-            if (!profile || profile.role !== "admin") {
+            console.log(
+                "is_admin() result:",
+                isAdmin
+            );
+
+
+            /* -------------------------------------------------
+               NOT ADMIN
+            ------------------------------------------------- */
+
+            if (isAdmin !== true) {
 
                 await sb.auth.signOut();
 
