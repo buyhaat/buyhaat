@@ -863,3 +863,258 @@ button.small.del {
   visibility: visible;
   transform: translateX(-50%) translateY(0);
 }
+
+/* =========================================================
+   BUYHAAT — SIDE MENU DESIGN
+========================================================= */
+
+.side-menu {
+    width: 285px;
+    max-width: 82vw;
+
+    background: #ffffff;
+
+    border-radius: 0 22px 22px 0;
+
+    box-shadow:
+        8px 0 30px rgba(0, 0, 0, 0.14);
+
+    overflow: hidden;
+
+    padding-bottom: 18px;
+}
+
+
+/* =========================================================
+   MENU HEADER
+========================================================= */
+
+.side-menu .menuhead {
+    height: 125px;
+
+    padding: 22px 18px;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    position: relative;
+
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #16a34a 0%,
+            #15803d 100%
+        );
+}
+
+
+/* BuyHaat name */
+
+.side-menu .menuhead b {
+    font-size: 22px;
+    font-weight: 800;
+
+    letter-spacing: -0.3px;
+
+    margin-top: 5px;
+}
+
+
+/* Small decorative line */
+
+.side-menu .menuhead::after {
+    content: "আপনার পছন্দ, আপনার বাজার";
+
+    position: absolute;
+
+    left: 18px;
+    bottom: 22px;
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+    opacity: 0.88;
+}
+
+
+/* =========================================================
+   CLOSE BUTTON
+========================================================= */
+
+.side-menu .menu-close {
+    width: 38px;
+    height: 38px;
+
+    border: none;
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255, 255, 255, 0.16);
+
+    color: #ffffff;
+
+    font-size: 25px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.side-menu .menu-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+
+    transform: rotate(90deg);
+}
+
+
+.side-menu .menu-close:active {
+    transform: scale(0.92);
+}
+
+
+/* =========================================================
+   MENU BUTTONS
+========================================================= */
+
+.side-menu > button[data-route] {
+    width: calc(100% - 24px);
+
+    min-height: 54px;
+
+    margin: 7px 12px;
+
+    padding: 0 15px;
+
+    border: none;
+    border-radius: 15px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    background: transparent;
+
+    color: #374151;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.15s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* =========================================================
+   ICON STYLE
+   ========================================================= */
+
+/*
+   তোমার HTML-এ emoji সরাসরি button-এর text হিসেবে আছে।
+   তাই আলাদা icon element না বানিয়েও সুন্দর spacing রাখা হচ্ছে।
+*/
+
+.side-menu > button[data-route]::first-letter {
+    font-size: 19px;
+}
+
+
+/* Hover */
+
+.side-menu > button[data-route]:hover {
+    background: #f0fdf4;
+
+    color: #15803d;
+
+    transform: translateX(3px);
+}
+
+
+/* Click */
+
+.side-menu > button[data-route]:active {
+    transform: scale(0.98);
+}
+
+
+/* =========================================================
+   ACTIVE MENU
+========================================================= */
+
+.side-menu > button[data-route].active {
+    background: #ecfdf5;
+
+    color: #15803d;
+
+    box-shadow:
+        inset 4px 0 0 #16a34a;
+}
+
+
+/* =========================================================
+   MENU OVERLAY
+========================================================= */
+
+.menu-overlay {
+    background: rgba(15, 23, 42, 0.42);
+
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+
+    transition:
+        opacity 0.25s ease;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .side-menu {
+        width: 280px;
+        max-width: 84vw;
+
+        border-radius: 0 20px 20px 0;
+    }
+
+    .side-menu .menuhead {
+        height: 120px;
+
+        padding: 20px 16px;
+    }
+
+    .side-menu .menuhead b {
+        font-size: 21px;
+    }
+
+    .side-menu > button[data-route] {
+        min-height: 52px;
+
+        margin: 6px 10px;
+
+        width: calc(100% - 20px);
+
+        font-size: 14px;
+    }
+}
+
