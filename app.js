@@ -1629,7 +1629,7 @@ async function createOrder(productId) {
                 buyer_id:
                     currentUser.id,
 
-                total_amount:
+                   total:
                     subtotal,
 
                 status:
