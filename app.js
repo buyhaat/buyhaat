@@ -1757,6 +1757,9 @@ async function createOrder(productId) {
                 product_id:
                     product.id,
 
+                product_name:
+                    product.name || "Product",
+
                 unit_price:
                     unitPrice,
 
@@ -1813,8 +1816,7 @@ async function createOrder(productId) {
 
     openProduct(productId);
 }
-
-
+   
 /* =========================================================
    CATEGORIES
 ========================================================= */
