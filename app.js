@@ -813,6 +813,7 @@ toast(
 
 route();
 
+}
 
 async function logout() {
 
