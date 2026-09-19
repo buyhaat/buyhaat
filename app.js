@@ -3676,113 +3676,296 @@ async function sellerOrders() {
                                     storeOrder.order_id ||
                                     storeOrder.id
                                 )}
-                            </b>
+async function sellerOrders() {
+    if (!currentMyStore) return;
 
+    const box = $("sellerOrders");
 
-                            <small class="store-meta">
+    if (!box) return;
 
-                                ${storeOrder.created_at
-                                    ? new Date(
-                                        storeOrder.created_at
-                                    ).toLocaleString(
-                                        "en-BD"
-                                    )
-                                    : ""
-                                }
+    box.innerHTML = `
+        <div class="empty-state">
+            Loading orders...
+        </div>
+    `;
 
-                            </small>
+    const { data, error } = await sb
+        .from("store_orders")
+        .select(`
+            id,
+            order_id,
+            store_id,
+            subtotal,
+            status,
+            completed_at,
+            created_at,
 
+            orders(
+                id,
+                customer_name,
+                customer_phone,
+                delivery_address,
+                notes,
+                payment_method,
+                payment_status,
+                total,
+                created_at
+            ),
 
-                            ${
-                                items
-                                    .map(
-                                        (item) => `
-
-                                            <div
-                                                style="
-                                                    padding:10px 0;
-                                                    border-bottom:1px solid #eee;
-                                                "
-                                            >
-
-                                                <p style="margin:0 0 5px;">
-
-                                                    <b>
-                                                        ${esc(
-                                                            item.products?.name ||
-                                                            "Product"
-                                                        )}
-                                                    </b>
-
-                                                </p>
-
-
-                                                <p style="margin:0;">
-
-                                                    Quantity:
-                                                    ${Number(
-                                                        item.quantity || 0
-                                                    )}
-
-                                                    ·
-
-                                                    Unit Price:
-                                                    ${money(
-                                                        item.unit_price
-                                                    )}
-
-                                                </p>
-
-
-                                                <p style="margin:5px 0 0;">
-
-                                                    Subtotal:
-                                                    <b>
-                                                        ${money(
-                                                            item.subtotal
-                                                        )}
-                                                    </b>
-
-                                                </p>
-
-                                            </div>
-
-                                        `
-                                    )
-                                    .join("")
-                            }
-
-
-                            <p>
-
-                                <b>
-                                    Store Subtotal:
-                                </b>
-
-                                ${money(
-                                    storeOrder.subtotal
-                                )}
-
-                            </p>
-
-
-                            <small>
-
-                                Status:
-
-                                ${esc(
-                                    storeOrder.status ||
-                                    "pending"
-                                )}
-
-                            </small>
-
-                        </div>
-
-                    `;
-                }
+            order_items(
+                id,
+                product_id,
+                product_name,
+                unit_price,
+                quantity,
+                subtotal,
+                created_at
             )
-            .join("");
+        `)
+        .eq("store_id", currentMyStore.id)
+        .order("created_at", {
+            ascending: false
+        });
+
+    if (error) {
+        console.error("SELLER ORDERS ERROR:", error);
+
+        box.innerHTML = `
+            <div class="empty-state">
+                Order load করতে সমস্যা হয়েছে।
+            </div>
+        `;
+
+        return;
+    }
+
+    if (!data || !data.length) {
+        box.innerHTML = `
+            <div class="empty-state">
+                এখনো কোনো order নেই।
+            </div>
+        `;
+
+        return;
+    }
+
+    box.innerHTML = data.map(order => {
+
+        const parentOrder = order.orders || {};
+
+        const items = order.order_items || [];
+
+        const status = order.status || "pending";
+
+        const statusText = {
+            pending: "Pending",
+            processing: "Processing",
+            delivered: "Delivered",
+            cancelled: "Cancelled",
+            rejected: "Rejected"
+        };
+
+        const itemsHTML = items.map(item => `
+            <div class="seller-order-item">
+                <div>
+                    <strong>
+                        ${escapeHtml(
+                            item.product_name || "Product"
+                        )}
+                    </strong>
+
+                    <div>
+                        ${item.quantity} × ৳${Number(
+                            item.unit_price || 0
+                        ).toFixed(2)}
+                    </div>
+                </div>
+
+                <strong>
+                    ৳${Number(
+                        item.subtotal || 0
+                    ).toFixed(2)}
+                </strong>
+            </div>
+        `).join("");
+
+        let actions = "";
+
+        if (status === "pending") {
+            actions = `
+                <button
+                    class="order-action-btn"
+                    data-order-action="processing"
+                    data-order-id="${order.id}"
+                >
+                    Accept Order
+                </button>
+
+                <button
+                    class="order-action-btn danger"
+                    data-order-action="cancelled"
+                    data-order-id="${order.id}"
+                >
+                    Reject
+                </button>
+            `;
+        }
+
+        else if (status === "processing") {
+            actions = `
+                <button
+                    class="order-action-btn"
+                    data-order-action="delivered"
+                    data-order-id="${order.id}"
+                >
+                    Mark Delivered
+                </button>
+
+                <button
+                    class="order-action-btn danger"
+                    data-order-action="cancelled"
+                    data-order-id="${order.id}"
+                >
+                    Cancel
+                </button>
+            `;
+        }
+
+        else if (status === "delivered") {
+            actions = `
+                <div class="order-completed-text">
+                    ✓ Delivered
+                </div>
+            `;
+        }
+
+        else {
+            actions = `
+                <div class="order-completed-text">
+                    ${escapeHtml(
+                        statusText[status] || status
+                    )}
+                </div>
+            `;
+        }
+
+        return `
+            <div class="seller-order-card">
+
+                <div class="seller-order-header">
+
+                    <div>
+                        <strong>
+                            Order #${escapeHtml(
+                                String(order.order_id || order.id)
+                                    .slice(0, 8)
+                            )}
+                        </strong>
+
+                        <div class="order-date">
+                            ${formatDate(order.created_at)}
+                        </div>
+                    </div>
+
+                    <span class="order-status ${status}">
+                        ${statusText[status] || status}
+                    </span>
+
+                </div>
+
+
+                <div class="seller-order-customer">
+
+                    <h4>Customer</h4>
+
+                    <p>
+                        <strong>Name:</strong>
+                        ${escapeHtml(
+                            parentOrder.customer_name || "N/A"
+                        )}
+                    </p>
+
+                    <p>
+                        <strong>Phone:</strong>
+                        ${escapeHtml(
+                            parentOrder.customer_phone || "N/A"
+                        )}
+                    </p>
+
+                    <p>
+                        <strong>Address:</strong>
+                        ${escapeHtml(
+                            parentOrder.delivery_address || "N/A"
+                        )}
+                    </p>
+
+                    ${
+                        parentOrder.notes
+                            ? `
+                                <p>
+                                    <strong>Note:</strong>
+                                    ${escapeHtml(
+                                        parentOrder.notes
+                                    )}
+                                </p>
+                            `
+                            : ""
+                    }
+
+                </div>
+
+
+                <div class="seller-order-items">
+
+                    <h4>Products</h4>
+
+                    ${itemsHTML}
+
+                </div>
+
+
+                <div class="seller-order-total">
+
+                    <span>Store Total</span>
+
+                    <strong>
+                        ৳${Number(
+                            order.subtotal || 0
+                        ).toFixed(2)}
+                    </strong>
+
+                </div>
+
+
+                <div class="seller-order-payment">
+
+                    Payment:
+                    ${escapeHtml(
+                        parentOrder.payment_method || "N/A"
+                    )}
+
+                    ${
+                        parentOrder.payment_status
+                            ? `
+                                · ${escapeHtml(
+                                    parentOrder.payment_status
+                                )}
+                            `
+                            : ""
+                    }
+
+                </div>
+
+
+                <div class="seller-order-actions">
+
+                    ${actions}
+
+                </div>
+
+            </div>
+        `;
+    }).join("");
 }
 
 
