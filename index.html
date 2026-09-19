@@ -1,593 +1,362 @@
-/* =========================================================
-   BASE & RESET
-========================================================= */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-body {
-  background-color: #f4f6f8;
-  color: #1a1a1a;
-  padding-bottom: 70px; /* Space for bottom nav */
-}
-
-body.menu-open {
-  overflow: hidden;
-}
-
-.hidden {
-  display: none !important;
-}
-
-.w-100 {
-  width: 100%;
-}
-
-/* =========================================================
-   HEADER & NAVIGATION
-========================================================= */
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logo {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2563eb;
-  cursor: pointer;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  font-size: 1.25rem;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.icon-btn:hover {
-  background-color: #f3f4f6;
-}
-
-/* Bottom Nav */
-.bottom {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: #ffffff;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  border-top: 1px solid #e5e7eb;
-  z-index: 90;
-}
-
-.bottom button {
-  background: none;
-  border: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 0.75rem;
-  color: #6b7280;
-  cursor: pointer;
-  gap: 2px;
-}
-
-.bottom button.active {
-  color: #2563eb;
-  font-weight: 600;
-}
-
-.nav-icon {
-  font-size: 1.1rem;
-}
-
-/* Side Menu & Overlay */
-.menu-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 200;
-  display: none;
-}
-
-.menu-overlay.show {
-  display: block;
-}
-
-.side-menu {
-  position: fixed;
-  top: 0;
-  left: -280px;
-  width: 280px;
-  height: 100%;
-  background: #ffffff;
-  z-index: 201;
-  transition: left 0.3s ease;
-  display: flex;
-  flex-direction: column;
-}
-
-.side-menu.open {
-  left: 0;
-}
-
-.menu-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.menu-content {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.menu-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* =========================================================
-   PAGES & LAYOUT
-========================================================= */
-.main-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 16px;
-}
-
-.page {
-  display: none;
-}
-
-.page.active-page {
-  display: block;
-}
-
-.section-title {
-  display: flex;
-  justify-content: space-between;
-  margin: 12px 0;
-  font-size: 0.9rem;
-  color: #6b7280;
-}
-
-/* =========================================================
-   FIXED IMAGE SIZES (CRITICAL REQUIREMENT)
-========================================================= */
-
-/* Product Image in Grid */
-.product-image {
-  width: 100%;
-  height: 180px; /* Fixed height */
-  object-fit: cover; /* Prevents stretching */
-  background-color: #e5e7eb;
-  border-radius: 8px 8px 0 0;
-}
-
-/* Product Detail Image */
-.detail img {
-  width: 100%;
-  max-height: 320px; /* Fixed max height */
-  object-fit: contain;
-  background-color: #ffffff;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-/* Store Logos & Avatars */
-.avatar {
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
-  min-height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-  background-color: #d1d5db;
-}
-
-.large-avatar {
-  width: 80px;
-  height: 80px;
-  min-width: 80px;
-  min-height: 80px;
-  border: 3px solid #ffffff;
-  margin-top: -40px;
-}
-
-/* Store Cover Photo */
-.store-cover {
-  width: 100%;
-  height: 140px; /* Fixed height */
-  object-fit: cover;
-  border-radius: 8px 8px 0 0;
-}
-
-/* Seller Manage List Image */
-.manage img, .manage-placeholder {
-  width: 60px;
-  height: 60px;
-  min-width: 60px;
-  min-height: 60px;
-  object-fit: cover;
-  border-radius: 6px;
-  background-color: #e5e7eb;
-}
-
-/* =========================================================
-   COMPONENTS
-========================================================= */
-
-/* Buttons */
-button.primary {
-  background-color: #2563eb;
-  color: #ffffff;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-button.primary:disabled {
-  background-color: #93c5fd;
-  cursor: not-allowed;
-}
-
-button.secondary {
-  background-color: #e5e7eb;
-  color: #374151;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-button.danger {
-  background-color: #ef4444;
-  color: #ffffff;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-button.small {
-  padding: 4px 8px;
-  font-size: 0.8rem;
-  border-radius: 4px;
-}
-
-button.small.edit {
-  background-color: #f59e0b;
-  color: white;
-  border: none;
-}
-
-button.small.del {
-  background-color: #ef4444;
-  color: white;
-  border: none;
-}
-
-/* Search & Categories */
-.search-bar {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.search-bar input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-}
-
-.category-list {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  margin-bottom: 12px;
-}
-
-.category {
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  padding: 6px 14px;
-  border-radius: 20px;
-  white-space: nowrap;
-  font-size: 0.85rem;
-  cursor: pointer;
-}
-
-.category.active {
-  background: #2563eb;
-  color: #ffffff;
-  border-color: #2563eb;
-}
-
-/* Product Cards Grid */
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.product-card {
-  background: #ffffff;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  overflow: hidden;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-}
-
-.product-info {
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.product-name {
-  font-size: 0.9rem;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.price {
-  color: #16a34a;
-  font-weight: 700;
-  font-size: 0.95rem;
-}
-
-.store-name {
-  font-size: 0.75rem;
-  color: #6b7280;
-}
-
-.stock-text {
-  font-size: 0.7rem;
-  color: #9ca3af;
-}
-
-/* Store Cards & List */
-.store-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.store-card, .store-result {
-  background: #ffffff;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.store-result-info {
-  flex: 1;
-}
-
-.store-meta {
-  font-size: 0.8rem;
-  color: #6b7280;
-}
-
-/* Cards & Forms */
-.card {
-  background: #ffffff;
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  margin-bottom: 12px;
-}
-
-.card-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.card-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-.card-form input, .card-form textarea, .card-form select {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-
-.form-msg {
-  font-size: 0.8rem;
-  color: #ef4444;
-  margin-top: 4px;
-}
-
-.empty {
-  text-align: center;
-  padding: 30px;
-  color: #6b7280;
-  background: #ffffff;
-  border-radius: 8px;
-  border: 1px dashed #d1d5db;
-}
-
-/* Store Profile View */
-.store-profile-card {
-  padding: 0 0 16px 0;
-  overflow: hidden;
-}
-
-.store-profile-row {
-  display: flex;
-  gap: 12px;
-  padding: 0 16px;
-  align-items: flex-end;
-  margin-bottom: 12px;
-}
-
-.store-profile-card p {
-  padding: 0 16px;
-  font-size: 0.9rem;
-}
-
-/* Tabs */
-.tabs {
-  display: flex;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 12px;
-}
-
-.tab {
-  flex: 1;
-  padding: 10px;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.tab.active {
-  border-color: #2563eb;
-  color: #2563eb;
-}
-
-/* Seller Manage Item */
-.manage {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.manage.inactive-product {
-  opacity: 0.5;
-}
-
-.manage-info {
-  flex: 1;
-}
-
-/* Product Detail */
-.detail-body {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.detail-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.detail-actions button {
-  flex: 1;
-}
-
-/* Modals */
-.modal {
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 16px;
-}
-
-.modal .shade {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.modal-card {
-  position: relative;
-  background: #ffffff;
-  width: 100%;
-  max-width: 440px;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding: 20px;
-  border-radius: 12px;
-  z-index: 301;
-}
-
-.close-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-/* Toast Notification */
-.toast {
-  position: fixed;
-  bottom: 75px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: #1f2937;
-  color: #ffffff;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  opacity: 0;
-  transition: all 0.3s ease;
-  z-index: 400;
-  pointer-events: none;
-}
-
-.toast.show {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <meta name="description" content="BuyHaat — সহজে পছন্দের পণ্য ও Store খুঁজে নাও">
+    <title>BuyHaat — Digital Marketplace</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- =====================================================
+     TOPBAR
+===================================================== -->
+<header class="topbar">
+    <button id="menuBtn" class="icon" type="button" aria-label="Menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    </button>
+
+    <a href="#home" class="brand">
+        Buy<span>Haat</span>
+    </a>
+
+    <button id="headerSearchBtn" class="icon" type="button" aria-label="Search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+</header>
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+<main>
+
+<!-- HOME PAGE -->
+<section id="home" class="page active-page">
+    <div class="search">
+        <input id="searchInput" type="search" placeholder="পণ্য বা Store username খুঁজুন..." autocomplete="off">
+        <button id="searchBtn" type="button" class="primary">Search</button>
+    </div>
+
+    <div class="welcome">
+        <span class="badge">BUYHAAT MARKETPLACE</span>
+        <h1>তোমার পছন্দের পণ্য খুঁজে নাও</h1>
+        <p>Product বা Store-এর নাম/@username দিয়ে সার্চ করো।</p>
+    </div>
+
+    <section class="section-block">
+        <h2>Categories</h2>
+        <div id="categories" class="categories"></div>
+    </section>
+
+    <section class="section-block">
+        <div class="head">
+            <h2>Products</h2>
+            <span id="productCount" class="count-badge"></span>
+        </div>
+        <div id="products" class="product-grid"></div>
+    </section>
+</section>
+
+<!-- FOLLOWING PAGE -->
+<section id="following" class="page">
+    <div class="pagehead">
+        <h1>Following</h1>
+        <p>তুমি যেসব Store follow করেছো।</p>
+    </div>
+    <div id="followingList"></div>
+</section>
+
+<!-- ADD PRODUCT PAGE -->
+<section id="add-product" class="page">
+    <div class="pagehead">
+        <h1>Add Product</h1>
+        <p>তোমার Store-এ নতুন product যোগ করো।</p>
+    </div>
+
+    <div id="addNotice"></div>
+
+    <form id="productForm" class="card form-card">
+        <label>
+            Product name
+            <input id="productName" type="text" placeholder="যেমন: Wireless Headphone" required>
+        </label>
+
+        <div class="form-row">
+            <label>
+                Price (৳)
+                <input id="productPrice" type="number" min="0" step="0.01" placeholder="0.00" required>
+            </label>
+
+            <label>
+                Stock
+                <input id="productStock" type="number" min="0" value="1" required>
+            </label>
+        </div>
+
+        <label>
+            Category
+            <select id="productCategory" required></select>
+        </label>
+
+        <label>
+            Description
+            <textarea id="productDescription" rows="4" placeholder="পণ্যটি সম্পর্কে বিস্তারিত লিখুন..."></textarea>
+        </label>
+
+        <label>
+            Product Image
+            <input id="productImageFile" type="file" accept="image/*">
+        </label>
+
+        <button type="submit" class="primary btn-block">Add Product</button>
+        <p id="productMsg" class="form-msg"></p>
+    </form>
+</section>
+
+<!-- CHAT PAGE -->
+<section id="chat" class="page">
+    <div class="pagehead">
+        <h1>Chat</h1>
+        <p>Buyer-Seller chat section.</p>
+    </div>
+    <div class="empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <p>Chat system database-এর সাথে পরে connect করা যাবে।</p>
+    </div>
+</section>
+
+<!-- MY STORE PAGE -->
+<section id="my-store" class="page">
+    <div class="pagehead">
+        <h1>My Store</h1>
+        <p>Account ও Store management.</p>
+    </div>
+
+    <div id="accountStatus"></div>
+    <div id="myStoreContent"></div>
+
+    <!-- SELLER MANAGEMENT -->
+    <div id="storeManagerCard" class="card hidden margin-top">
+        <div class="tabs">
+            <button type="button" data-tab="products" class="tab active">Products</button>
+            <button type="button" data-tab="orders" class="tab">Orders</button>
+            <button type="button" data-tab="settings" class="tab">Store Settings</button>
+        </div>
+
+        <div id="sellerProductsTab"></div>
+        <div id="sellerOrdersTab" class="hidden"></div>
+        <div id="sellerSettingsTab" class="hidden"></div>
+    </div>
+
+    <div class="actions">
+        <button id="loginBtn" type="button" class="primary">Login / Register</button>
+        <button id="createStoreBtn" type="button" class="secondary hidden">Create Store</button>
+        <button id="logoutBtn" type="button" class="danger hidden">Logout</button>
+    </div>
+</section>
+
+<!-- PRODUCT DETAIL PAGE -->
+<section id="product-detail" class="page">
+    <div id="productDetailContent"></div>
+</section>
+
+</main>
+
+<!-- =====================================================
+     SIDE MENU
+===================================================== -->
+<aside id="sideMenu" class="side-menu">
+    <div class="menuhead">
+        <b>Buy<span>Haat</span></b>
+        <button id="closeMenuBtn" class="menu-close" type="button" aria-label="Close menu">&times;</button>
+    </div>
+
+    <nav class="menu-nav">
+        <button type="button" data-route="home">🏠 Home</button>
+        <button type="button" data-route="following">♡ Following</button>
+        <button type="button" data-route="add-product">＋ Add Product</button>
+        <button type="button" data-route="chat">💬 Chat</button>
+        <button type="button" data-route="my-store">🏪 My Store</button>
+    </nav>
+</aside>
+
+<div id="menuOverlay" class="menu-overlay"></div>
+
+<!-- =====================================================
+     BOTTOM NAV
+===================================================== -->
+<nav class="bottom">
+    <button type="button" data-route="home">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <span>Home</span>
+    </button>
+    <button type="button" data-route="following">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span>Following</span>
+    </button>
+    <button type="button" data-route="add-product">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Add</span>
+    </button>
+    <button type="button" data-route="chat">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Chat</span>
+    </button>
+    <button type="button" data-route="my-store">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        <span>My Store</span>
+    </button>
+</nav>
+
+<!-- =====================================================
+     AUTH MODAL
+===================================================== -->
+<div id="authModal" class="modal hidden">
+    <div class="shade"></div>
+    <div class="modal-box">
+        <button id="closeAuthBtn" class="x" type="button" aria-label="Close">&times;</button>
+        <h2 id="authTitle">Login</h2>
+        <p id="authSubtitle" class="sub-text"></p>
+
+        <form id="authForm">
+            <label>
+                Email
+                <input id="authEmail" type="email" autocomplete="email" placeholder="name@example.com" required>
+            </label>
+
+            <label>
+                Password
+                <input id="authPassword" type="password" minlength="6" autocomplete="current-password" placeholder="••••••••" required>
+            </label>
+
+            <button id="authSubmitBtn" type="submit" class="primary btn-block">Login</button>
+        </form>
+
+        <p id="authMessage" class="form-msg"></p>
+        <button id="authSwitchBtn" type="button" class="linkbtn">নতুন অ্যাকাউন্ট তৈরি করুন</button>
+    </div>
+</div>
+
+<!-- =====================================================
+     CREATE STORE MODAL
+===================================================== -->
+<div id="storeModal" class="modal hidden">
+    <div class="shade"></div>
+    <div class="modal-box">
+        <button id="closeStoreBtn" class="x" type="button" aria-label="Close">&times;</button>
+        <h2>Create Store</h2>
+
+        <form id="storeForm">
+            <label>
+                Store name
+                <input id="storeName" type="text" placeholder="যেমন: Gadget Shop BD" required>
+            </label>
+
+            <label>
+                Description
+                <textarea id="storeDescription" rows="3" placeholder="স্টোর সম্পর্কে তথ্য লিখুন..."></textarea>
+            </label>
+
+            <div class="form-row">
+                <label>
+                    Phone
+                    <input id="storePhone" type="tel" placeholder="01700000000">
+                </label>
+
+                <label>
+                    Address
+                    <input id="storeAddress" type="text" placeholder="Dhaka, Bangladesh">
+                </label>
+            </div>
+
+            <label>
+                Store Logo
+                <input id="storeLogoFile" type="file" accept="image/*">
+            </label>
+
+            <label>
+                Store Cover
+                <input id="storeCoverFile" type="file" accept="image/*">
+            </label>
+
+            <button type="submit" class="primary btn-block">Create Store</button>
+            <p id="storeMessage" class="form-msg"></p>
+        </form>
+    </div>
+</div>
+
+<!-- =====================================================
+     PRODUCT EDIT MODAL
+===================================================== -->
+<div id="productEditModal" class="modal hidden">
+    <div class="shade"></div>
+    <div class="modal-box">
+        <button id="closeProductEditBtn" class="x" type="button" aria-label="Close">&times;</button>
+        <h2>Edit Product</h2>
+
+        <form id="productEditForm">
+            <input id="editProductId" type="hidden">
+
+            <label>
+                Product name
+                <input id="editProductName" type="text" required>
+            </label>
+
+            <div class="form-row">
+                <label>
+                    Price (৳)
+                    <input id="editProductPrice" type="number" min="0" step="0.01" required>
+                </label>
+
+                <label>
+                    Stock
+                    <input id="editProductStock" type="number" min="0" required>
+                </label>
+            </div>
+
+            <label>
+                Category
+                <select id="editProductCategory" required></select>
+            </label>
+
+            <label>
+                Description
+                <textarea id="editProductDescription" rows="3"></textarea>
+            </label>
+
+            <label>
+                Product Image
+                <input id="editProductImageFile" type="file" accept="image/*">
+            </label>
+            <small class="help-text">নতুন ছবি না দিলে আগের ছবিটাই থাকবে।</small>
+
+            <button type="submit" class="primary btn-block">Save Changes</button>
+            <p id="editProductMessage" class="form-msg"></p>
+        </form>
+    </div>
+</div>
+
+<!-- =====================================================
+     TOAST
+===================================================== -->
+<div id="toast" class="toast"></div>
+
+<!-- =====================================================
+     SCRIPTS
+===================================================== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
