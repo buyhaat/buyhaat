@@ -439,13 +439,15 @@ function updateAddProductNotice() {
 
 async function updateAuth() {
 
-    if (!sb?.auth) return;
+    if (!sb?.auth) return true;
+
 
     const {
         data,
         error
     } =
         await sb.auth.getSession();
+
 
     if (error) {
 
@@ -454,11 +456,100 @@ async function updateAuth() {
             error
         );
 
-        return;
+        return false;
     }
+
 
     currentUser =
         data?.session?.user || null;
+
+
+    /*
+       Guest user
+    */
+
+    if (!currentUser) {
+
+        currentMyStore = null;
+        followedStores = [];
+
+        updateAccount();
+        updateAddProductNotice();
+
+        return true;
+    }
+
+
+    /*
+       Check user active status
+    */
+
+    const {
+        data: profile,
+        error: profileError
+    } =
+        await sb
+            .from("profiles")
+            .select(
+                "id, role, is_active"
+            )
+            .eq(
+                "id",
+                currentUser.id
+            )
+            .maybeSingle();
+
+
+    /*
+       Profile check failed
+    */
+
+    if (profileError) {
+
+        console.error(
+            "Profile status error:",
+            profileError
+        );
+
+        return false;
+    }
+
+
+    /*
+       Blocked user
+       Admin automatically allowed
+    */
+
+    if (
+        profile &&
+        profile.role !== "admin" &&
+        profile.is_active !== true
+    ) {
+
+        await sb.auth.signOut();
+
+
+        currentUser = null;
+        currentMyStore = null;
+        followedStores = [];
+
+
+        updateAccount();
+        updateAddProductNotice();
+
+
+        toast(
+            "তোমার account বর্তমানে Blocked।"
+        );
+
+
+        return false;
+    }
+
+
+    /*
+       Active user
+    */
 
     await loadMyStore();
 
@@ -467,6 +558,9 @@ async function updateAuth() {
     updateAccount();
 
     updateAddProductNotice();
+
+
+    return true;
 }
 
 
