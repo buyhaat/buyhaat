@@ -181,7 +181,6 @@ main {
 /* =========================================================
    HOME PAGE COMPONENTS
 ========================================================= */
-/* Search Bar */
 .search {
   display: flex;
   gap: 8px;
@@ -203,7 +202,6 @@ main {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-/* Welcome Banner */
 .welcome {
   background: linear-gradient(135deg, #1e293b, #0f172a);
   color: var(--text-white);
@@ -255,7 +253,6 @@ main {
   font-weight: 600;
 }
 
-/* Categories Scroll */
 .categories {
   display: flex;
   gap: 10px;
@@ -287,7 +284,77 @@ main {
   border-color: var(--primary);
 }
 
-/* Product Grid */
+/* Store Search Result & Store Cards */
+.store-search-results {
+  margin-bottom: 24px;
+}
+
+.store-search-results h2 {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+
+.store-result, .store-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.store-result:hover, .store-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-focus);
+}
+
+.store-result-info {
+  flex: 1;
+}
+
+.store-meta {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  background: var(--bg-surface);
+}
+
+.avatar.large-avatar {
+  width: 72px;
+  height: 72px;
+}
+
+.store-profile-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.store-cover {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  margin: -20px -20px 16px -20px;
+}
+
+.store-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Product Cards & Grid */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -299,6 +366,131 @@ main {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px;
   }
+}
+
+.product-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-focus);
+}
+
+.product-image {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: var(--bg-surface);
+}
+
+.product-info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.product-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  line-height: 1.3;
+}
+
+.price {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 1.05rem;
+}
+
+.store-name {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.stock-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: auto;
+}
+
+/* Product Management Styles */
+.manage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin-bottom: 10px;
+}
+
+.manage.inactive-product {
+  opacity: 0.6;
+}
+
+.manage img, .manage-placeholder {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--bg-surface);
+}
+
+.manage-info {
+  flex: 1;
+}
+
+/* Product Detail Page */
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 16px;
+  background: var(--bg-card);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+@media (min-width: 768px) {
+  .detail {
+    flex-direction: row;
+  }
+  .detail img {
+    width: 50%;
+    max-height: 400px;
+  }
+}
+
+.detail img {
+  width: 100%;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+
+.detail-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
 }
 
 /* =========================================================
@@ -329,6 +521,7 @@ label {
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--text-main);
+  margin-bottom: 12px;
 }
 
 input, select, textarea {
@@ -364,12 +557,13 @@ input:focus, select:focus, textarea:focus {
 .form-msg {
   font-size: 0.85rem;
   color: var(--danger);
+  margin-top: 8px;
 }
 
 /* =========================================================
    BUTTONS
 ========================================================= */
-.primary, .secondary, .danger {
+.primary, .secondary, .danger, button.small {
   padding: 10px 20px;
   border-radius: var(--radius-md);
   font-weight: 600;
@@ -377,6 +571,22 @@ input:focus, select:focus, textarea:focus {
   align-items: center;
   justify-content: center;
   transition: var(--transition);
+}
+
+button.small {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+button.small.edit {
+  background: var(--bg-surface);
+  color: var(--text-main);
+  margin-right: 6px;
+}
+
+button.small.del {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
 }
 
 .primary {
@@ -535,7 +745,6 @@ input:focus, select:focus, textarea:focus {
   transform: translateY(-2px);
 }
 
-/* Desktop Hide for Bottom Nav */
 @media (min-width: 768px) {
   .bottom {
     display: none;
@@ -598,7 +807,6 @@ input:focus, select:focus, textarea:focus {
   margin-bottom: 16px;
 }
 
-/* Tabs inside Store/Dashboard */
 .tabs {
   display: flex;
   gap: 8px;
@@ -618,7 +826,6 @@ input:focus, select:focus, textarea:focus {
   border-color: var(--primary);
 }
 
-/* Empty State */
 .empty {
   text-align: center;
   padding: 40px 20px;
