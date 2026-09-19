@@ -1,13 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="bn">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
+        content="width=device-width, initial-scale=1"
     >
 
     <meta
@@ -17,7 +16,7 @@
 
     <meta
         name="description"
-        content="BuyHaat — সহজে পছন্দের পণ্য ও Store খুঁজে নাও"
+        content="BuyHaat — সহজে পছন্দের পণ্য খুঁজে নাও এবং নিজের Store পরিচালনা করো।"
     >
 
     <title>BuyHaat</title>
@@ -26,16 +25,15 @@
         rel="stylesheet"
         href="style.css"
     >
-
 </head>
 
 
 <body>
 
 
-<!-- =====================================================
+<!-- =========================================================
      TOPBAR
-===================================================== -->
+========================================================= -->
 
 <header class="topbar">
 
@@ -43,11 +41,10 @@
         id="menuBtn"
         class="icon"
         type="button"
-        aria-label="Menu"
+        aria-label="Open menu"
     >
         ☰
     </button>
-
 
     <a
         href="#home"
@@ -55,7 +52,6 @@
     >
         BuyHaat
     </a>
-
 
     <button
         id="headerSearchBtn"
@@ -69,21 +65,20 @@
 </header>
 
 
-
-<!-- =====================================================
+<!-- =========================================================
      MAIN
-===================================================== -->
+========================================================= -->
 
 <main>
 
 
-<!-- =====================================================
+<!-- =========================================================
      HOME
-===================================================== -->
+========================================================= -->
 
 <section
     id="home"
-    class="page active-page"
+    class="page"
 >
 
     <div class="search">
@@ -122,6 +117,8 @@
     </div>
 
 
+    <!-- Categories -->
+
     <section>
 
         <h2>
@@ -136,6 +133,8 @@
     </section>
 
 
+    <!-- Products -->
+
     <section>
 
         <div class="head">
@@ -148,7 +147,6 @@
 
         </div>
 
-
         <div
             id="products"
             class="product-grid"
@@ -159,12 +157,149 @@
 </section>
 
 
+<!-- =========================================================
+     FOLLOWING
+========================================================= -->
+
+<section
+    id="following"
+    class="page"
+>
+
+    <div class="pagehead">
+
+        <h1>
+            Following
+        </h1>
+
+        <p>
+            তুমি যেসব Store follow করেছো।
+        </p>
+
+    </div>
 
 
+    <div id="followingList"></div>
 
-<!-- =====================================================
+</section>
+
+
+<!-- =========================================================
+     ADD PRODUCT
+========================================================= -->
+
+<section
+    id="add-product"
+    class="page"
+>
+
+    <div class="pagehead">
+
+        <h1>
+            Add Product
+        </h1>
+
+        <p>
+            তোমার Store-এ নতুন product যোগ করো।
+        </p>
+
+    </div>
+
+
+    <div id="addNotice"></div>
+
+
+    <form
+        id="productForm"
+        class="card"
+    >
+
+        <label>
+            Product name
+
+            <input
+                id="productName"
+                type="text"
+                required
+            >
+        </label>
+
+
+        <label>
+            Price
+
+            <input
+                id="productPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+            >
+        </label>
+
+
+        <label>
+            Category
+
+            <select
+                id="productCategory"
+                required
+            ></select>
+
+        </label>
+
+
+        <label>
+            Stock
+
+            <input
+                id="productStock"
+                type="number"
+                min="0"
+                value="1"
+                required
+            >
+        </label>
+
+
+        <label>
+            Description
+
+            <textarea
+                id="productDescription"
+            ></textarea>
+        </label>
+
+
+        <label>
+            Image URL
+
+            <input
+                id="productImageUrl"
+                type="url"
+                placeholder="https://..."
+            >
+        </label>
+
+
+        <button
+            class="primary"
+            type="submit"
+        >
+            Add Product
+        </button>
+
+
+        <p id="productMsg"></p>
+
+    </form>
+
+</section>
+
+
+<!-- =========================================================
      CHAT
-===================================================== -->
+========================================================= -->
 
 <section
     id="chat"
@@ -186,17 +321,16 @@
 
     <div class="empty">
 
-        Chat system database-এর সাথে পরে connect করা যাবে।
+        Chat system পরের ধাপে database-এর সাথে connect করা যাবে।
 
     </div>
 
 </section>
 
 
-
-<!-- =====================================================
+<!-- =========================================================
      MY STORE
-===================================================== -->
+========================================================= -->
 
 <section
     id="my-store"
@@ -216,13 +350,17 @@
     </div>
 
 
+    <!-- Account status -->
+
     <div id="accountStatus"></div>
 
+
+    <!-- Store information -->
 
     <div id="myStoreContent"></div>
 
 
-    <!-- SELLER MANAGEMENT -->
+    <!-- Store manager -->
 
     <div
         id="storeManagerCard"
@@ -232,27 +370,25 @@
         <div class="tabs">
 
             <button
-                type="button"
                 data-tab="products"
                 class="tab active"
+                type="button"
             >
                 Products
             </button>
 
-
             <button
-                type="button"
                 data-tab="orders"
                 class="tab"
+                type="button"
             >
                 Orders
             </button>
 
-
             <button
-                type="button"
                 data-tab="settings"
                 class="tab"
+                type="button"
             >
                 Store
             </button>
@@ -260,14 +396,20 @@
         </div>
 
 
+        <!-- Seller products -->
+
         <div id="sellerProductsTab"></div>
 
+
+        <!-- Seller orders -->
 
         <div
             id="sellerOrdersTab"
             class="hidden"
         ></div>
 
+
+        <!-- Seller settings -->
 
         <div
             id="sellerSettingsTab"
@@ -277,12 +419,14 @@
     </div>
 
 
+    <!-- Account actions -->
+
     <div class="actions">
 
         <button
             id="loginBtn"
-            type="button"
             class="primary"
+            type="button"
         >
             Login / Register
         </button>
@@ -290,8 +434,8 @@
 
         <button
             id="createStoreBtn"
-            type="button"
             class="secondary hidden"
+            type="button"
         >
             Create Store
         </button>
@@ -299,8 +443,8 @@
 
         <button
             id="logoutBtn"
-            type="button"
             class="danger hidden"
+            type="button"
         >
             Logout
         </button>
@@ -310,10 +454,9 @@
 </section>
 
 
-
-<!-- =====================================================
+<!-- =========================================================
      PRODUCT DETAIL
-===================================================== -->
+========================================================= -->
 
 <section
     id="product-detail"
@@ -324,125 +467,154 @@
 
 </section>
 
+
 </main>
 
 
-
-<!-- =====================================================
+<!-- =========================================================
      SIDE MENU
-===================================================== -->
+========================================================= -->
 
-<aside
+<nav
     id="sideMenu"
-    class="side-menu"
+    class="side"
 >
 
-    <div class="menuhead">
+    <div
+        id="menuOverlay"
+        class="overlay"
+    ></div>
 
-        <b>
-            BuyHaat
-        </b>
+
+    <div class="panel">
+
+        <div class="menuhead">
+
+            <b>
+                BuyHaat
+            </b>
+
+            <button
+                id="closeMenuBtn"
+                type="button"
+                aria-label="Close menu"
+            >
+                ×
+            </button>
+
+        </div>
 
 
         <button
-            id="closeMenuBtn"
-            class="menu-close"
+            data-route="home"
             type="button"
-            aria-label="Close menu"
         >
-            ×
+            🏠 Home
+        </button>
+
+
+        <button
+            data-route="following"
+            type="button"
+        >
+            ♡ Following
+        </button>
+
+
+        <button
+            data-route="add-product"
+            type="button"
+        >
+            ＋ Add Product
+        </button>
+
+
+        <button
+            data-route="chat"
+            type="button"
+        >
+            💬 Chat
+        </button>
+
+
+        <button
+            data-route="my-store"
+            type="button"
+        >
+            🏪 My Store
         </button>
 
     </div>
 
-
-    <button
-        type="button"
-        data-route="home"
-    >
-        🏠 Home
-    </button>
+</nav>
 
 
-    <button
-        type="button"
-        data-route="chat"
-    >
-        💬 Chat
-    </button>
-
-
-    <button
-        type="button"
-        data-route="my-store"
-    >
-        🏪 My Store
-    </button>
-
-</aside>
-
-
-<div
-    id="menuOverlay"
-    class="menu-overlay"
-></div>
-
-
-
-<!-- =====================================================
-     BOTTOM NAV
-===================================================== -->
+<!-- =========================================================
+     BOTTOM NAVIGATION
+========================================================= -->
 
 <nav class="bottom">
 
     <button
-        type="button"
         data-route="home"
+        type="button"
     >
-
         ⌂
-
         <span>
             Home
         </span>
-
     </button>
 
 
     <button
+        data-route="following"
         type="button"
-        data-route="chat"
     >
+        ♡
+        <span>
+            Following
+        </span>
+    </button>
 
+
+    <button
+        data-route="add-product"
+        type="button"
+    >
+        ＋
+        <span>
+            Add
+        </span>
+    </button>
+
+
+    <button
+        data-route="chat"
+        type="button"
+    >
         ◌
-
         <span>
             Chat
         </span>
-
     </button>
 
 
     <button
-        type="button"
         data-route="my-store"
+        type="button"
     >
-
         ♙
-
         <span>
             My Store
         </span>
-
     </button>
 
 </nav>
 
 
-
-<!-- =====================================================
+<!-- =========================================================
      AUTH MODAL
-===================================================== -->
+========================================================= -->
 
 <div
     id="authModal"
@@ -452,7 +624,7 @@
     <div class="shade"></div>
 
 
-    <div class="modal-box">
+    <div class="modalbox">
 
         <button
             id="closeAuthBtn"
@@ -475,7 +647,6 @@
         <form id="authForm">
 
             <label>
-
                 Email
 
                 <input
@@ -484,12 +655,10 @@
                     autocomplete="email"
                     required
                 >
-
             </label>
 
 
             <label>
-
                 Password
 
                 <input
@@ -499,14 +668,13 @@
                     autocomplete="current-password"
                     required
                 >
-
             </label>
 
 
             <button
                 id="authSubmitBtn"
-                type="submit"
                 class="primary"
+                type="submit"
             >
                 Login
             </button>
@@ -519,8 +687,8 @@
 
         <button
             id="authSwitchBtn"
-            type="button"
             class="linkbtn"
+            type="button"
         >
             নতুন অ্যাকাউন্ট তৈরি করুন
         </button>
@@ -530,10 +698,9 @@
 </div>
 
 
-
-<!-- =====================================================
+<!-- =========================================================
      CREATE STORE MODAL
-===================================================== -->
+========================================================= -->
 
 <div
     id="storeModal"
@@ -543,7 +710,7 @@
     <div class="shade"></div>
 
 
-    <div class="modal-box">
+    <div class="modalbox">
 
         <button
             id="closeStoreBtn"
@@ -563,7 +730,6 @@
         <form id="storeForm">
 
             <label>
-
                 Store name
 
                 <input
@@ -571,75 +737,63 @@
                     type="text"
                     required
                 >
-
             </label>
 
 
             <label>
-
                 Description
 
                 <textarea
                     id="storeDescription"
-                    rows="4"
                 ></textarea>
-
             </label>
 
 
             <label>
-
                 Phone
 
                 <input
                     id="storePhone"
                     type="tel"
                 >
-
             </label>
 
 
             <label>
-
                 Address
 
                 <input
                     id="storeAddress"
                     type="text"
                 >
-
             </label>
 
 
             <label>
-
-                Store Logo
+                Logo URL
 
                 <input
-                    id="storeLogoFile"
-                    type="file"
-                    accept="image/*"
+                    id="storeLogoUrl"
+                    type="url"
+                    placeholder="https://..."
                 >
-
             </label>
 
 
             <label>
-
-                Store Cover
+                Cover URL
 
                 <input
-                    id="storeCoverFile"
-                    type="file"
-                    accept="image/*"
+                    id="storeCoverUrl"
+                    type="url"
+                    placeholder="https://..."
                 >
-
             </label>
 
 
             <button
-                type="submit"
                 class="primary"
+                type="submit"
             >
                 Create Store
             </button>
@@ -654,162 +808,20 @@
 </div>
 
 
-
-<!-- =====================================================
-     PRODUCT EDIT MODAL
-===================================================== -->
-
-<div
-    id="productEditModal"
-    class="modal hidden"
->
-
-    <div class="shade"></div>
-
-
-    <div class="modal-box">
-
-        <button
-            id="closeProductEditBtn"
-            class="x"
-            type="button"
-            aria-label="Close"
-        >
-            ×
-        </button>
-
-
-        <h2>
-            Edit Product
-        </h2>
-
-
-        <form id="productEditForm">
-
-            <input
-                id="editProductId"
-                type="hidden"
-            >
-
-
-            <label>
-
-                Product name
-
-                <input
-                    id="editProductName"
-                    type="text"
-                    required
-                >
-
-            </label>
-
-
-            <label>
-
-                Price
-
-                <input
-                    id="editProductPrice"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    required
-                >
-
-            </label>
-
-
-            <label>
-
-                Category
-
-                <select
-                    id="editProductCategory"
-                    required
-                ></select>
-
-            </label>
-
-
-            <label>
-
-                Stock
-
-                <input
-                    id="editProductStock"
-                    type="number"
-                    min="0"
-                    required
-                >
-
-            </label>
-
-
-            <label>
-
-                Description
-
-                <textarea
-                    id="editProductDescription"
-                    rows="4"
-                ></textarea>
-
-            </label>
-
-
-            <label>
-
-                Product Image
-
-                <input
-                    id="editProductImageFile"
-                    type="file"
-                    accept="image/*"
-                >
-
-            </label>
-
-
-            <small>
-                নতুন ছবি না দিলে আগের ছবিটাই থাকবে।
-            </small>
-
-
-            <button
-                type="submit"
-                class="primary"
-            >
-                Save Changes
-            </button>
-
-
-            <p id="editProductMessage"></p>
-
-        </form>
-
-    </div>
-
-</div>
-
-
-
-<!-- =====================================================
+<!-- =========================================================
      TOAST
-===================================================== -->
+========================================================= -->
 
-<div
-    id="toast"
-    class="toast"
-></div>
+<div id="toast"></div>
 
 
-
-<!-- =====================================================
+<!-- =========================================================
      SCRIPTS
-===================================================== -->
+========================================================= -->
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
 
 <script src="supabase-config.js"></script>
 
