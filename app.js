@@ -1629,8 +1629,30 @@ async function createOrder(productId) {
                 buyer_id:
                     currentUser.id,
 
-                   total:
+                total:
                     subtotal,
+
+                customer_name:
+                    currentUser.user_metadata?.full_name ||
+                    currentUser.email ||
+                    "Customer",
+
+                customer_phone:
+                    currentUser.user_metadata?.phone ||
+                    "",
+
+                delivery_address:
+                    currentUser.user_metadata?.address ||
+                    "",
+
+                payment_method:
+                    "cod",
+
+                payment_status:
+                    "pending",
+
+                notes:
+                    "",
 
                 status:
                     "pending"
@@ -1654,8 +1676,6 @@ async function createOrder(productId) {
 
         return;
     }
-
-
     /*
        STEP 2
        Store order
