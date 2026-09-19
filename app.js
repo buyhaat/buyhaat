@@ -793,14 +793,25 @@ async function authSubmit(event) {
     }
 
 
-    closeAuth();
-
+    const authOK =
     await updateAuth();
 
-    toast("Success");
 
-    route();
+if (!authOK) {
+
+    return;
 }
+
+
+closeAuth();
+
+toast(
+    authMode === "login"
+        ? "Login successful"
+        : "Account created successfully"
+);
+
+route();
 
 
 async function logout() {
