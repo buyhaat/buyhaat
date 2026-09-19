@@ -445,8 +445,7 @@ async function updateAuth() {
     const {
         data,
         error
-    } =
-        await sb.auth.getSession();
+    } = await sb.auth.getSession();
 
 
     if (error) {
@@ -464,9 +463,9 @@ async function updateAuth() {
         data?.session?.user || null;
 
 
-    /*
-       Guest user
-    */
+    /* ==============================
+       GUEST USER
+    ============================== */
 
     if (!currentUser) {
 
@@ -480,9 +479,9 @@ async function updateAuth() {
     }
 
 
-    /*
-       Check user active status
-    */
+    /* ==============================
+       LOAD PROFILE STATUS
+    ============================== */
 
     const {
         data: profile,
@@ -491,7 +490,7 @@ async function updateAuth() {
         await sb
             .from("profiles")
             .select(
-                "id, role, is_active"
+                "id, role, is_active, approval_status"
             )
             .eq(
                 "id",
@@ -499,10 +498,6 @@ async function updateAuth() {
             )
             .maybeSingle();
 
-
-    /*
-       Profile check failed
-    */
 
     if (profileError) {
 
@@ -515,52 +510,137 @@ async function updateAuth() {
     }
 
 
-    /*
-       Blocked user
-       Admin automatically allowed
-    */
+    /* ==============================
+       ADMIN
+       Admin approval check লাগবে না
+    ============================== */
 
     if (
-        profile &&
-        profile.role !== "admin" &&
-        profile.is_active !== true
+        profile?.role === "admin"
+    ) {
+
+        await loadMyStore();
+
+        await loadFollowing();
+
+        updateAccount();
+        updateAddProductNotice();
+
+        return true;
+    }
+
+
+    /* ==============================
+       NORMAL USER APPROVAL CHECK
+    ============================== */
+
+    const status =
+        profile?.approval_status;
+
+
+    /* ---------- PENDING ---------- */
+
+    if (
+        status === "pending"
     ) {
 
         await sb.auth.signOut();
-
 
         currentUser = null;
         currentMyStore = null;
         followedStores = [];
 
-
         updateAccount();
         updateAddProductNotice();
 
-
-        toast(
-            "তোমার account বর্তমানে Blocked।"
-        );
-
+        $("authMessage").textContent =
+            "তোমার account এখনো Admin approval-এর অপেক্ষায় আছে।";
 
         return false;
     }
 
 
-    /*
-       Active user
-    */
+    /* ---------- REJECTED ---------- */
 
-    await loadMyStore();
+    if (
+        status === "rejected"
+    ) {
 
-    await loadFollowing();
+        await sb.auth.signOut();
+
+        currentUser = null;
+        currentMyStore = null;
+        followedStores = [];
+
+        updateAccount();
+        updateAddProductNotice();
+
+        $("authMessage").textContent =
+            "তোমার account Admin reject করেছে।";
+
+        return false;
+    }
+
+
+    /* ---------- BLOCKED ---------- */
+
+    if (
+        status === "blocked"
+    ) {
+
+        await sb.auth.signOut();
+
+        currentUser = null;
+        currentMyStore = null;
+        followedStores = [];
+
+        updateAccount();
+        updateAddProductNotice();
+
+        $("authMessage").textContent =
+            "তোমার account বর্তমানে blocked।";
+
+        return false;
+    }
+
+
+    /* ==============================
+       APPROVED USER
+    ============================== */
+
+    if (
+        status === "approved" &&
+        profile?.is_active === true
+    ) {
+
+        await loadMyStore();
+
+        await loadFollowing();
+
+        updateAccount();
+        updateAddProductNotice();
+
+        return true;
+    }
+
+
+    /* ==============================
+       UNKNOWN / INVALID STATUS
+    ============================== */
+
+    await sb.auth.signOut();
+
+    currentUser = null;
+    currentMyStore = null;
+    followedStores = [];
 
     updateAccount();
-
     updateAddProductNotice();
 
+    $("authMessage").textContent =
+        "তোমার account এখনো অনুমোদিত নয়।";
 
-    return true;
+    return false;
 }
 
 
