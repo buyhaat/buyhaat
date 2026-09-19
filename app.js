@@ -4766,3 +4766,30 @@ async function updateSellerOrderStatus(orderId, newStatus) {
     await sellerOrders();
 }
 
+document.addEventListener("click", async (event) => {
+
+    const button =
+        event.target.closest(
+            "[data-order-action]"
+        );
+
+    if (!button) return;
+
+    const orderId =
+        button.dataset.orderId;
+
+    const newStatus =
+        button.dataset.orderAction;
+
+    if (!orderId || !newStatus) return;
+
+    button.disabled = true;
+
+    await updateSellerOrderStatus(
+        orderId,
+        newStatus
+    );
+
+    button.disabled = false;
+});
+
