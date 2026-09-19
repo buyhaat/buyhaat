@@ -1,1016 +1,280 @@
 <!DOCTYPE html>
 <html lang="bn">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <meta
-        name="color-scheme"
-        content="light"
-    >
-
-    <meta
-        name="description"
-        content="BuyHaat — সহজে পছন্দের পণ্য ও Store খুঁজে নাও"
-    >
-
-    <title>BuyHaat</title>
-
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuyHaat</title>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
-
-
 <body>
 
-
-<!-- =====================================================
-     TOPBAR
-===================================================== -->
-
-<header class="topbar">
-
-    <button
-        id="menuBtn"
-        class="icon"
-        type="button"
-        aria-label="Menu"
-    >
-        ☰
-    </button>
-
-
-    <a
-        href="#home"
-        class="brand"
-    >
-        BuyHaat
-    </a>
-
-
-    <button
-        id="headerSearchBtn"
-        class="icon"
-        type="button"
-        aria-label="Search"
-    >
-        ⌕
-    </button>
-
-</header>
-
-
-
-<!-- =====================================================
-     MAIN
-===================================================== -->
-
-<main>
-
-
-<!-- =====================================================
-     HOME
-===================================================== -->
-
-<section
-    id="home"
-    class="page active-page"
->
-
-    <div class="search">
-
-        <input
-            id="searchInput"
-            type="search"
-            placeholder="পণ্য বা Store username খুঁজুন..."
-            autocomplete="off"
-        >
-
-        <button
-            id="searchBtn"
-            type="button"
-        >
-            Search
-        </button>
-
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <button id="menuBtn" class="icon-btn" aria-label="Open Menu">☰</button>
+      <h1 class="logo" onclick="go('home')">BuyHaat</h1>
     </div>
-
-
-    <div class="welcome">
-
-        <small>
-            BUYHAAT MARKETPLACE
-        </small>
-
-        <h1>
-            তোমার পছন্দের পণ্য খুঁজে নাও
-        </h1>
-
-        <p>
-            Product বা Store-এর নাম/@username দিয়ে সার্চ করো।
-        </p>
-
+    <div class="header-right">
+      <button id="headerSearchBtn" class="icon-btn" aria-label="Search">🔍</button>
     </div>
+  </header>
 
+  <!-- Side Menu & Overlay -->
+  <div id="menuOverlay" class="menu-overlay"></div>
+  <aside id="sideMenu" class="side-menu" aria-hidden="true">
+    <div class="menu-header">
+      <h2>Menu</h2>
+      <button id="closeMenuBtn" class="icon-btn">&times;</button>
+    </div>
+    <div class="menu-content">
+      <div id="accountStatus"></div>
+      <nav class="menu-nav">
+        <button id="loginBtn" class="primary w-100">Login</button>
+        <button id="createStoreBtn" class="secondary w-100 hidden">Create Store</button>
+        <button id="logoutBtn" class="danger w-100 hidden">Logout</button>
+      </nav>
+    </div>
+  </aside>
 
-    <section>
+  <!-- Main Content Container -->
+  <main class="main-container">
 
-        <h2>
-            Categories
-        </h2>
+    <!-- HOME PAGE -->
+    <section id="home" class="page active-page">
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search products or @store...">
+        <button id="searchBtn" class="primary">Search</button>
+      </div>
 
-        <div
-            id="categories"
-            class="categories"
-        ></div>
+      <div id="categories" class="category-list"></div>
 
+      <div class="section-title">
+        <span id="productCount">0 products</span>
+      </div>
+
+      <div id="products" class="product-grid"></div>
     </section>
 
-
-    <section>
-
-        <div class="head">
-
-            <h2>
-                Products
-            </h2>
-
-            <span id="productCount"></span>
-
-        </div>
-
-
-        <div
-            id="products"
-            class="product-grid"
-        ></div>
-
+    <!-- FOLLOWING PAGE -->
+    <section id="following" class="page">
+      <h2>Followed Stores</h2>
+      <div id="followingList" class="store-list"></div>
     </section>
 
-</section>
-
-
-
-<!-- =====================================================
-     FOLLOWING
-===================================================== -->
-
-<section
-    id="following"
-    class="page"
->
-
-    <div class="pagehead">
-
-        <h1>
-            Following
-        </h1>
-
-        <p>
-            তুমি যেসব Store follow করেছো।
-        </p>
-
-    </div>
-
-
-    <div id="followingList"></div>
-
-</section>
-
-
-
-<!-- =====================================================
-     ADD PRODUCT
-===================================================== -->
-
-<section
-    id="add-product"
-    class="page"
->
-
-    <div class="pagehead">
-
-        <h1>
-            Add Product
-        </h1>
-
-        <p>
-            তোমার Store-এ নতুন product যোগ করো।
-        </p>
-
-    </div>
-
-
-    <div id="addNotice"></div>
-
-
-    <form
-        id="productForm"
-        class="card form-card"
-    >
-
+    <!-- ADD PRODUCT PAGE -->
+    <section id="add-product" class="page">
+      <h2>Add New Product</h2>
+      <div id="addNotice"></div>
+      
+      <form id="productForm" class="card-form">
         <label>
-
-            Product name
-
-            <input
-                id="productName"
-                type="text"
-                required
-            >
-
+          Product Name
+          <input type="text" id="productName" required placeholder="Product title">
+        </label>
+        
+        <label>
+          Price (৳)
+          <input type="number" id="productPrice" min="0" step="any" required placeholder="0.00">
         </label>
 
-
         <label>
-
-            Price
-
-            <input
-                id="productPrice"
-                type="number"
-                min="0"
-                step="0.01"
-                required
-            >
-
+          Stock Quantity
+          <input type="number" id="productStock" min="0" value="1" required placeholder="1">
         </label>
 
-
         <label>
-
-            Category
-
-            <select
-                id="productCategory"
-                required
-            ></select>
-
+          Category
+          <select id="productCategory" required></select>
         </label>
 
-
         <label>
-
-            Stock
-
-            <input
-                id="productStock"
-                type="number"
-                min="0"
-                value="1"
-                required
-            >
-
+          Description
+          <textarea id="productDescription" rows="3" placeholder="Product details..."></textarea>
         </label>
 
-
         <label>
-
-            Description
-
-            <textarea
-                id="productDescription"
-                rows="4"
-            ></textarea>
-
+          Product Image
+          <input type="file" id="productImageFile" accept="image/*">
         </label>
 
+        <button type="submit" class="primary w-100">Add Product</button>
+        <p id="productMsg" class="form-msg"></p>
+      </form>
+    </section>
 
-        <label>
+    <!-- MY STORE PAGE -->
+    <section id="my-store" class="page">
+      <div id="myStoreContent"></div>
 
-            Product Image
-
-            <input
-                id="productImageFile"
-                type="file"
-                accept="image/*"
-            >
-
-        </label>
-
-
-        <button
-            type="submit"
-            class="primary"
-        >
-            Add Product
-        </button>
-
-
-        <p id="productMsg"></p>
-
-    </form>
-
-</section>
-
-
-
-<!-- =====================================================
-     CHAT
-===================================================== -->
-
-<section
-    id="chat"
-    class="page"
->
-
-    <div class="pagehead">
-
-        <h1>
-            Chat
-        </h1>
-
-        <p>
-            Buyer-Seller chat section.
-        </p>
-
-    </div>
-
-
-    <div class="empty">
-
-        Chat system database-এর সাথে পরে connect করা যাবে।
-
-    </div>
-
-</section>
-
-
-
-<!-- =====================================================
-     MY STORE
-===================================================== -->
-
-<section
-    id="my-store"
-    class="page"
->
-
-    <div class="pagehead">
-
-        <h1>
-            My Store
-        </h1>
-
-        <p>
-            Account ও Store management.
-        </p>
-
-    </div>
-
-
-    <div id="accountStatus"></div>
-
-
-    <div id="myStoreContent"></div>
-
-
-    <!-- SELLER MANAGEMENT -->
-
-    <div
-        id="storeManagerCard"
-        class="card hidden"
-    >
-
+      <div id="storeManagerCard" class="card hidden">
         <div class="tabs">
-
-            <button
-                type="button"
-                data-tab="products"
-                class="tab active"
-            >
-                Products
-            </button>
-
-
-            <button
-                type="button"
-                data-tab="orders"
-                class="tab"
-            >
-                Orders
-            </button>
-
-
-            <button
-                type="button"
-                data-tab="settings"
-                class="tab"
-            >
-                Store
-            </button>
-
+          <button class="tab active" data-tab="products">Products</button>
+          <button class="tab" data-tab="orders">Orders</button>
+          <button class="tab" data-tab="settings">Settings</button>
         </div>
 
+        <div id="sellerProductsTab" class="tab-content"></div>
+        <div id="sellerOrdersTab" class="tab-content hidden"></div>
+        <div id="sellerSettingsTab" class="tab-content hidden"></div>
+      </div>
+    </section>
 
-        <div id="sellerProductsTab"></div>
+    <!-- PRODUCT DETAIL PAGE -->
+    <section id="product-detail" class="page">
+      <div id="productDetailContent"></div>
+    </section>
 
+    <!-- CHAT PAGE (Placeholder for route) -->
+    <section id="chat" class="page">
+      <h2>Chat</h2>
+      <div class="empty">Chat feature coming soon...</div>
+    </section>
 
-        <div
-            id="sellerOrdersTab"
-            class="hidden"
-        ></div>
+  </main>
 
-
-        <div
-            id="sellerSettingsTab"
-            class="hidden"
-        ></div>
-
-    </div>
-
-
-    <div class="actions">
-
-        <button
-            id="loginBtn"
-            type="button"
-            class="primary"
-        >
-            Login / Register
-        </button>
-
-
-        <button
-            id="createStoreBtn"
-            type="button"
-            class="secondary hidden"
-        >
-            Create Store
-        </button>
-
-
-        <button
-            id="logoutBtn"
-            type="button"
-            class="danger hidden"
-        >
-            Logout
-        </button>
-
-    </div>
-
-</section>
-
-
-
-<!-- =====================================================
-     PRODUCT DETAIL
-===================================================== -->
-
-<section
-    id="product-detail"
-    class="page"
->
-
-    <div id="productDetailContent"></div>
-
-</section>
-
-</main>
-
-
-
-<!-- =====================================================
-     SIDE MENU
-===================================================== -->
-
-<aside
-    id="sideMenu"
-    class="side-menu"
->
-
-    <div class="menuhead">
-
-        <b>
-            BuyHaat
-        </b>
-
-
-        <button
-            id="closeMenuBtn"
-            class="menu-close"
-            type="button"
-            aria-label="Close menu"
-        >
-            ×
-        </button>
-
-    </div>
-
-
-    <button
-        type="button"
-        data-route="home"
-    >
-        🏠 Home
+  <!-- Bottom Navigation -->
+  <nav class="bottom">
+    <button data-route="home" class="active">
+      <span class="nav-icon">🏠</span>
+      <span>Home</span>
     </button>
-
-
-    <button
-        type="button"
-        data-route="following"
-    >
-        ♡ Following
+    <button data-route="following">
+      <span class="nav-icon">❤️</span>
+      <span>Following</span>
     </button>
-
-
-    <button
-        type="button"
-        data-route="add-product"
-    >
-        ＋ Add Product
+    <button data-route="add-product">
+      <span class="nav-icon">➕</span>
+      <span>Add</span>
     </button>
-
-
-    <button
-        type="button"
-        data-route="chat"
-    >
-        💬 Chat
+    <button data-route="chat">
+      <span class="nav-icon">💬</span>
+      <span>Chat</span>
     </button>
-
-
-    <button
-        type="button"
-        data-route="my-store"
-    >
-        🏪 My Store
+    <button data-route="my-store">
+      <span class="nav-icon">🏪</span>
+      <span>My Store</span>
     </button>
+  </nav>
 
-</aside>
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
 
-
-<div
-    id="menuOverlay"
-    class="menu-overlay"
-></div>
-
-
-
-<!-- =====================================================
-     BOTTOM NAV
-===================================================== -->
-
-<nav class="bottom">
-
-    <button
-        type="button"
-        data-route="home"
-    >
-
-        ⌂
-
-        <span>
-            Home
-        </span>
-
-    </button>
-
-
-    <button
-        type="button"
-        data-route="following"
-    >
-
-        ♡
-
-        <span>
-            Following
-        </span>
-
-    </button>
-
-
-    <button
-        type="button"
-        data-route="add-product"
-    >
-
-        ＋
-
-        <span>
-            Add
-        </span>
-
-    </button>
-
-
-    <button
-        type="button"
-        data-route="chat"
-    >
-
-        ◌
-
-        <span>
-            Chat
-        </span>
-
-    </button>
-
-
-    <button
-        type="button"
-        data-route="my-store"
-    >
-
-        ♙
-
-        <span>
-            My Store
-        </span>
-
-    </button>
-
-</nav>
-
-
-
-<!-- =====================================================
-     AUTH MODAL
-===================================================== -->
-
-<div
-    id="authModal"
-    class="modal hidden"
->
-
+  <!-- AUTH MODAL -->
+  <div id="authModal" class="modal hidden">
     <div class="shade"></div>
+    <div class="modal-card">
+      <button id="closeAuthBtn" class="close-btn">&times;</button>
+      <h2 id="authTitle">Login</h2>
+      <p id="authSubtitle" class="store-meta"></p>
+      
+      <form id="authForm" class="card-form">
+        <label>
+          Email
+          <input type="email" id="authEmail" required placeholder="example@mail.com">
+        </label>
+        <label>
+          Password
+          <input type="password" id="authPassword" required placeholder="******">
+        </label>
 
-
-    <div class="modal-box">
-
-        <button
-            id="closeAuthBtn"
-            class="x"
-            type="button"
-            aria-label="Close"
-        >
-            ×
-        </button>
-
-
-        <h2 id="authTitle">
-            Login
-        </h2>
-
-
-        <p id="authSubtitle"></p>
-
-
-        <form id="authForm">
-
-            <label>
-
-                Email
-
-                <input
-                    id="authEmail"
-                    type="email"
-                    autocomplete="email"
-                    required
-                >
-
-            </label>
-
-
-            <label>
-
-                Password
-
-                <input
-                    id="authPassword"
-                    type="password"
-                    minlength="6"
-                    autocomplete="current-password"
-                    required
-                >
-
-            </label>
-
-
-            <button
-                id="authSubmitBtn"
-                type="submit"
-                class="primary"
-            >
-                Login
-            </button>
-
-        </form>
-
-
-        <p id="authMessage"></p>
-
-
-        <button
-            id="authSwitchBtn"
-            type="button"
-            class="linkbtn"
-        >
-            নতুন অ্যাকাউন্ট তৈরি করুন
-        </button>
-
+        <button type="submit" id="authSubmitBtn" class="primary w-100">Login</button>
+        <button type="button" id="authSwitchBtn" class="secondary w-100">Create New Account</button>
+        <p id="authMessage" class="form-msg"></p>
+      </form>
     </div>
+  </div>
 
-</div>
-
-
-
-<!-- =====================================================
-     CREATE STORE MODAL
-===================================================== -->
-
-<div
-    id="storeModal"
-    class="modal hidden"
->
-
+  <!-- CREATE STORE MODAL -->
+  <div id="storeModal" class="modal hidden">
     <div class="shade"></div>
+    <div class="modal-card">
+      <button id="closeStoreBtn" class="close-btn">&times;</button>
+      <h2>Create Store</h2>
+      
+      <form id="storeForm" class="card-form">
+        <label>
+          Store Name *
+          <input type="text" id="storeName" required placeholder="My Awesome Store">
+        </label>
+        <label>
+          Description
+          <textarea id="storeDescription" rows="2"></textarea>
+        </label>
+        <label>
+          Phone Number
+          <input type="text" id="storePhone" placeholder="01700000000">
+        </label>
+        <label>
+          Address
+          <input type="text" id="storeAddress" placeholder="City, Country">
+        </label>
+        <label>
+          Store Logo
+          <input type="file" id="storeLogoFile" accept="image/*">
+        </label>
+        <label>
+          Store Cover
+          <input type="file" id="storeCoverFile" accept="image/*">
+        </label>
 
-
-    <div class="modal-box">
-
-        <button
-            id="closeStoreBtn"
-            class="x"
-            type="button"
-            aria-label="Close"
-        >
-            ×
-        </button>
-
-
-        <h2>
-            Create Store
-        </h2>
-
-
-        <form id="storeForm">
-
-            <label>
-
-                Store name
-
-                <input
-                    id="storeName"
-                    type="text"
-                    required
-                >
-
-            </label>
-
-
-            <label>
-
-                Description
-
-                <textarea
-                    id="storeDescription"
-                    rows="4"
-                ></textarea>
-
-            </label>
-
-
-            <label>
-
-                Phone
-
-                <input
-                    id="storePhone"
-                    type="tel"
-                >
-
-            </label>
-
-
-            <label>
-
-                Address
-
-                <input
-                    id="storeAddress"
-                    type="text"
-                >
-
-            </label>
-
-
-            <label>
-
-                Store Logo
-
-                <input
-                    id="storeLogoFile"
-                    type="file"
-                    accept="image/*"
-                >
-
-            </label>
-
-
-            <label>
-
-                Store Cover
-
-                <input
-                    id="storeCoverFile"
-                    type="file"
-                    accept="image/*"
-                >
-
-            </label>
-
-
-            <button
-                type="submit"
-                class="primary"
-            >
-                Create Store
-            </button>
-
-
-            <p id="storeMessage"></p>
-
-        </form>
-
+        <button type="submit" class="primary w-100">Create Store</button>
+        <p id="storeMessage" class="form-msg"></p>
+      </form>
     </div>
+  </div>
 
-</div>
-
-
-
-<!-- =====================================================
-     PRODUCT EDIT MODAL
-===================================================== -->
-
-<div
-    id="productEditModal"
-    class="modal hidden"
->
-
+  <!-- EDIT PRODUCT MODAL -->
+  <div id="productEditModal" class="modal hidden">
     <div class="shade"></div>
+    <div class="modal-card">
+      <button id="closeProductEditBtn" class="close-btn">&times;</button>
+      <h2>Edit Product</h2>
+      
+      <form id="productEditForm" class="card-form">
+        <input type="hidden" id="editProductId">
+        
+        <label>
+          Product Name
+          <input type="text" id="editProductName" required>
+        </label>
+        <label>
+          Price (৳)
+          <input type="number" id="editProductPrice" min="0" step="any" required>
+        </label>
+        <label>
+          Stock Quantity
+          <input type="number" id="editProductStock" min="0" required>
+        </label>
+        <label>
+          Category
+          <select id="editProductCategory" required></select>
+        </label>
+        <label>
+          Description
+          <textarea id="editProductDescription" rows="3"></textarea>
+        </label>
+        <label>
+          Change Image
+          <input type="file" id="editProductImageFile" accept="image/*">
+        </label>
 
-
-    <div class="modal-box">
-
-        <button
-            id="closeProductEditBtn"
-            class="x"
-            type="button"
-            aria-label="Close"
-        >
-            ×
-        </button>
-
-
-        <h2>
-            Edit Product
-        </h2>
-
-
-        <form id="productEditForm">
-
-            <input
-                id="editProductId"
-                type="hidden"
-            >
-
-
-            <label>
-
-                Product name
-
-                <input
-                    id="editProductName"
-                    type="text"
-                    required
-                >
-
-            </label>
-
-
-            <label>
-
-                Price
-
-                <input
-                    id="editProductPrice"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    required
-                >
-
-            </label>
-
-
-            <label>
-
-                Category
-
-                <select
-                    id="editProductCategory"
-                    required
-                ></select>
-
-            </label>
-
-
-            <label>
-
-                Stock
-
-                <input
-                    id="editProductStock"
-                    type="number"
-                    min="0"
-                    required
-                >
-
-            </label>
-
-
-            <label>
-
-                Description
-
-                <textarea
-                    id="editProductDescription"
-                    rows="4"
-                ></textarea>
-
-            </label>
-
-
-            <label>
-
-                Product Image
-
-                <input
-                    id="editProductImageFile"
-                    type="file"
-                    accept="image/*"
-                >
-
-            </label>
-
-
-            <small>
-                নতুন ছবি না দিলে আগের ছবিটাই থাকবে।
-            </small>
-
-
-            <button
-                type="submit"
-                class="primary"
-            >
-                Save Changes
-            </button>
-
-
-            <p id="editProductMessage"></p>
-
-        </form>
-
+        <button type="submit" class="primary w-100">Save Changes</button>
+        <p id="editProductMessage" class="form-msg"></p>
+      </form>
     </div>
+  </div>
 
-</div>
-
-
-
-<!-- =====================================================
-     TOAST
-===================================================== -->
-
-<div
-    id="toast"
-    class="toast"
-></div>
-
-
-
-<!-- =====================================================
-     SCRIPTS
-===================================================== -->
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script src="supabase-config.js"></script>
-
-<script src="app.js"></script>
-
-
+  <!-- Config & App Script -->
+  <script>
+    // Supabase Credentials Check
+    window.SUPABASE_URL = "YOUR_SUPABASE_URL";
+    window.SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+    if (window.supabase) {
+      window.supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    }
+  </script>
+  <script src="app.js"></script>
 </body>
 </html>
