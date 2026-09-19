@@ -26,7 +26,7 @@
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
     </button>
 
-    <a href="#home" class="brand">
+    <a href="#home" class="brand" data-route="home">
         Buy<span>Haat</span>
     </a>
 
@@ -354,8 +354,13 @@
 <!-- =====================================================
      SCRIPTS
 ===================================================== -->
+<!-- 1. Supabase SDK CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- 2. Supabase Configuration and Initialization -->
 <script src="supabase-config.js"></script>
+
+<!-- 3. Main Application Script -->
 <script src="app.js"></script>
 
 </body>
