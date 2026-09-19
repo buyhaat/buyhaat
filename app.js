@@ -4702,3 +4702,67 @@ window.createOrder =
 
 window.toggleFollow =
     toggleFollow;
+
+async function updateSellerOrderStatus(orderId, newStatus) {
+
+    if (!currentMyStore) return;
+
+    const allowedStatuses = [
+        "pending",
+        "processing",
+        "delivered",
+        "cancelled"
+    ];
+
+    if (!allowedStatuses.includes(newStatus)) {
+        toast("Invalid order status");
+        return;
+    }
+
+    const confirmed = confirm(
+        newStatus === "processing"
+            ? "এই order Accept করতে চাও?"
+            : newStatus === "delivered"
+                ? "Orderটি Delivered হিসেবে mark করতে চাও?"
+                : "এই orderটি Cancel করতে চাও?"
+    );
+
+    if (!confirmed) return;
+
+
+    const { error } = await sb
+        .from("store_orders")
+        .update({
+            status: newStatus
+        })
+        .eq("id", orderId)
+        .eq("store_id", currentMyStore.id);
+
+
+    if (error) {
+
+        console.error(
+            "ORDER STATUS UPDATE ERROR:",
+            error
+        );
+
+        toast(
+            "Order status update করা যায়নি"
+        );
+
+        return;
+    }
+
+
+    toast(
+        newStatus === "processing"
+            ? "Order accepted"
+            : newStatus === "delivered"
+                ? "Order delivered"
+                : "Order cancelled"
+    );
+
+
+    await sellerOrders();
+}
+
